@@ -1,0 +1,12 @@
+---
+# This playbook is an example of the group module.
+- hosts: localhost
+  user: ansible
+  become: yes
+  gather_facts: no
+  tasks:
+      - name: Ensure the group 'developers' exists.
+        group:
+            name: developers
+            state: present
+...

@@ -1,0 +1,16 @@
+---
+# This playbook is an example of the use of block/rescue error handlers.
+# When using block/rescue, you need to specify the working module as a list item.
+# The use of 'always' is optional.
+- hosts: localhost
+  tasks:
+      - name: Get HTTP file.
+        block:
+            - get_url:
+                url: "http://test.example.com/index.html"
+                dest: "/tmp/index.html"
+        rescue:
+            - debug: msg="The file doesn't exists or server is not responding."
+        always:
+            - debug: msg="Play execution is completed."
+...

@@ -1,0 +1,26 @@
+---
+# This playbook is an example of the use of handlers.
+# The task 'Update Apache configuration' will call the handler 'Restart Apache' only if the task itself is executed.
+- hosts: localhost
+  become: yes
+
+  handlers:
+      - name: Restart Apache.
+        service:
+            name: httpd
+            state: restarted
+        listen: apache handler
+
+  tasks:
+      - name: Update Apache configuration.
+        replace:
+            path: /etc/httpd/conf/httpd.conf
+            regexp: '^DocumentRoot.*$'
+            replace: 'DocumentRoot "/opt/www"'
+            backup: yes
+        # You can use the list invocation.
+        notify:
+            - apache handler
+        # Or direct invocation if only one handler.
+        # notify: "apache handler"
+...

@@ -1,0 +1,20 @@
+# This playbook is an example of the use of variables and variable files.
+# The script make use of a var file containing 3 lists of users. The var file is not specified within the playbook but specified at the command line:
+#   ansible-playbook plbk_varfiles.yaml -e "@../vars/examples/varfile_example"
+- hosts: localhost
+  vars:
+      userFile: /home/user/vars/list
+  tasks:
+      - name: Create the new file.
+        file:
+            path: "{{ userFile }}"
+            state: touch
+      - name: Add list of users into the file.
+        lineinfile:
+            path: "{{ userFile }}"
+            line: "{{ item }}"
+        with_items:
+            - "{{ staff }}"
+            - "{{ faculty }}"
+            - "{{ other }}"
+...

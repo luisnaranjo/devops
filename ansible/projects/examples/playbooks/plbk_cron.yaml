@@ -1,0 +1,32 @@
+---
+# This playbook is an example of the use of the cron module.
+# It will set a crontab entry like "0 5,17 * * * df -h >> /tmp/diskspace"
+
+- hosts: localhost
+  user: ansible
+  become: yes
+  gather_facts: no
+  tasks:
+      - name: Ensure a job that runs at 5am & 5pm exists.
+        cron:
+            name: "Job 001"
+            minute: "0"
+            hour: "5,17"
+            job: "df -h >> /tmp/diskspace"
+            #state: absent   # Removes the entry if existing.
+
+      - name: Creates an entry (environment variable in the crontab) like "PATH=/opt/bin" on top of crontab.
+        cron:
+            name: PATH
+            env: yes
+            job: /opt/bin
+            #state: absent  # Removes the entry if existing.
+
+      - name: Creates an entry (environment variable in the crontab) like "APP_HOME=/srv/app" on top of crontab before PATH=/opt/bin.
+        cron:
+            name: APP_HOME
+            env: yes
+            job: /srv/app
+            insertbefore: PATH
+            #state: absent  # Removes the entry if existing.
+...

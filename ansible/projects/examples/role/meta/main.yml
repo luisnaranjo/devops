@@ -1,0 +1,4 @@
+# This is an example of a main.yml file for the meta in the example role.
+# It will pull a fictional dependency role to example role.
+dependencies:
+    - role: dependency_apache

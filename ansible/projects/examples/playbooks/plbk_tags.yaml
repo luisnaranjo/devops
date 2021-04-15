@@ -1,0 +1,27 @@
+---
+# This playbook is an example of the use of tags.
+# You can specify one or more tags per tasks.
+# This playbook emulates the deployment of an application to the appserver group, and a database script to the dbserver group.
+
+# First play.
+- hosts: appservers
+  become: yes
+  tasks:
+      - name: Deploy the application binary.
+        copy:
+            src: /home/user/apps/hello
+            dest: /var/www/apps/hello
+        tags:
+            - appdeploy
+
+# Second play.
+- hosts: dbservers
+  become: yes
+  tasks:
+      - name: Deploy the DB script.
+        copy:
+            src: /home/user/apps/script.sql
+            dest: /opt/db/scripts/script.sql
+        tags:
+            - dbdeploy
+...

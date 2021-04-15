@@ -1,0 +1,10 @@
+---
+# This playbook is an example of template usage.
+# Remember that the property 'src' will look for the file in the control node, and 'dest' will deploy the config file in the target host.
+- hosts: localhost
+  tasks:
+      - name: Deploy local network file.
+        template:
+            src: /home/user/template/network.j2
+            dest: /home/user/network/network.txt
+...

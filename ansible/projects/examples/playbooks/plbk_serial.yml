@@ -1,0 +1,15 @@
+# Playbook to demostrate the control of the feature parallelism in Ansible.
+# The serial section will limit the number of host running the tasks at the same time.
+- host: all
+  become: yes
+  serial:
+      - 1   # First will execute the play on a batch of 1 node.
+      - 2   # Then will execute it on a batch of 2 nodes.
+      - 50% # And after that it will be applied on the 50% of the complete number of nodes in the inventory.
+  max_fail_percentage: 30   # If the percentage of the total number of hosts fail, it will consider the whole playbook a failure and it will stop running.
+  tasks:
+      - name: Add host entry.
+        lineinfile:
+            path: /etc/hosts
+            line: "naranjo naranjo.local"
+...

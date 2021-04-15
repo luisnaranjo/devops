@@ -1,0 +1,14 @@
+---
+# This playbook is an example of loops.
+# You can use either 'with_items' or 'with_files' (files only) in loops.
+- hosts: localhost
+  become: yes
+  tasks:
+      - name: Create users.
+        user:
+            name: "{{ item }}"
+        with_items:
+            - luis
+            - antonio
+            - brenda
+....

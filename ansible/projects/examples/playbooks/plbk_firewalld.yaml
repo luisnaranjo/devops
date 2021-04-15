@@ -1,0 +1,28 @@
+---
+# This playbook is an example of the use of firewalld module. How to manage firewall rules via ansible.
+# Firewall uses the service firewalld (for systemd systems).
+# This playbook will install firewalld service, enable it at boot, and enable http traffic via a firewall rule.
+
+- hosts: localhost
+  become: yes
+  gather_facts: no  # Disable facts gathering.
+  tasks:
+      - name: Install firewalld service.
+        yum:
+            name: firewalld
+            state: latest
+      - name: Enable firewalld service at boot.
+        service:
+            name: firewalld
+            state: started
+            enabled: yes
+      - name: Enable http traffic in firewall.
+        firewalld:
+            service: http
+            permanent: yes
+            state: enabled
+      - name: Restart firewalld service.
+        service:
+            name: firewalld
+            state: restarted
+...

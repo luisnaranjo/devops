@@ -1,0 +1,26 @@
+---
+# Playbook for demostration of the at module.
+# The playbook will install it if not installed, start it, and enable it at boot.
+- hosts: localhost
+  user: ansible
+  become: yes
+  gather_facts: no
+  tasks:
+      - name: Install the 'at' command for job scheduling.
+        yum:
+            name: at
+            state: latest
+
+      - name: Enable and start the 'at' service if not started.
+        service:
+            name: atd
+            state: started
+            enabled: yes
+
+      - name: Schedule a command to execute in 20 mins as the ansible user.
+        at:
+            command: "df -h > /tmp/diskspace"
+            count: 20
+            units: minutes
+            #state: absent   # Ensures that job is removed from the execution log.
+...

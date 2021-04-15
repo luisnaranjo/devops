@@ -1,0 +1,10 @@
+---
+# This playbook is an example of the use of roles.
+# If you want to override a variable already defined inside the role, you can do it at the playbook level in the 'vars:' section by just specifying the variable with the new value.
+- hosts: localhost
+  become: yes
+  roles:
+      - example
+  # To override a default value, you can use the next syntax:
+  # vars:
+    # apache_server_admin: naranjo@example.com

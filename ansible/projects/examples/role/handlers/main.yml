@@ -1,0 +1,5 @@
+# Handlers file for example role.
+# Since this is a tasks file, there is no need to specify the 'tasks:'.
+- name: Restart Apache service.
+  service: name=httpd state=restarted
+  listen: "restart httpd"

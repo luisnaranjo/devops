@@ -1,0 +1,19 @@
+---
+# Task file for example role.
+# Apache management.
+# Since this is a tasks file, there is no need to specify the 'tasks:'.
+- name: Install Apache service.
+  yum: name=httpd state: latest
+
+- name: Copy httpd.conf template.
+  template:
+      src: httpd.conf.j2
+      dest: /etc/httpd/conf/httpd.conf
+  notify: restart httpd
+
+- name: Enable and start HTTP service.
+  service:
+      name: httpd
+      state: started
+      enabled: yes
+...

@@ -1,0 +1,2 @@
+# Defaults file for example role.
+apache_server_admin: admin@example.com

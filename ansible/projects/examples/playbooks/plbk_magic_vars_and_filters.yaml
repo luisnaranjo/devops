@@ -1,0 +1,18 @@
+---
+# This playbook is an example of the use of variables and filters.
+# This playbook will pick some hosts from the 'groups' magic variable and store the hosts list in a file (specified in a variable).
+# The obtained hosts will be ones in the 'labservers' group.
+- hosts: local
+  vars:
+      inv_file: /home/user/vars/inv.txt
+  tasks:
+      - name: Create the inventory file.
+        file:
+            path: "{{ inv_file }}"
+            state: touch
+      - name: Generate inventory (inserting the info into the file).
+        lineinfile:
+            path: "{{ inv_file }}"
+            # line: "{{ groups['labservers'] }}"  # Magic variable.
+            line: "{{ groups['labservers']|join(' ') }}"  # Magic variable and filter.
+...

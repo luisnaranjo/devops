@@ -1,0 +1,17 @@
+---
+all:
+    hosts:
+        mail.example.com
+            ansible_port: 5556
+            ansible_host: 192.168.0.5
+    children:
+        webservers:
+            hosts:
+                myhttp1.example.com
+                myhttp2.example.com
+            vars:
+                http_port: 8080
+        appservers:
+            hosts:
+                app[01-09].example.com
+...

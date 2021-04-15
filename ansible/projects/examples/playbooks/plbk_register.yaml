@@ -1,0 +1,16 @@
+---
+# This playboook is an example of the use of variables inside a playbook to retrieve results of running commands.
+# At the end, it will output one specific attribute value into a file.
+
+- hosts: localhost
+  tasks:
+      - name: Create a tmp file.
+        file:
+            path: /tmp/newfile
+            state: touch
+        register: props   # This variable is going to contain the returned information. Same indentation as the module.
+      - name: Write the property in the file.
+        lineinfile:
+            path: /tmp/newfile
+            line: "The user ID of the new file is: {{ props.uid }}". # Making use of the variable (variable.property).
+...

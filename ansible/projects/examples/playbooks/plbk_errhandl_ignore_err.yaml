@@ -1,0 +1,17 @@
+---
+# This playbook is an example of ignoring errors in playbook tasks.
+# By default, Ansible will stop any further task execution is one task fails.
+# This can be avoided by using the ignore_errors property (keyword).
+
+- hosts: localhost
+  tasks:
+      - name: Get some files from http.
+        get_url:
+            url: "http://{{ item }}/index.html"
+            dest: "/tmp/{{ item }}"
+        ignore_errors: yes
+        with_items:
+            - testserver1.example.com
+            - testserver2.example.com
+            - testserver3.example.com
+...

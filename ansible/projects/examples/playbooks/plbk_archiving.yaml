@@ -1,0 +1,20 @@
+---
+# This playbook is an example of the archive module.
+- hosts: localhost
+  user: ansible     # This playbook will be run as the user 'ansible'.
+  become: yes
+  gather_facts: no
+  tasks:
+      - name: Compress directory /var/log into /home/ansible/logs.tar.gz
+        archive:
+            path: /var/log  # Directory to compress in the target node.
+            dest: /home/ansible/logs.tar.gz # Destination file in the target node.
+            owner: ansible  # User owner of the file.
+            group: ansible  # Group user of the file.
+            format: gz      # It will use gzip compression.
+      - name: Fetch the tarballs from target nodes to control note.
+        fetch:
+            src: /home/ansible/logs.tar.gz  # In target nodes.
+            dest: "logbackup-{{ inventory_hostname }}.tar.gz"   # In control node.
+            flat: yes
+...
