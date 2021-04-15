@@ -1,0 +1,15 @@
+version: '3'
+services:
+    # Service called 'web' with image nginx and port published.
+    web:
+        image: nginx
+        ports:
+        - "8080:80"
+        deploy:
+            replicas: 3     # Sets 3 replicas for the web service.
+    # Service called 'busybox' with custom image and a command specified when the container is run.
+    busybox:
+        image: radial/busyboxplus:curl
+        command: /bin/sh -c "while true; do echo $$MESSAGE; curl web:80; sleep 10; done"    # Just prints out Hello! every 10 seconds, and curl the tasks inside the web service.
+        environment:
+        - MESSAGE=Hello!    # Environment variable.

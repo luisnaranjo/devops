@@ -1,0 +1,11 @@
+version: '3'
+services:
+    # First service called 'web'.
+    web:
+        image: nginx    # Image used for the web service.
+        ports:
+        - "8080:80"
+
+    # Second service called 'redis'.
+    redis:
+        image: redis:alpine # Image used for the redis service.
