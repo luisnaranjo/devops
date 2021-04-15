@@ -1,0 +1,766 @@
+----------------------------------------------- INTRODUCTION -----------------------------------------------
+[PUPPET INTRODUCTION AND ARCHITECTURE]
+Configuration Management is setting up bits of code that will help you provision and manage tens or hundreds or thousands or more-than-thousands of servers from a central, or "master" server.
+That's what Puppet is, a configuration management platform.
+
+HOW PUPPET WORKS:
+The master server runs the Puppet Server, and stores the manifest (server descriptions), the catalogs (the mapping that determines which servers receive what configurations), and the data store data.
+
+The minion the "puppet-agent" and collects information about itself, which it then in turn sends back to the Master on port 1840.
+The minions then request a catalog.
+
+Next, the master compiles a catalog for each minion, based on the facts the minion sent it.
+The master gives that catalog to the minion.
+
+The minion ensures that it matches the described state by applying the catalog and going through each manifest in the catalog.
+Anything that doesn't match is brought up to date in a process called "a catalog converge".
+
+Once converged, the minion sends a report about the catalog converge back to the master.
+
+MODULE:
+A module is a full configuration for one specific item, such as "nginx"
+
+
+[PUPPET SERVER: INSTALLATION & CONFIGURATION]
+Puppet Open Source (and Puppet Enterprise) only supports master-agent setups now, and recommends using the Java Virtual Machine-based Puppet Server for the master, not the older, Ruby-based Puppet Master application.
+The size of the server needed for the Puppet differs depending on how many agents that server will support:
+For more than 10 agents:
+    - 2 Cores.
+    - 1GB of RAM.
+For more than 1000 agents:
+    - 4 Cores.
+    - 4GB of RAM.
+
+The master-agent setup is the only acceptable configuration at the moment.
+There are 2 types of masters:
+    - Ruby-based "puppetmaster" (legacy).
+    - Java Virtual Machine-based "puppetserver" (preferred).
+For setting Puppet Server, it's suggested to work as root user (sudo -i).
+
+ADDING THE PUPPET REPOSITORY:
+Puppet maintains its own repositories for all supported Puppet Server distributions, including:
+    - Red Hat Enterprise Linux and derived distros.
+    - Debian.
+    - Fedora.
+    - Ubuntu.
+
+To add the Puppet repository in Ubuntu, use:
+    wget https://apt.puppetlabs.com/puppet6-release-bionic.deb
+    dpkg -i puppet6-release-bionic.deb
+    apt-get update
+
+If you want, you can also remove the ".deb" package now that the repository is set up:
+    rm puppet6-release-bionic.deb
+
+INSTALL THE PUPPET SERVER PACKAGE:
+You may need to configure the "/etc/hosts" file properly, depending on who your network is going to be.
+If needed, set the "puppet" hostname in the localhost IP.
+Example:
+    127.0.0.1 \<LABSERVERID\>.mylabserver.com localhost puppet
+
+Then you can install the "puppetserver" package in the system.
+    apt-get install -y puppetserver
+
+CONFIGURE PUPPET SERVER:
+Puppet can detect the hostname by default.
+Configurations used for initial Puppet Server startup and certificate generation are found at "/etc/puppetlabs/puppet/puppet.conf".
+You can modify this file as needed (hostname for example). However, this is not required in all cases.
+Example:
+[main]
+    certname = \<LABSERVERID\>.mylabserver.com
+
+    [master]
+    certname = \<LABSERVERID\>.mylabserver.com
+    vardir = /opt/puppetlabs/server/data/puppetserver
+    logdir = /var/log/puppetlabs/puppetserver
+    rundir = /var/run/puppetlabs/puppetserver
+    pidfile = /var/run/puppetlabs/puppetserver/puppetserver.pid
+    codedir = /etc/puppetlabs/code
+
+If needed, you can make some changes to the "/etc/default/puppetserver" config file (limit the memory allocation for example).
+Example:
+    JAVA_ARGS="-Xms1g -Xmx1g -Djruby.logger.class=com.puppetlabs.jruby_utils.jruby.Slf4jLogger"
+
+SETUP THE CERTIFICATE AUTHORITY:
+Puppet manages its own intermediate signing CA.
+Before you start the Puppet Server for the first time, you need to run the CA setup.
+    /opt/puppetlabs/bin/puppetserver ca setup
+
+START THE PUPPET SERVER:
+You can now start the Puppet Server (and enable it to start when the system boots) with:
+    systemctl start puppetserver
+    systemctl enable puppetserver
+
+Check the CA list to make sure the Puppet Server has no issues communicating through the certname you set up:
+    sudo -i
+    puppetserver ca list
+
+
+[PUPPET AGENT: INSTALLATION & CONFIGURATION]
+The Puppet Agent is supported on the next platforms:
+    - *nix.
+    - Windows.
+    - MacOS.
+
+PREPARE THE SERVER:
+Update your "/etc/hosts" file if needed, to specify the Puppet Server information.
+Example:
+    127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4 web01
+    ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+    # Cloud Server Hostname mapping
+    3.16.69.73   myserver.mylabserver.com
+    172.31.31.126    puppet  puppetserver.mylabserver.com
+
+ADD PUPPET REPOSITORIES:
+Add the Puppet repository corresponding to your system distribution.
+Example for RHEL-based distro:
+    sudo rpm -Uvh https://yum.puppet.com/puppet6/puppet6-release-el-7.noarch.rpm
+
+Run a "yum update" to enable the repository for use.
+    sudo yum update
+
+INSTALL PUPPET:
+To install Puppet on the agent server, you need to run the next command:
+    sudo yum install puppet-agent
+
+Then start and enable the service.
+    sudo systemctl start puppet
+    sudo systemctl enable puppet
+
+CONFIGURE PUPPET:
+The Puppet agent will automatically look for the server with the hostname "puppet".
+If you wanted to change that, you could have to make changes within the "/etc/puppetlabs/puppet/puppet.conf" file, where all of the Puppet agent-related configurations would be stored.
+For example, if you wanted to use "mylabserver" hostname, you could update this to read:
+    [main]
+    server = mypuppetserver.mylabserver.com
+You can also use the "puppet-config" command-line utility:
+    sudo /opt/puppetlabs/bin/puppet config set server mypuppetserver.mylabserver.com
+
+APPROVE AGENT:
+Next, as root:
+    sudo -i
+With the agent ready, you can go ahead and confirm the certificate on the Puppet Server.
+Outputs the agent's certificate fingerprint with command:
+    puppet agent --fingerprint
+
+If you faced an error caused by conflicting Ruby version, you would need to disable the "rvm" settings in "/etc/profile.d" to continue.
+    mv /etc/profile.d/rvm.sh /etc/profile.d/rvm.sh.disabled
+And log out/log back in to take effect on this change.
+    exit
+    sudo -i
+
+Now switch to the Puppet Server and see what you have to accept.
+    ssh USER@PUPPETSERVER
+    sudo -i
+    puppetserver ca list
+
+If the fingerprints match, you can approve the server.
+    puppetserver ca sign --certname AGENTSERVERID.mylabserver.com
+
+You can verify the signed certificated with command:
+    puppetserver ca list --all
+
+
+----------------------------------------------- PUPPET MODULES -----------------------------------------------
+[MODULE CREATION]
+Since Puppet is a configuration management (or infrastructure as code) solution, you use Puppet by providing it written descriptions of the desired end server state (modules).
+This is done in the Puppet language, which is comprised of a number of resource declarations that allows us to define the results you want for the managed nodes.
+
+ENVIRONMENTS:
+By default, Puppet has environment use enabled and sets the default environment to "production".
+The environments are stored in the Puppet code directory, located at "/etc/puppetlabs/code".
+The "production" environment is one directory below that.
+    cd /etc/puppetlabs/code/environments/production
+
+Within each environment you have 3 directories and a couple of files:
+    - FILE: environment.conf. Contains environmental settings. No need to touch this to adjust the production environment out-of-the-box.
+    - FILE: hiera.yaml. The Hiera configuration file.
+    - DIR: data. The directory where you store the Hiera data.
+    - DIR: manifests. Where the main manifest(s) are stored, and where we'll take the end-state configurations and map them to which servers you want to use them against.
+    - DIR: modules. Directory where you write and store the end-state configuration file.
+
+MODULES:
+Inside the "modules" directory:
+    cd modules
+If you list the contents of this directory, you will see it's empty.
+At this point, you have 2 options:
+    - You can manually create a module directory for the module you want to create.
+    - Use the Puppet Development Kit to generate one.
+
+NOTE: In the previous versions of Puppet, the "puppet module generate" command was used instead of the PDK.
+This is deprecated, and should not be used with Puppet 6.
+
+The Puppet Development Kit makes the creation of a module, or at least the skeleton of one.
+In order to use it, you need to install it:
+    sudo apt-get install pdk
+
+When the installation is complete, you can then generate the new module with the "pdk new module" command:
+    pdk new module nginx
+
+You will be prompted with a series of questions:
+    [Q 1/4] If you have a Puppet Forge username, add it here.
+    We can use this to upload your module to the Forge when it's complete.
+    --> myuser
+
+    [Q 2/4] Who wrote this module?
+    This is used to credit the module's author.
+    --> Luis N
+
+    [Q 3/4] What license does this module code fall under?
+    This should be an identifier from https://spdx.org/licenses/. Common values are "Apache-2.0", "MIT", or "proprietary".
+    --> Apache-2.0
+
+    [Q 4/4] What operating systems does this module support?
+    Use the up and down keys to move between the choices, space to select and enter to continue.
+    --> RedHat based Linux, Debian based Linux, Windows (Use arrow or number (1-7) keys, pres--> RedHat based Linux, Debian based Linux
+
+    Metadata will be generated based on this information, continue? Yes
+
+If you want to make any changes on this specified values, you can modify the "metadata.json" file that sits in the newly-created module directory.
+
+Inside the module directory you see several files and directories:
+    cd nginx
+    ls
+    CHANGELOG.md  README.md     data      hiera.yaml     spec
+    Gemfile       Rakefile      examples  manifests      tasks
+    Gemfile.lock  appveyor.yml  files     metadata.json  templates
+
+    - DIR: data. Just like in the above "production" directory, this "data" directory stores Hiera information.
+    - DIR: examples. Store examples on how to use the module's classes and types.
+    - DIR: files. Stores static files for nodes.
+    - DIR: manifests. Stores the manifests. The files that build out the module.
+    - DIR: spec. Spec tests for any plug-ins.
+    - DIR: tasks. Contains any Puppet tasks, which allows us to provide ad-hoc commands and scripts to run on the nodes.
+    - DIR: templates. Stores any templates, which can be used to generate content.
+
+WRITING A MANIFEST:
+As with module creation, you can use the PDK to generate a module "class".
+A class is a single component of the end-state description, while the "manifest" is the containing file.
+You can have multiple class inside a manifest file.
+Example:
+In our install class, it will tell Puppet that you want to install nginx on a node, and would be contained in the "install.pp" manifest.
+Similar to the creation of the module itself, you have 2 options:
+    - Opening your text editor and just write the class from scratch.
+    - Using the "pdk" command.
+Make sure to run this pdk command in the module root directory (/etc/puppetlabs/code/environments/ENV/modules/nginx).
+This is needed since pdk relies in the "metadata.json" file. Failing to do so, will make the pdk command to fail.
+    pdk new class install
+
+Now you can open the file with your text editor.
+    cd manifests
+    TEXTEDITOR install.pp
+
+At first the content will be a template:
+    # A description of what this class does
+    #
+    # @summary A short summary of the purpose of this class
+    #
+    # @example
+    #   include nginx::install
+    class nginx::install {
+    }
+You have a description, a summary, an example, and a very simple starting function bracket to work with.
+Update that information as needed.
+    # Installs nginx
+    #
+    # @summary Installs nginx
+    #
+    # @example
+    #   include nginx::install
+
+You now need to fill out the defined class, but before that, some things to consider:
+    - When tabbing in, use 2 single spaces, as you would with Ruby.
+    - Keep "hashrockets" between values and mappings aligned.
+Within the "nginx::install" class, you want to provide information about the "resource type" you want to use to perform an action.
+Resource types allows you to manage a single kind of resource in the node.
+We'll be using the "package" resource type, which allows you to manage packages on the nodes:
+    class nginx::install {
+      package { 'install_nginx':
+      }
+    }
+"install_nginx" is simply the name you provided this specific task the "package" resource is supposed to perform.
+Each resource type has a number of defined attributes (also called parameters) that you can use alongside.
+For the "install" class, we're going to use the "name" and "ensure" attributes:
+    class nginx::install {
+      package { 'install_nginx':
+        name   => 'nginx',
+        ensure => 'present',
+      }
+    }
+The "name" value is the package name for installation.
+"ensure" makes certain that the package is "present" on the targeted system.
+
+TESTING:
+Validate the Puppet code:
+    puppet parser validate install.pp
+If nothing is returned, you know the file is properly formatted.
+
+
+[THE init.pp AND site.pp FILES]
+FILE init.pp:
+The init.pp file is what gets called when you reference just the module itself, and all modules must have an "init.pp" file.
+You use this file to reference all of the classes, so that when you call the module, all tasks are complete.
+Example:
+    pdk new class nginx     # Since you are specifying a class with same module name, it will create the "init.pp" file.
+    vim manifest/init.pp
+
+The "contain" function ensures that the classes are performed in the correct order, making sure the contained class is not run prior to the manifest (in this instance, the init.pp), but is finished before the manifest is complete.
+    class nginx {
+      contain nginx::install
+    }
+Save and exit the init.pp file.
+
+When you have several classes to add in your "init.pp" file, you want to make sure they are run in the correct order.
+You do this by using the "Class" reference (notice the capital "C", this works the same as "Service" and is referencing the name of the class, not the "class" function itself) and "chaining" the existing classes together to define the order in which they are run.
+These are called "chaining arrows", with the "->" being an ordering arrow where the resource to the "right" of the arrow is always run after the left.
+And "~>" being a notify arrow, which only runs the resource to the right of the arrow only if the left-resource provoke a change.
+Example:
+    class nginx {
+      contain nginx::install
+      contain nginx::config
+      contain nginx::service
+
+      Class['nginx::install']
+      -> Class['nginx::config']
+      ~> Class['nginx::service']
+    }
+
+FILE site.pp:
+You can now map the module (nginx) to the agent node, allowing you to apply it.
+This is done in the environment's ("production" this case) "site.pp" file (inside the environment's manifest directory), which is the default manifest name.
+All you need to do is define the node, then include the module.
+    node AGENTSERVER.mylabserver.com {
+      class { 'nginx': }
+    }
+Save and exit the file.
+
+You can now make sure the module works by logging to the agent node server, becoming "root" user and running:
+    puppet agent -t
+
+Then confirm the configuration was applied.
+    which nginx
+
+
+[THE file RESOURCE TYPE]
+When referencing files in a class, you want to use the Puppet URI.
+Instead of putting the full path, you can use the "puppet:///" shorthand to reference the "/etc/puppetlabs/code/environments/ENV" directory.
+It will also know to pull from the "files" directory for static files, and the directory itself should not be referenced in the path.
+Example:
+    # Manages the nginx.conf file
+    #
+    # @summary Manages the nginx.conf file
+    #
+    # @example
+    #   include nginx::config
+    class nginx::config {
+      file { 'nginx_config':
+        path   => '/etc/nginx/nginx.conf',
+        source => 'puppet:///modules/nginx/rh-nginx.conf',
+        ensure => 'present',
+        notify => Service['nginx_service']
+      }
+    }
+
+ATTRIBUTES:
+    - path   => 'PATH'. The destination path for the file.
+    - source => 'PUPPET_URI'. The source location of the file.
+    - ensure => 'STATE'. Describes the desired state of the file.
+    - notify => Class['NAMEOFCLASS']. Allows you to notify another class to be run once this class is run.
+                                      Notice how, when referencing the class you use the capital letter. This differentiates it from a resource type.
+
+
+[THE service RESOURCE TYPE]
+When working with services. You want to use the 'service' resource type.
+Example:
+    # Manage the state of the nginx daemon
+    #
+    # @summary Manage the state of the nginx daemon
+    #
+    # @example
+    #   include nginx::service
+    class nginx::service {
+      service { 'nginx_service':
+        name       => 'nginx',
+        ensure     => 'runnning',
+        enable     => true,
+        hasrestart => true,
+      }
+    }
+
+ATTRIBUTES:
+    - name       => 'NAMEOFSERVICE'. Specifies the name of the service you want to configure.
+    - ensure     => 'STATE'. Describes the desired state for the service.
+    - enable     => true|false. Specifies if it's enabled across reboots or not.
+    - hasrestart => true|false. Specifies if you want the service to be restarted when this class is executed.
+
+
+[FACTER AND THE params.pp FILE]
+There is a bit of discord in the Puppet community as to whether you should use Hiera, the Puppet key/value store for all variables, or whether Hiera should be used alongside a "params.pp" file to store OS related configurations.
+Regardless of where anyone stands on this, however, you're going to run into a "params.pp" file at some point in your Puppet use.
+
+FACTER:
+You can create OS-specific parameters because Puppet uses a cross-platform system profiling library called Facter.
+Facter records "facts" about a system, such as the OS family and kernel version. And reports it back to the Puppet Master so that the master has a high-level overview of all its nodes.
+
+Facter records information about a node and returns it to the Puppet Master. The port is 8140 on the Master.
+
+For example, if you want to view a full list of facts about the system, you can just run:
+    facter
+Or be more specific:
+    factor os.family
+
+Used in module creation:
+    - params.pp
+    - if, case statements.
+
+FILE params.pp:
+But how can you use these facts in a module?
+You can use the params.pp file to "Parameterize" a module.
+To do this, you're going to add a "params.pp" file.
+    pdk new class params
+Example of the structure of params.pp:
+    # Default configurations.
+    class nginx::params {
+      $package_name = 'nginx'
+      $service_name = 'nginx'
+    }
+
+    # Distro-specific values.
+    case $::osfamily {
+      'RedHat': {
+        $config_path = '/etc/nginx/nginx.conf'
+        $config_source = 'puppet:///modules/nginx/rh-nginx.conf'
+      }
+      'Debian': {
+        $config_path = '/etc/nginx/nginx.conf'
+        $config_source = 'puppet:///modules/nginx/deb-nginx.conf'
+      }
+    }
+
+Then you need to reference these variables in the manifest files as needed.
+Example:
+    init.pp:
+        class nginx (
+          $package_name  = $nginx::params::package_name,
+          $config_path   = $nginx::params::config_path,
+          $config_source = $nginx::params::config_source,
+          $service_name  = $nginx::params::service_name,
+        ) inherits nginx::params {
+        contain nginx::install
+        contain nginx::config
+        contain nginx::service
+
+        ...
+        }
+
+    config.pp:
+        class nginx::config (
+          $config_path   = $nginx::params::config_path,
+          $config_source = $nginx::params::config_source,
+        ) inherits nginx::params {
+        file { 'nginx_config':
+          path    => $config_path,
+          source  => $config_source,
+          ensure  => 'present',
+          notify  => Service['nginx_service'],
+        }
+        }
+
+
+
+----------------------------------------------- HIERA -----------------------------------------------
+[HIERA: MODULE DATA]
+In an ideal world, every value would be able to be overwritten.
+But since every value isn't affected by the OS of the servers, you have another data store to work with: Hiera.
+Hiera lets you store key-value pairs in a hierarchy of directories for use in modules.
+
+FILE common.yaml:
+Hiera is configured in a multiple of places:
+    - There's an architectural-wide configuration file at "/etc/puppetlabs/puppet/hiera.yaml".
+      These settings are relevant to every server in the fleet.
+    - One within the environment itself at "/etc/puppetlabs/code/environments/ENV/hiera.yaml".
+      These settings are relevant on a per-node, role, or "group" basis.
+    - One for each module using Hiera at "etc/puppetlabs/code/environments/ENV/modules/MODULE/hiera.yaml".
+      These settings are relevant for the module itself.
+
+Example of the module's hiera.yaml file:
+    ---
+    version: 5
+
+    defaults:  # Used for any hierarchy level that omits these keys.
+    datadir: data         # This path is relative to hiera.yaml's directory.
+    data_hash: yaml_data  # Use the built-in YAML backend.
+
+    hierarchy:
+    - name: 'common'
+    path: 'common.yaml'
+Under "defaults", you have the "datadir" setting: This just tells Hiera that for this module, the Hiera data is under "data" directory.
+Hiera reads this from the directory the "hiera.yaml" file is located in.
+You can also see that Hiera will specifically look for the "common" hierarchy, located at "common.yaml" in the "datadir"
+
+In the "common.yaml" file, you want to add variables and values for your needed attributes.
+To do so, you just have to use simple key-value pairs to add these to Hiera.
+Example:
+    ---
+    nginx::package_ensure: 'present'
+    nginx::config_ensure: 'present'
+    nginx::service_ensure: 'running'
+    nginx::service_enable: true
+    nginx::service_hasrestart: true
+
+You would then need to update you "init.pp" file and any other manifest files so that it calls these needed values.
+Hiera has one benefit in contrast to the "params.pp" file way to do it. With Hiera, you only need to specify the variables at the top of the class here (init.pp), not in each manifest file.
+But you would need to update the hardcoded values as needed.
+When you define the variables in the "init.pp" file, you also need to supply the data type it should be expecting.
+Example of a "init.pp" file using Hiera values form "common.yaml" file:
+    class nginx (
+    $package_name  = $nginx::params::package_name,
+    $config_path   = $nginx::params::config_path,
+    $config_source = $nginx::params::config_source,
+    $service_name  = $nginx::params::service_name,
+    String $package_ensure,
+    String $config_ensure,
+    String $service_ensure,
+    Boolean $service_enable,
+    Boolean $service_hasrestart,
+    ) inherits nginx::params {
+    ...
+
+Remember to update the hardcoded values with the variables as needed.
+Example of updating "config.pp" manifest file:
+    class nginx::config (
+    $config_path   = $nginx::params::config_path,
+    $config_source = $nginx::params::config_source,
+    ) inherits nginx::params {
+    file { 'nginx_config':
+    path   => $config_path,
+    source => $config_source,
+    ensure => $nginx::config_ensure,
+    notify => Service['nginx_service'],
+    }
+    }
+
+
+[HIERA: NODE DATA]
+With Hiera, you can also provide node-specific values for a module.
+
+EXAMPLE:
+Use "pdk" to generate a new class from the "nginx" directory.
+    pdk new class vhosts
+
+Update the "manifest/vhosts.pp" file that was just generated with the needed instructions.
+    # Generate a virtual hosts file for nginx. Requires node-specific Hiera data
+    #
+    # @summary Generate a virtual hosts file for nginx
+    #
+    # @example
+    #   include nginx::vhosts
+    class nginx::vhosts (
+    $vhosts_dir = $nginx::params::vhosts_dir,
+    ) inherits nginx::params {
+    file { "${nginx::vhosts_name}.conf":
+    content => epp('nginx/vhosts.conf.epp'),
+    ensure  => $nginx::vhosts_ensure,
+    path    => "${vhosts_dir}/${nginx::vhosts_name}.conf",
+    }
+
+    file { "$nginx::vhosts_root":
+    ensure => 'directory',
+    }
+    }
+Notice how you have one parameter to add to "params.pp": the "vhosts_dir" value.
+You also have a couple of Hiera values in "nginx::vhosts_name" and "nginx::vhosts_ensure".
+See how variables are provided when they're in large double-quoted strings. Instead of using $nginx::vhosts_server you use ${nginx::vhosts_server}.
+
+The "content => epp('nginx/vhosts.conf.epp')" line populates a new file based on the given Puppet template, which you need to add to the "templates" directory of the module (nginx).
+Content of the template file:
+    # This file is managed by Puppet; do not make changes by hand
+    server {
+    listen <%= $nginx::vhosts_port %>;
+      listen [::]:<%= $nginx::vhosts_port %>;
+
+      root <%= $nginx::vhosts_root %>;
+      server_name <%= $nginx::vhosts_name %> www.<%= $nginx::vhosts_name %>;
+      }
+    }
+This is an ".epp" file, which means it uses Puppet's templating language.
+If you're familiar with Ruby, you also have the option to create an ".erb" file.
+
+
+Now you want to go ahead and update the "manifests/init.pp", "manifests/params.pp" and "data/common.yaml" files:
+init.pp:
+    ...
+    $vhosts_dir    = $nginx::params::vhosts_dir,
+    String $package_ensure,
+    String $config_ensure,
+    String $service_ensure,
+    Boolean $service_enable,
+    Boolean $service_hasrestart,
+    String $vhosts_port,
+    String $vhosts_root,
+    String $vhosts_ensure,
+    String $vhosts_name,
+    ) inherits nginx::params {
+    ...
+
+params.pp:
+    'RedHat': {
+      $config_path = '/etc/nginx/nginx.conf'
+      $config_source = 'puppet:///modules/nginx/rh-nginx.conf'
+      $vhosts_dir = '/etc/nginx/conf.d/'
+    }
+    'Debian': {
+      $config_path = '/etc/nginx/nginx.conf'
+      $config_source = 'puppet:///modules/nginx/deb-nginx.conf'
+      $vhosts_dir = '/etc/nginx/sites-available/'
+    }
+
+common.yaml:
+    ---
+    nginx::package_ensure: 'present'
+    nginx::config_ensure: 'present'
+    nginx::service_ensure: 'running'
+    nginx::service_enable: true
+    nginx::service_hasrestart: true
+    nginx::vhosts_ensure: 'present'
+
+Open the environment's specific Hiera file.
+Like in the module's Hiera file, you have default "data" directory in the same directory as this file.
+Focus on the next lines:
+    - name: "Per-node data (yaml version)"
+    path: "nodes/%{::trusted.certname}.yaml"
+These define where you'll be placing the per-node data, especially in the "data/nodes/" directory in the "production" environment.
+The name of the file should be the trusted certname that Puppet uses to talk to the server, ending in ".yaml".
+The "hiera.yaml" file defines this using the "trusted.certname" fact, referenced in the "path".
+
+Create the node files.
+    mkdir data/nodes
+    vim data/nodes/myserver.mylabserver.con.yaml
+From here, you can add the Hiera values that aren't relevant to the "common.yaml" file, because they would be specific to the node or role.
+    ---
+
+    nginx::vhosts_port: '80'
+    nginx::vhosts_root: '/var/www'
+    nginx::vhosts_name: 'the-puppet-project.com'
+    nginx::vhosts_ensure: 'present'
+
+When you apply this module, the "nginx::vhosts_ensure" variable will take this value, not the one in the "common.yaml" file, although at this point they are the same.
+
+
+
+----------------------------------------------- MORE PUPPET -----------------------------------------------
+[THE PUPPET FORGE]
+You don't need to create new modules for everything you need to do with Puppet.
+The Puppet Forge is a repository of existing Puppet modules written by PuppetLabs and other contributors.
+You can also add a module to Puppet Forge, although not all modules are Puppet-approved.
+The Puppet Forge is located at "forge.puppet.com".
+An example of a Module in Puppet Forge is "PuppetDB". You can install it through the use of the PuppetLabs's PuppetDB module on the Forge.
+
+Once on The Forge search page, take a look at the sidebar Guide to module badges.
+This is how you can tell the quality of a module. There are 5 badges.
+3 Quality Badges:
+    - Supported. It means it works on Puppet Enterprise and is maintained by Puppet.
+    - Partner. Means it works with Puppet Enterprise and is maintained by a Puppet partner.
+    - Approved. Means that Puppet has reviewed the module and found it meets their standards, but it's not maintained by Puppet or a supported partner.
+2 Support badges:
+    - Tasks. Means the module works with Tasks, which is part of "Puppet Bolt", it's an automation tool.
+    - PDK. Means a module works with Puppet Development Kit validation and testing.
+
+Once you find and click on the module you need, you will find download instructions and information on using the module.
+Any specific directions for using the module would be here, such as Hiera data you need to add, or changes to the manifests to achieve specific behavior.
+
+You can also search for modules in Puppet Forge via command line:
+    puppet module search puppetdb
+
+In the case of the PuppetDB page, we're presented with 2 installation options:
+    - The "Puppetfile" method is related to Puppet Enterprise.
+    - The other method is with the "puppet module" command (This can be used with Puppet Open Source).
+
+The "puppet module" command allows you to search for, install, uninstall, upgrade, and list modules.
+In previous versions of Puppet, it was also the command used to generate the skeleton of a new module, but that behavior has been deprecated in favor of the Puppet Dev Kit.
+Example of installing PuppetDB:
+    puppet module install puppetlabs-puppetdb
+Note that when you install a module from the Puppet Forge, all its dependent modules are installed along with it.
+
+Since you don't need to make changes to the module itself for it work, all you have to do to install it on the desired servers is to add it to the "site.pp" file.
+    vim manifests/site.pp
+
+With PuppetDB, generally would be hosted on its own server, with the option to put the Postgresql database on a third, separate server.
+However, for test and small environments, you can install it alongside the Puppet Server.
+    node PUPPETSERVER.mylabserver.com {
+        # Configure puppetdb and its underlying database
+        class { 'puppetdb': }
+        # Configure the Puppet master to use puppetdb
+        class { 'puppetdb::master::config': }
+    }
+
+For a Puppet run to apply the configs to the server and verify puppetdb is running.
+    puppet agent -t
+    systemctl status puppetdb
+
+
+
+----------------------------------------------- MISCELLANEOUS -----------------------------------------------
+[COMMANDS]
+SERVER INSTALLATION #########################
+/opt/puppetlabs/bin/puppetserver ca setup   # Setup the certificate authority.
+puppetserver ca list                        # Display the CA list.
+puppetserver ca list -all                   # Display all the signed certificated.
+
+AGENT INSTALLATION ##############################################
+puppet agent --fingerprint                                      # Print the agent fingerprint (Run this on the Agent server).
+puppetserver ca sign --certname AGENTSERVERID.mylabserver.com   # Approved a server agent (Run this on the Puppet Master).
+
+MODULE CREATION #################################################
+pdk new module MODULE                                           # Generates the module directory skeleton.
+pdk new class CLASS                                             # Generate the manifest file for the class CLASS.
+puppet parser validate MANIFEST.pp                              # Validate the manifest syntax.
+facter                                                          # Displays a full list of facts about the system.
+facter os.family                                                # Displays specifically the facts about the os family.
+
+THE PUPPET FORGE ################################################
+puppet module search MODULENAME                                 # Search for the specified module in Puppet Forge.
+puppet module install MODULENAME                                # Install a module from Puppet Forge.
+
+
+[FILES & DIRECTORIES]
+FILES:
+GENERAL #################################################################
+/etc/hosts                                                              # The host file.
+/etc/puppetlabs/puppet/puppet.conf                                      # Configuration file used for initial Puppet Server startup and certificate generation. This configuration file is also there for Puppet agents.
+/etc/default/puppetserver                                               # Configuration file for the Java Virtual Machines, you can update the heapsize values here.
+
+MODULE CREATION #############################################################
+/etc/puppetlabs/code/environments/ENV/environment.conf                      # Environment config file.
+/etc/puppetlabs/code/environments/ENV/hiera.yaml                            # The Hiera configuration file.
+/etc/puppetlabs/code/environments/ENV/modules/MODULE/metadata.json          # Contains the configured values you specified at module creation time with the PDK.
+/etc/puppetlabs/code/environments/ENV/modules/MODULE/manifests/init.pp      # File that gets called when you reference just the module itself. Used to reference all module classes.
+/etc/puppetlabs/code/environments/ENV/modules/MODULE/manifests/params.pp    # File that allows you to define facts about your nodes and use them in your modules.
+/etc/puppetlabs/code/environments/ENV/manifests/site.pp                     # Module file that map the end-state configurations to the nodes.
+
+HIERA ###################################################################
+/etc/puppetlabs/puppet/hiera.yaml                                       # Architectural-wide Hiera config file.
+/etc/puppetlabs/code/environments/ENV/hiera.yaml                        # Environment-wide Hiera config file.
+etc/puppetlabs/code/environments/ENV/modules/MODULE/hiera.yaml          # Module-wide Hiera config file.
+
+DIRECTORIES:
+GENERAL #########################################################
+/etc/puppetlabs/puppet/ssl/ca                                   # Directory for Puppet certificates.
+
+MODULE CREATION #################################################
+/etc/puppetlabs/code                                            # The Puppet Code directory. The environments are stored in this directory.
+
+/etc/puppetlabs/code/environments/ENV/data                      # The directory where you store the Hiera data.
+/etc/puppetlabs/code/environments/ENV/manifests                 # Where the main manifest(s) are stored.
+/etc/puppetlabs/code/environments/ENV/modules                   # Directory where you write and store the end-state configuration file.
+
+/etc/puppetlabs/code/environments/ENV/modules/MODULE/data       # Just like in the above "production" directory, this "data" directory stores Hiera information.
+/etc/puppetlabs/code/environments/ENV/modules/MODULE/examples   # Store examples on how to use the module's classes and types.
+/etc/puppetlabs/code/environments/ENV/modules/MODULE/files      # Stores static files for nodes.
+/etc/puppetlabs/code/environments/ENV/modules/MODULE/manifests  # Stores the manifests. The files that build out the module.
+/etc/puppetlabs/code/environments/ENV/modules/MODULE/spec       # Spec tests for any plug-ins.
+/etc/puppetlabs/code/environments/ENV/modules/MODULE/tasks      # Contains any Puppet tasks, which allows us to provide ad-hoc commands and scripts to run on the nodes.
+/etc/puppetlabs/code/environments/ENV/modules/MODULE/templates  # Stores any templates, which can be used to generate content.
+
+
+[MISCELLANEOUS]

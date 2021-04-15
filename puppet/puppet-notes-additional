@@ -1,0 +1,32 @@
+[PUPPET]
+Puppet is designed to manage the configuration of Unix-like and Microsoft Windows systems declaratively.
+It describes system resources and their state using the Puppet DSL. The Puppet DSL is based on Ruby.
+Resource types are used to manage system resources.
+    - Users.
+    - Groups.
+    - File.
+    - Package.
+    - Service.
+Resource types are declared in manifest files. Manifest files can be used within a Module.
+You can either run Puppet locally, or in a Master-Slave setup.
+
+RESOURCE TYPE FORMAT:
+TYPE{'TITLE':
+    ATTRIBUTE => VALUE,
+}
+Example:
+user{'myuser':
+    ensure => present,
+    uid => '102',
+    gid => 'wheel',
+    shell => '/bin/bash',
+    home => '/home/myuser',
+    managehome => true,
+}
+
+COMMAND puppet apply: Manages systems without needing to contact a Puppet master server.
+COMMAND puppet agent: Manages systems, with the help of a Puppet master.
+COMMAND puppet cert: Helps manage Puppet's built-in certificate authority (CA).
+COMMAND puppet module: It's a multi-purpose tool for working with Puppet modules.
+COMMAND puppet resource: It lets you interactively inspect and manipulate resources on a system.
+COMMAND puppet parser: Lets you validate Puppet code to make sure it contains no syntax errors.

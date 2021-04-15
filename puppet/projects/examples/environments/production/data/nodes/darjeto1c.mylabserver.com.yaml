@@ -1,0 +1,6 @@
+---
+
+nginx::vhosts_port: '8080'
+nginx::vhosts_root: '/var/www'
+nginx::vhsots_name: 'the-puppet-project.com'
+nginx::vhosts_ensure: 'present'         # This overrides the module specific value.
