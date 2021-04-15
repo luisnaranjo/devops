@@ -1,0 +1,701 @@
+----------------------------------------------- PACKER -----------------------------------------------
+[PACKER]
+Packer is a tool for building machine images or "compute" resources that store configuration, metadata, and permissions information for the creation of a virtual machine.
+Packer works cross-platform, which means you can create machine images for everything from cloud platform, like AWS, to old-school virtualization tools, like VirtualBox.
+
+Packer does this by leveraging the tools you already use, such as the cloud platform APIs, and current configuration management tools.
+Packer will take any templates you provide and produce an image, sending it straight to the appropriate platform just by running a single command.
+
+Packer, much like the configuration management programs, let us write the desired outcome via text file.
+This doesn't just mean removing the need to access a VM itself to create a machine image. This also means we can create multiple machine images, as well as automate the creation, testing, and release of these images.
+
+Additionally, Packer lets us achieve the dev/prod parity and multi-cloud environment we need by allowing us to configure the machine image to work cross-platform in a single template.
+This way, the end result will be the same even if we're creating a Docker image for developers and an Amazon Machine Image for production.
+
+As a result, Packer:
+  - Removes the need to individually configure machine images in favor of writing templates.
+  - Packer templates fit in with existing automation pipelines.
+  - Packer let us work cross-platform and cross-environment. All with a single configuration.
+
+
+[PACKER BREAKDOWN]
+The majority of work you do with Packer will be contained in the templates you write.
+However, you may take the time to ensure you have the basic vocabulary and structuring information needed.
+
+These components are combined in the template to create a build, or a single machine image.
+A template can contain multiple builds that each produce their own machine image.
+
+BUILDER:
+A Packer template, at the very least, must have a builder assigned to it.
+A builder is what defines the platform you want to build the image on, as well as any base configurations you need to work with that platform, such as API keys or image destinations.
+
+PROVISIONER:
+You can then define the various desired configurations for the image with a provisioner (or multiple provisioners).
+Packer offers provisioners for all major configuration management platforms (as well as some less common).
+You also have the option to provide shell scripts and upload files directly, if you're working outside the scope of config management.
+
+POST-PROCESSOR:
+Finally, once the build is done, you may want to provide instructions on what to do with the image itself or any other artifacts (which are the end result of the build).
+For this, you can add a post-processor.
+Post-processors tend to be closely tied to the builder (we wouldn't use the Amazon Import post-processor with the Microsoft Azure builder, for example).
+
+COMMUNICATOR:
+All of this work is done via Packer through the use of a communicator.
+If working exclusively on *nix-based hosts, you don't have to worry about this. SSH is the default communicator and works in the majority of instances.
+However, if you're using Packer provision on Windows, you would need to switch this to the "winrm"communicator.
+Communicators determine how Packer talks to the machine during image creation.
+
+COMMAND:
+Once the template is finished, you'll leverage the "packer" command on the CLI to launch the image.
+Most often, this is the "packer build" command.
+
+BUILD:
+A build is the overall combination of configurations that result in an image.
+A template can have multiple builds.
+
+ARTIFACT:
+An artifact is the result of a build.
+Generally, this is the machine image itself and any generated log or metadata files.
+
+
+
+----------------------------------------------- TEMPLATE LANGUAJES -----------------------------------------------
+[JSON]
+JSON is one of two languages supported by Packer and is by far the more mature.
+While slightly less human readable than HCL, JSON is currently the more stable option for writing Packer templates.
+
+JSON data comprises two structures:
+  - Objects.
+  - Arrays.
+
+OBJECT:
+An object comprises a name/value pair.
+In JSON, objects begin with a left brace ({), end with a right brace (}), and the name portion of the name/value pairs ends with a colon(:).
+An object of multiple pairs should separate the pair with a comma (,).
+Structure:
+  {
+    "name": "value",
+    "name": "value"
+  }
+Example:
+  "filters":
+  {
+    "virtualization-type": "hvm",
+    "name": "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*",
+    "root-device-type": "ebs"
+  }
+
+Objects can also contain the next structure, the array.
+
+ARRAY:
+An array is just a list. In JSON, this list is contained in left and right brackets ([ ... ]), and multiple items are separated by commas (,).
+Structure:
+  [
+    "item",
+    "item"
+  ]
+In Packer, the arrays tend to be a little more involved, and they're always part of a greater object.
+Example:
+  "provisioners":
+  [
+    {
+      "type": "file",
+      "source": "./welcome.txt",
+      "destination": "/home/ubuntu"
+    },
+    {
+      "type": "shell",
+      "inline":
+      [
+        "ls -al /home/ubuntu",
+        "cat /home/ubuntu/welcome.txt"
+      ]
+    }
+  ]
+The above snippet contains 2 arrays:
+  - The overall "provisioners" array, which contains 2 objects for provisioning ("type": "file" and "type": "shell").
+  - The array assigned to the "inline" name-value pair. Which list 2 commands to run via the shell provisioner.
+
+WHITESPACE IN JSON:
+Whitespace in JSON doesn't really matter.
+Using indexing is really up to you. but HashiCorp tends to use four spaces in their documentation.
+
+
+[HCL2]
+HashiCorp has release beta support for HCL2, or HashiCorp Configuration Language, most commonly associated with HashiCorp's other product, Terraform.
+This is done with the intention of having HCL take over from JSON as the primary configuration language for Packer.
+HCL itself is JSON-compatible, working as a "most human-readable" version than JSON's machine-friendly formatting.
+
+As with JSON, HCL is also made up of objects and arrays, although there are differences to the presentation.
+Where JSON relied on its objects always being encased in braces, HCL takes a more simplified approach, allowing for object blocks to first define a "type", then provide attributes in simple "name = "value"" format, eliminating excessive quotation marks.
+So this JSON object:
+    {
+        "builders": [
+        {
+            "ami_name": "packer-test",
+            "region": "us-east-1",
+            "instance_type": "t2.micro"
+        }
+        ]
+    }
+Would become this in HCL:
+    source "amazon-ebs" "example" {
+        ami_name = "packer-test"
+        region = "us-east-1"
+        instance_type = "t2.micro"
+    }
+With "source" working as the "type". The equivalent of defining the "builders" object above.
+
+Arrays, in contrast, work essentially the same, but instead of being leveraged to list multiple of any Packer component, lists are instead reserved for any list in the attributes of a template.
+Lists can also be assigned in HCL by repeating the object name. This will add an item, not overwrite it:
+    service {
+        key = "value"
+    }
+
+    service {
+        key = "value"
+    }
+While the 2 core structures of a template remain the same in HCL as JSON, HCL also leverages a few different concepts and terms:
+    - Attributes.
+    - Blocks
+    - Bodies.
+
+ATTRIBUTES:
+Attributes are a single configuration unit, such as "ami_name = "packer-test"".
+
+BLOCKS
+Blocks are a collection of these units, annotated with a block type, which we've already discussed.
+
+BODY:
+A collection of related blocks is a body. A template can comprise a single body or multiple, depending on the goals of the template.
+
+COMMENTS:
+One primary benefit of using HCL is the ability to add comments natively.
+Since you'll be using Packer to write templates (templates that will undoubtedly be used by others) leaving comments when needed can be valuable to the templating.
+It has the option for single line and multi line comments.
+Examples:
+    /*
+    This is a comment!
+    */
+    # Comment.
+    // Comment.
+
+
+
+----------------------------------------------- INSTALLATION -----------------------------------------------
+[LINUX INSTALLATION]
+Packer itself is only a single binary file.
+
+Get the binary file from HashiCorp's website using curl or wget.
+    curl https://releases.hashicorp.com/packer/1.5.6/packer_1.5.6_linux_amd64.zip -o packer.zip
+    wget https://releases.hashicorp.com/packer/1.5.6/packer_1.5.6_linux_amd64.zip -O packer.zip
+
+Unzip the compressed file.
+    unzip packer.zip
+
+Move the resulting binary to the appropriate place, which can be /usr/bin, to share across users or anywhere within the desired user's $PATH setting.
+    sudo mv packer /usr/bin
+
+Confirm that Packer is working and see a command list.
+    packer --help
+
+[WINDOWS INSTALLATION]
+Packer can be installed by downloading a zip file directly from Packer's website and extracting the binary.
+
+We can also install it via the open source Windows package manager Chocolatey.
+To install Chocolatey, you need to open PowerShell by right clicking and selecting Run As Administrator.
+Then you need to check that "Get-ExecutionPolicy" is not restricted.
+    Get-ExecutionPolicy
+
+If it is, set it to "Bypass".
+    Set-ExecutionPolicy Bypass -Scope Process
+
+Install Chocolaatey with:
+    Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+
+Exit PowerShell, then relaunch it.
+Install Packer with this:
+    choco install packer
+
+
+
+----------------------------------------------- ENVIRONMENT -----------------------------------------------
+[PACKER PLUGINS]
+While Packer itself comes with support for over 30 builders, 15 provisioners, and 20 post-processors, there will be time when you find the initial Packer binary not enough to meet your needs.
+As a solution for this, Packer supports community-written builders, provisioners, and post-processors that can be installed as Packer plugins.
+
+Plugins are usually installed one of two ways:
+    - Moving the binary to the appropriate location (like when you install Packer).
+    - Cloning the plugin repository and using Go to build it.
+
+Regardless of which type of plugin you download, ensure you look over any supplied README files and download any dependencies.
+
+EXAMPLE:
+Let's demonstrate with a simple plugin that allows you to add comments to the output when building the images. The "packer-provisioner-comment":
+First install Go on the workstation:
+    sudo apt install golang-go
+
+Clone the plugin repository:
+    git clone https://github.com/SwampDragons/packer-provisioner-comment.git
+
+Move into the newly created directory and build the module:
+    cd packer-provisioner-comment/
+    go mod download
+    go build
+
+Here, you need to decide where you want to move the Packer plugin.
+You have a few options depending on if you want to have the plugin available for all users or not (assuming Packer is installed outside of a single user space).
+
+To add the plugin to all users, you can either move it to the same location as the Packer binary (/usr/bin) or you can package it with the build files themselves.
+
+You can also make the binary available to just the user by creating ".packer.d" directory for user-based Packer configurations.
+Within this, you want the "plugins" directory:
+    mkdir -p ~/.packer.d/plugins
+Note that Windows users would instead create their directories at %APPDATA%/packer.d/plugins or %USERPROFILE%/packer.d/plugins.
+
+Then, move the binary. Note that plugins must be named in the "packer-type-name" format.
+In this case "packer-provisioner-comment".
+    mv main ~/.packer.d/plugins/packer-provisioner-comment
+
+
+
+----------------------------------------------- BUILDING A BASE TEMPLATE (BUILDERS & COMMUNICATORS) -----------------------------------------------
+[BUILDERS]
+Builders are what define the platform and its configuration (platform configuration) when writing a Packer template (including API key information and desired source images).
+The builder essentially does the work of the build. Without it, Packer would not know how to generate a new image.
+
+Currently, there are over 30 builders available for us to use, and each builder has its own configuration parameters.
+Think about your preferred cloud, container, or virtualization platform, what is the smallest amount of information you need to deploy an image from the command line? That's the same information Packer needs.
+
+A Packer build can contain a number of files.
+
+AMAZON EBS BUILDER EXAMPLE:
+For a build with the Amazon EBS Builder you will need the next information:
+    - Access key.
+    - Secret key.
+    - Region information.
+    - Instance type.
+    - AMI information.
+    - Source image. If you want to make sure you're always pulling the newest version of an image, you'll need to use the "source_ami_filter" option.
+                    This option lets you filter down the AMI by attributes (until there is only one left), and supply some other general information.
+
+## Refer the "base-ami" example project for an example of syntax.
+
+
+[COMMUNICATORS]
+To write the simplest possible template, the last piece you need is to add the communicator.
+By default, this is SSH, so as long as you're not spinning up a Windows image, you won't need to specify the communicator itself.
+Instead, You'll just be adding some parameters to the builder.
+At minimum, this will need to be the "ssh_username", although additional values depend on the source image.
+
+Communicators tell Packer how to connect to the temporary instance; used for provisioning.
+    - none. Disable provisioning.
+    - ssh. Default. Connect with SSH.
+    - winrm. Connect to Windows instances with WinRM.
+
+## Refer the "base-ami" example project for an example of syntax.
+
+
+[BUILDING THE IMAGE]
+With the minimum configurations set for a build (builder and communicator), you can proceed building the image.
+First you can validate the syntax of the template.
+    packer validate packer.json
+Currently this command can only validate json templates. This doesn't work with HCL at the moment.
+
+You can update (reformat) the structure of older packer templates to the latest version of Packer formatting.
+    packer fix packer.json
+By default, it sends the output to STDOUT. You can save the output to a new file though.
+    packer fix packer.json > packer_new.json
+
+You can then build the image with:
+    packer build packer.json
+Note that we define the name of the Packer file.
+If we were using HCL, we could alternately define a whole directory, and all "pkr.hcl" files will be used in the build.
+
+
+
+----------------------------------------------- PROVISIONING -----------------------------------------------
+Provisioning is a core component of a Packer template.
+Depending on the desired purpose of the image, you can handle this a number of ways.
+    - By tapping into an existing configuration management setup.
+    - By using solo or masterless version of a configuration management platform.
+    - By using the default shell (whether that be Bash or the Windows Shell).
+
+To set a provisioner in your Packer template you use an array.
+    "provisioners": [
+
+    ]
+
+You have a few options for defining the provisioner.
+No matter what, you'll have to provide the "type" parameter, designated
+
+
+[SHELL (BASH) PROVISIONER]
+With the Bash provisioner, you can use Bash commands and scripts to set up the image with desired configuration.
+Bash provisioner is often used with the File provisioner.
+REQUIRED PARAMETERS:
+    - "inline": ["COMMAND", ...]. Allows you to specify the bash command.
+    - "script": "SCRIPT.SH". Allows you to run a single script.
+    - "scripts": ["SCRIPT.sh", ...]. Allows you to run a list of scripts.
+EXAMPLE:
+    ...
+        ],
+        "provisioners": [
+            {
+                "type": "shell",
+                "inline": ["sudo apt-get update -y && sudo apt-get upgrade -y"]
+            },
+            {
+                "type": "shell",
+                "script": "init.sh"
+            }
+
+        ]
+    }
+
+The Bash provisioner also offers a wide variety of parameters you can work with.
+Of most interest will probably be the option to add environmental variables for use within your scripts, and the option to change or tweak the behavior of the provisioner itself.
+For example, if you're altering the SSH configuration for the image, you can use the "expect_disconnect" option to prevent an error when the virtual machine being used to create the image temporarily disconnects.
+You can also change how commands are executed, variable format, and how often Packer will attempt to run a command in case it initially fails.
+Documentation about optional parameters:
+    https://www.packer.io/docs/provisioners/shell
+
+
+[FILE PROVISIONER]
+With the file provisioner, we can upload files into the machine (image) from the local machine.
+This helps to expedite configurations, by placing files with specific configuration into the image.
+The File provisioner is often used along with the Shell provisioner.
+REQUIRED PARAMETERS:
+    - "source": "PATH". The source file or directory in the local machine to be uploaded.
+    - "destination": "PATH". The destination in the image. Files that require escalated privileges should be saved to "/tmp" and moved with a script.
+
+EXAMPLE:
+    ...
+        ],
+        "provisioners": [
+            {
+                "type": "file",
+                "source": "files/",
+                "destination": "/tmp"
+            }
+
+        ]
+    }
+
+Single files or whole directories can be uploaded:
+    - Upload the directory itself by leaving off the trailing slash (/tmp/files).
+    - Upload only the contents of the directory by adding the trailing slash (/tmp/files/).
+
+
+[ANSIBLE PROVISIONER]
+Ansible is a configuration management platform and leverages YAML-based playbooks to configure remote hosts through SSH.
+You have 2 options for Ansible provisioning:
+    - ansible-local.
+    - ansible.
+
+ANSIBLE LOCAL (ansible-local):
+ansible-local works by using Ansible on the remote machine itself (which means Ansible must be installed before the provisioner is run).
+This can be accomplished using the "Shell" provisioner and running a few "inline" commands.
+Afterward, all you need to do is supply one or more playbooks for Ansible to run during the provisioning process.
+REQUIRED PARAMETERS:
+    - "playbook_file": "PATH". Specify the playbook to run.
+EXAMPLE:
+    ...
+        ],
+        "provisioners": [
+            {
+                "type": "ansible-local",
+                "playbook_file": "playbook.yml"
+            }
+
+        ]
+    }
+
+ANSIBLE (ansible):
+ansible works by using Ansible on the local machine.
+So you would need to have Ansible installed on your workstation and set up the provisioner to use the "ansible" option.
+REQUIRED PARAMETERS:
+    - "playbook_file": "PATH". Specify the playbook to run.
+EXAMPLE:
+    ...
+        ],
+        "provisioners": [
+            {
+                "type": "ansible",
+                "playbook_file": "playbook.yml"
+            }
+
+        ]
+    }
+
+
+[CHEF PROVISIONER]
+As with Ansible, Packer offers 2 options for using Chef as a means of provisioning the remote for image creation: one that assumes an existing Chef setup and one that doesn't.
+While these provisioners both work differently, they each still let you leverage common Chef tools and functionality.
+You can add cookbooks, provide recipe run lists, assign environments, provide data bags, and supply a custom Chef configuration.
+The primary difference is that "chef-client" requires "server_url" parameter, indicating the Chef Infra Server location.
+
+CHEF CLIENT (chef-client):
+Chef normally leverages what is known as a Chef Infra Server, or an overall primary server that manages the configuration of nodes.
+If you already have a Chef Infra Server set up, you can have the remote connect to this to provision using your regular Chef setup.
+This is called "chef-client" provisioner, because it installs the "chef-client" package on the remote so it can speak to the Infra Server.
+REQUIRED PARAMETERS:
+    - "cookbook_paths": ["PATH", ...]. Specify the location of the cookbooks.
+    - "server_url": "SERVER". Specify the Chef Infra Server url.
+EXAMPLE:
+    ...
+        ],
+        "provisioners": [
+            {
+                "type": "chef-client",
+                "cookbook_paths": ["cookbooks"]
+                "server_url": "https://mychefserver.com"
+            }
+
+        ]
+    }
+
+CHEF SOLO (chef-solo):
+If you don't have a Chef Infra Server, or would rather not have temporary remote servers connect to your production infrastructure, you can leverage similar provisioning via "chef-solo".
+This lets you run the Chef Infra Client without the need of a server to provision the remote.
+This does, however, require a working setup of the "knife" command, installed alongside the Chef Workstation.
+chef-solo also offers the option to define the desired environment, how to manage the Chef license acceptance, template configurations, data bag information, and other behavior-related settings.
+REQUIRED PARAMETERS:
+    - "cookbook_paths": ["PATH", ...]. Specify the location of the cookbooks.
+    - "run_list": ["STRING", ...]. Specify the desired run list.
+EXAMPLE:
+    ...
+        ],
+        "provisioners": [
+            {
+                "type": "chef-solo",
+                "cookbook_paths": ["cookbooks"]
+                "run_list": ["docker::install", "docker::service", "docker::appimage"]
+            }
+
+        ]
+    }
+
+
+[PUPPET PROVISIONER]
+As with both Ansible and Chef provisioner, Puppet is another configuration managements platform that offers 2 options:
+    - puppet-server. A version in which we connect to an overall Puppet Server.
+    - puppet-masterless. A self-contained version.
+Puppet uses "modules" to configure the hosts, called "nodes", and "manifest" to assign modules to nodes.
+
+The Puppet provisioner doesn't install Puppet, you will need to add the Shell provisioner block to install it and ensure you can run puppet commands via the secure path.
+This involved adding the Puppet repositories, installing the "puppet-agent" package and updating the "secure_path".
+
+PUPPET MASTERLESS (puppet-masterless):
+This Puppet provisioner runs solo on the remote machine.
+The Puppet provisioner doesn't install Puppet, you will need to add the Shell provisioner block to install it and ensure you can run puppet commands via the secure path.
+This involved adding the Puppet repositories, installing the "puppet-agent" package and updating the "secure_path".
+REQUIRED PARAMETERS:
+    - "manifest_file": "PATH". Specify the manifest file.
+    - "module_paths": ["PATH", ...]. Specify the paths for the modules.
+
+EXAMPLE:
+    ...
+        ],
+        "provisioners": [
+            {
+                "type": "puppet-masterless",
+                "manifest_file": "manifest.pp",
+                "module_paths": ["modules"]
+            }
+
+        ]
+    }
+
+PUPPET SERVER (puppet-server):
+This Puppet provisioner runs solo on the remote machine.
+The Puppet provisioner doesn't install Puppet, you will need to add the Shell provisioner block to install it and ensure you can run puppet commands via the secure path.
+This involved adding the Puppet repositories, installing the "puppet-agent" package and updating the "secure_path".
+REQUIRED PARAMETERS:
+    - "puppet_server": "PUPPETSERVER". Specify the puppet server to connect.
+
+EXAMPLE:
+    ...
+        ],
+        "provisioners": [
+            {
+                "type": "puppet-server",
+                "puppet_server": "puppet"
+            }
+
+        ]
+    }
+
+
+[SALT PROVISIONER]
+Unlike other configuration management platforms, Salt is only offered masterless (salt-masterless) with Packer.
+This means all formulas, pillar data, and additional configurations will be stored on your workstation, then uploaded to the remote for use.
+The "salt-masterless" provisions the remote using the "salt-call" command locally.
+This provisioner is rife with bugs.
+It copies states and pillar data with "file" command.
+Alternately, you can supply a custom "minion" config.
+REQUIRED PARAMETERS:
+    - "local_state_tree": "PATH". Specify the location of the Salt states on the localhost (workstation).
+EXAMPLE:
+    ...
+        ],
+        "provisioners": [
+            {
+                "type": "salt-masterless",
+                "local_state_tree": "salt"
+            }
+
+        ]
+    }
+
+
+
+----------------------------------------------- POST-PROCESSORS -----------------------------------------------
+There are times when you want to take the resulting image (from working with provisioners) and artifacts and do a little more work with that.
+For example, you may want to take the resulting AMI, convert it to an AWS Vagrant box , and then compress the resulting files so they can be sent to a member of another team.
+You could write a Vagrant provisioning block. Alternatively, you could just add a couple post-processors:
+    - One for Vagrant.
+    - One to compress.
+
+To specify post-processors in a packer template, you use an array.
+    "post-processors": [
+        {
+            "type": "POSTPROCESSOR"
+        }
+
+    ]
+Notice how no extra information even needs to be provided. Many post-processors can run just by specifying the type itself.
+
+Example:
+    "post-processors": [
+        {
+            "type": "vagrant"
+        }
+    ]
+
+The same is true for the "compress" post-processor.
+    {
+        "type": "compress",
+        "output": "vagrant.tar.gz"
+    }
+
+Post-processors tend to alter, upload, or repackage the image or resulting metadata.
+Most can be run by only defining the type.
+
+Some of the tasks post-processors can do are:
+    - Repackage an image: Amazon Import, Docker Import, Vagrant.
+    - Upload or alter artifacts: Artifice, Compress, Manifest, Docker Build, Docker Tag.
+    - Checksum: Evaluate checksums.
+    - Shell: Run commands on the workstation after the build is run.
+
+
+
+----------------------------------------------- EXTENDING THE TEMPLATE -----------------------------------------------
+[PARALLEL BUILDS]
+There are often already platform-specific tools that can leverage the builds of images (what you are doing with Packer).
+But Packer can let you cross platforms by allowing you to provision multiple images at once with parallel builds.
+
+## Refer the "parallel-builds" example project for an example of syntax.
+
+
+[HCL "BUILDING BLOCKS"]
+Writing Packer templates with HCL offers an alternative way of structuring and building Packer files.
+You can take the templates and break them down to general components, and then create multiple builds based on these reusable components.
+With HCL, the builder become a "source", wherein you define the builder type , and also provide the builder a name for reference in the "builds" section.
+You also use less quotes around the parameters' names and drop the commas after each line (except in list and arrays).
+
+The other primary change lies in how you actually build the images.
+After you define your "source" block, you then have a "build", that defined a "source", and then supplies the provisioners.
+This structure, combined with the ability for Packer to read multiple HCL files at once, lets you break up the builds and structures.
+
+With HCL you can use different files for building blocks. But you need to use the ".pkr.hcl" extension!
+
+When building an Packer project based on HCL, you need to specify the whole directory in case you are working with multiple .pkr.hcl files.
+    packer build .
+    packer build /home/user/packer/hcl
+
+Remember that "packer validate" doesn't work at the moment with HCL!
+
+## Refer the "hcl" example project for an example of syntax.
+
+
+
+----------------------------------------------- DEBUGGING -----------------------------------------------
+[THE "-debug" FLAG]
+When writing Packer templates, it's important to learn some troubleshooting tactics to figure out what's going on in your build.
+One option you have for this is the "-debug" option, which lets you parse through the output, pausing when you need to access the remote or otherwise review the output.
+    packer build -debug packer.json
+You'll have to verify each step by pressing ENTER. Go through each step until the failing step.
+You'll now want to access the remote and take a look at what's going on.
+With the issue located, you can now return to the usual command line and let the build finish by moving through the clean-up steps.
+
+
+[BREAKPOINT PROVISIONER]
+The breakpoint provisioner works by adding an automatic stop during the provisioning process at the defined point.
+This lets us debug any issues or confirm the previous provisioners are working as expected.
+Example:
+{
+    "type": "breakpoint",
+    "note": "Confirm Salt provisioner"
+}
+
+So why to use "-debug" flag if you have the breakpoint provisioner?
+Unfortunately, when a provisioner fails, the build is automatically terminated, so it will never reach the breakpoint provisioning step.
+
+
+
+----------------------------------------------- VIRTUALIZATION -----------------------------------------------
+[BUILDING A VIRTUALBOX IMAGE WITH PACKER]
+Packer has 3 separate VirtualBox builders:
+    - virtualbox-iso: Starts with an source ISO image for building images from scratch.
+    - virtualbox-ovf: Start with a source OVA/OVF image.
+    - virtualbox-vm: Start with a source virtual machine.
+All builders output the resulting image as an OVF.
+
+VIRTUALBOX-ISO:
+At a minimum, you need to provide an ISO file, a checksum, and a series of boot commands that are fed into VirtualBox.
+You will see how Packer type the boot commands in as the VirtualBox remote is spun up.
+The resulting build's artifact will be an .ovf file.
+
+The other provisioners are much the same, just with varying starting points.
+The core consideration with these builders is the "boot_command" parameter, which will get you past the initial VirtualBox provisioning, that normally uses user feedback to install and configure the virtual machine.
+
+## Refer the "virtualbox" example project for an example of syntax.
+
+
+[BUILDING A VAGRANT BOX WITH PACKER]
+Vagrant supports a number of providers, which are similar to the builders in Packer.
+They're just the platform Vagrant is building the environment for.
+
+As with the other builders, you need to supply a source image, or "source box" to use Vagrant terminology.
+If the source image is available for multiple Vagrant providers, the "provider" property must be specified.
+Boxes can be local or found at "apps.vagrantup.com". Keep in mind Vagrant and VirtualBox can both be infamously slow.
+
+By default, the Vagrant builder also works a little different in that it doesn't remove the remote.
+If you want to tear down the remote the image is based on, you need to add the "teardown" option.
+
+The resulting image will be output in the current working directory.
+
+Additionally, Packer expects Vagrant and any necessary Vagrant provider configuration to already be set up and configured on the workstation you're using.
+
+## Refer the "vagrant" example project for an example of syntax.
+
+
+
+----------------------------------------------- MISCELLANEOUS -----------------------------------------------
+[COMMANDS]
+packer --version                # Display Packer version.
+packer validate FILE.json       # Validates JSON syntax.
+packer fix FILE.json            # Ensure the template is using the latest version of Packer formatting.
+packer build FILE.json          # Build the image.
+packer build -debug packer.json # Enable debugging at build time.
+
+
+[FILES & DIRECTORIES]
+FILES:
+
+DIRECTORIES:
+~/.packer.d/plugins             # Standard user-scoped directory for Packer plugins.
+
+
+[MISCELLANEOUS]

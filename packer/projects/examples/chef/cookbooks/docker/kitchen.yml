@@ -1,0 +1,143 @@
+---
+driver:
+  name: vagrant
+  customize:
+    memory: 2048
+    cpus: 2
+
+provisioner:
+  name: chef_solo
+  product_name: chef
+  enforce_idempotency: true
+  multiple_converge: 2
+  deprecations_as_errors: true
+
+verifier:
+  name: inspec
+
+platforms:
+  - name: amazonlinux-2
+  - name: debian-9
+  - name: debian-10
+  - name: centos-7
+  - name: centos-8
+  - name: fedora-latest
+  - name: ubuntu-16.04
+  - name: ubuntu-18.04
+  - name: ubuntu-20.04
+
+suites:
+
+  ###############################
+  # docker_installation resources
+  ###############################
+  - name: installation_script_main
+    excludes:
+      - 'amazonlinux-2'
+    attributes:
+      docker:
+        repo: 'main'
+    run_list:
+      - recipe[docker_test::installation_script]
+
+  - name: installation_script_test
+    excludes:
+      - 'amazonlinux-2'
+    attributes:
+      docker:
+        repo: 'test'
+    run_list:
+      - recipe[docker_test::installation_script]
+
+  - name: installation_script_experimental
+    excludes:
+      - 'amazonlinux-2'
+    attributes:
+      docker:
+        repo: 'experimental'
+    run_list:
+      - recipe[docker_test::installation_script]
+
+  - name: installation_package
+    attributes:
+      docker:
+        version: '19.03.13'
+    run_list:
+      - recipe[docker_test::installation_package]
+    excludes:
+      - 'amazonlinux-2'
+
+  - name: installation_tarball
+    run_list:
+      - recipe[docker_test::installation_tarball]
+
+  ##################
+  # resource testing
+  ##################
+
+  - name: resources
+    provisioner:
+      enforce_idempotency: false
+      multiple_converge: 1
+    attributes:
+      docker:
+        version: '19.03.13'
+    run_list:
+      - recipe[docker_test::default]
+      - recipe[docker_test::image]
+      - recipe[docker_test::container]
+      - recipe[docker_test::exec]
+      - recipe[docker_test::plugin]
+    excludes:
+      - 'amazonlinux-2'
+      - 'fedora-latest'
+
+  - name: network
+    provisioner:
+      enforce_idempotency: false
+      multiple_converge: 1
+    attributes:
+      docker:
+        version: '19.03.13'
+    run_list:
+      - recipe[docker_test::default]
+      - recipe[docker_test::network]
+    excludes:
+      - 'amazonlinux-2'
+      - 'fedora-latest'
+
+  - name: volume
+    provisioner:
+      enforce_idempotency: false
+      multiple_converge: 1
+    attributes:
+      docker:
+        version: '19.03.13'
+    run_list:
+      - recipe[docker_test::default]
+      - recipe[docker_test::volume]
+    excludes:
+      - 'amazonlinux-2'
+      - 'fedora-latest'
+
+  - name: registry
+    provisioner:
+      enforce_idempotency: false
+      multiple_converge: 1
+    attributes:
+      docker:
+        version: '19.03.13'
+    run_list:
+      - recipe[docker_test::default]
+      - recipe[docker_test::registry]
+    excludes:
+      - 'amazonlinux-2'
+      - 'fedora-latest'
+
+  #############################
+  # quick service smoke testing
+  #############################
+
+  - name: smoke
+    run_list:
+      - recipe[docker_test::smoke]

@@ -1,0 +1,62 @@
+{
+    "variables": {
+        "awc_access_key": "MyAccessKey",
+        "awc_secret_key": "MySecretKey"
+    },
+
+
+    "builders": [
+        {
+            "type": "amazon-ebs",
+            "access_key": "{{user `awc_access_key`}}",
+            "secret_key": "{{user `awc_secret_key`}}",
+            "region": "us-east-1",
+            "instance_type": "t2.micro",
+            "ami_name": "first-ami-test-{{timestamp}}",
+            "source_ami_filter": {
+                "filters": {
+                    "virtualization_type": "hvm",
+                    "name": "ubuntu/images/*ubuntu-bionic-18.04-amd64-server-*",
+                    "root-device-type": "ebs"
+                },
+                "owners": ["099720109477"],
+                "most_recent": true
+            },
+            "ssh_username": "ubuntu"
+        }
+    ],
+
+
+    "provisioners": [
+        {
+            "type": "shell",
+            "inline": ["sudo apt-get update -y && sudo apt-get upgrade -y"]
+        },
+
+        {
+            "type": "file",
+            "source": "files/",
+            "destination": "/tmp"
+        },
+
+        {
+            "type": "shell",
+            "scripts": [
+                "scripts/init.sh",
+                "scripts/metrics.sh"
+            ]
+        }
+    ],
+
+
+    "post-processors": [
+        {
+            "type": "vagrant"
+        },
+
+        {
+            "type": "compress",
+            "output": "vagrant.tar.gz"
+        }
+    ]
+}

@@ -1,0 +1,42 @@
+---
+# yamllint disable rule:line-length
+".gitlab-ci.yml":
+  delete: true
+".travis.yml":
+  global_env:
+    - HONEYCOMB_WRITEKEY="7f3c63a70eecc61d635917de46bea4e6",HONEYCOMB_DATASET="litmus tests"
+  dist: trusty
+  deploy_to_forge:
+    enabled: false
+  branches:
+    - release
+  use_litmus: true
+  litmus:
+    provision_list:
+      - travis_deb
+      - travis_ub
+      - travis_el6
+      - travis_el7
+      - travis_el8
+      - ---travis_el
+  simplecov: true
+  notifications:
+    slack:
+      secure: >-
+        NeHtAtZH+/xvLTp04VMI5PqKa7EhoZD4xipzbV/BeA8xMxuwW70K3KsgkTJNsUojnLJwM4Ypn1s9F+nNRymHm+4qwFNeSG/mZYMMsNs9x6Do6PMSWYR1Q6ICoJ4q4hYW50x0+F04SMYyfU8cYzh7k9JuDyyqgQFtzjG3CZDWUgq17JVhqutIhkYv4geiRnbJcLcPUtW1vPPD8vN7ugeCG7wZxPoT/aAGE5UIuoU3Sdlur93R4XpU7+TcY02bWj0mARC4GK4eRlPgyj6hNOG4fhQRkgGxhwJwxMzOvNIDkziLN2ce9NOH4vSykv3uzTLTwr8RmSDyLYL91b/jms2dTfc0JG5D7nCAP2W4m4X2dE+olP0aTLFHysL3Wck4dyqrElNQaYFg0KNc8n3n6z2ldPxYWyuCGbYt51eOIcxJwXy08NfgnzYhUBL6bnr0cq7JAW//EaHX949x/6UPApyvOk3jSSQf8AngEcRfSydXXAH0cGa6iQRFkbGcy4KqLvGBjMudMKGzb63wuo4GuAU5hppOhW6g+L2U3C9NefhZd9FNNM6JR/bUWEC6roRMt17PZyK407CuTVai0oxGVHbTJTOXdEXFhnIHf35lurCTdCWeKNCzFJUVwOHTGVZ1bP44L9cqNiZ16lG+KJfJdk3uvaY3715eY29u0Y9S51zu7s4=
+appveyor.yml:
+  delete: true
+Gemfile:
+  optional:
+    ":development":
+      - gem: github_changelog_generator
+        git: https://github.com/skywinder/github-changelog-generator
+        ref: 20ee04ba1234e9e83eb2ffb5056e23d641c7a018
+        condition: Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new('2.2.2')
+spec/spec_helper.rb:
+  mock_with: ":rspec"
+  coverage_report: true
+.gitpod.Dockerfile:
+  unmanaged: false
+.gitpod.yml:
+  unmanaged: false

@@ -1,0 +1,35 @@
+{
+    "variables": {
+        "password": "packer"
+    },
+
+
+    "builders": [
+        {
+            "type": "virtualbox-iso",
+            "guest_os_type": "Other_64",
+            "iso_url": "http://dl-cdn.alpinelinux.org/alpine/v3.12/releases/x86_64/alpine-standard-3.12.0-x86_64.iso",
+            "iso_checksum": "file:http://dl-cdn.alpinelinux.org/alpine/v3.12/releases/x86_64/alpine-standard-3.12.0-x86_64.iso.sha256",
+            "ssh_username": "root",
+            "ssh_password": "{{user `password`}}",
+            "boot_command": [
+                "root<enter><wait>",
+                "passwd<enter><wait>{{user `password`}}<enter><wait>{{user `password`}}<enter><wait>",
+                "setup-interfaces<enter><wait><enter><wait><enter><wait><enter><wait>",
+                "/etc/init.d/networking start<enter><wait10>",
+                "setup-sshd -c openssh<enter><wait>",
+                "echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config<enter><wait>",
+                "/etc/init.d/sshd restart <enter><wait5>"
+            ],
+            "shutdown_command": "poweroff"
+        }
+    ],
+
+
+    "provisioners": [
+        {
+            "type": "shell",
+            "inline": ["apk update"]
+        }
+    ]
+}

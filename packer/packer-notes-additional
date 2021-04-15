@@ -1,0 +1,77 @@
+[PACKER]
+Packer is a tool for automating the creation of machine images.
+Packer is an open source tool for creating identical machine images for multiple platforms using a single configuration.
+It runs on every major OS.
+It allows you to create machine images for multiple platforms in parallel using a single configuration file.
+Package doesn't replace configuration management. It works in parallel with it.
+A machine image is a single static unit that contains a pre-configured OS.
+You can download packer from https://www.package.io/downloads.html
+
+PACKER TEMPLATES:
+Templates in Packer are JSON files.
+Template components:
+    - builders. Builder component is an array. Builders are used to specify what type of image will be creating (AMI AWS, Docker Image, etc).
+    - description. This is optional. String to provide a description.
+    - min_packer_version. This is optional. Minimal Packer Version you can use.
+    - post-processor. Actions executed once the build is completed (tagging or publishing a docker image).
+    - provisioners. This is an array. Specify how to configure the machine image. You can use a variety of configuration managers (Puppet, Chef, Ansible, shell scripts).
+    - variables. You can pass variables at runtime. Key-Value pairs.
+
+COMMAND packer build: Runs all the builds in order and generate a set of artifacts.
+COMMAND packer fix: Find backwards incompatible parts and brings them up to date. Changes will be send to STDOUT.
+COMMAND packer inspect: Reads a template and outputs the various components that the template defines.
+COMMAND packer validate: Validates the syntax and configuration of a template.
+
+BUILDERS:
+The builder is responsible for creating machines and generating images.
+Example of Builders are:
+    - Amazon AMI.
+    - Azure Resource Manager.
+    - Docker.
+    - HyperV.
+    - OpenStack.
+    - VirtualBox.
+    - VMWare.
+
+PROVISIONERS:
+They install and configure the machine image after booting.
+Example of Provisioners are:
+    - Ansible. You can use Ansible locally (needs to be installed in the guest machine), or Ansible remotely.
+    - Chef. You can use Chef solo (locally). You can also use it remotely.
+    - File. Uploads file to the machine being built by Packer. Recommended to add folder, files or archives to the machine being build.
+    - PowerShell.
+    - Puppet. You can use Puppet masterless (locally) or Puppet server.
+    - Shell. Shell commands (inline method) / scripts.
+
+POST-PROCESSORS:
+They run after the image is built by the builder and provisioned by the provisioner.
+Example of Post-Processors are:
+    - Amazon Import.
+    - Checksum. Creates a checksum artifact for machine image verification.
+    - Docker Push.
+    - Docker Tag.
+    - Google Compute Image Exporter.
+    - Shell. Either shell scripts or inline (commands).
+    - Vagrant. Allows you to create a Vagrant box file based on a supported builder (AWS DigitalOcean, Google, HyperV, QEMU, VirtualBox, VMWare).
+    - vSphere.
+
+
+[INSTALLING PACKER]
+Set the current directory to '/usr/local/bin' to place the binary file there.
+    cd /usr/bin/local/
+
+Download the packer zip file.
+    wget https://releases.hashicorp.com/packer/1.6.1/packer_1.6.1_linux_amd64.zip
+
+Install the package.
+    yum install unzip -y
+    unzip packer_1.6.1_linux_amd64.zip
+    rm packer_1.6.1_linux_amd64.zip # As optional, you can remove the zip file.
+
+Verify packer version.
+    packer --version
+
+----------------------------------------------- MISCELLANEOUS -----------------------------------------------
+[COMMANDS]
+packer validate packer.json                                 # Validates the syntax in the template packer.json.
+packer build -var 'tag=0.0.1' packer.json                   # Builds a package machine image.

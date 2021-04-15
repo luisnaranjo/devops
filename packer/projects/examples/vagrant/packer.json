@@ -1,0 +1,21 @@
+{
+    "builders": [
+        {
+            "type": "vagrant",
+            "source_path": "generic/alpine38",
+            "provider": "virtualbox",
+            "teardown_method": "destroy",
+            "communicator": "ssh"
+        }
+    ],
+
+
+    "provisioners": [
+        {
+            "type": "shell",
+            "inline": [
+                "sudo apk update"
+            ]
+        }
+    ]
+}
