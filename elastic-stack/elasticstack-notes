@@ -1,0 +1,548 @@
+----------------------------------------------- OVERVIEW -----------------------------------------------
+What is the ELK Stack?
+"ELK" is the acronym for 3 open source projects:
+    - Elasticsearch: Elasticsearch is a search and analytics engine.
+    - Logstash: It's a server-side data processing pipeline that ingests data from multiple sources simultaneously, transforms it, and then sends it to a "stash" like Elasticsearch.
+    - Kibana. It let users to visualize data with charts and graphs in Elasticsearch.
+
+The Elastic Stack is the next evolution of the ELK Stack. Having Beats as part of the Stack too.
+
+
+[BEATS]
+Beats are lightweight data shippers. They are clients that you deploy on your end user machines wherever you want to collect data.
+There are beats for every type of data you want to collect.
+    - Filebeat | Log files.
+    - Metricbeat | Telemetry data.
+    - Packetbeat | Network data.
+    - Heartbeat | Uptime monitoring.
+    - Winlogbeat | Windows Event Logs.
+    - Auditbeat | Auditd data.
+    - Functionbeat | Serverless data.
+    - Journalbeat | Journald logs.
+
+LIB BEAT:
+On top of these supported Beats, there is the Lib Beat. From this library you can create your own Beats.
+
+
+[LOGSTASH]
+Once you collect the data, you want to ship it somewhere.
+Here you would have 2 options:
+    - Ship it directly to ElasticSearch. Using and Ingest Node pipeline (will parse the data for us).
+    - Ship it to Logstash (This way is use in Production environments).
+An Ingest node in Elasticsearch is like a very light  version of Logstash.
+
+Logstash is a standalone data processing pipeline. You can use it outside of the Elastic Stack.
+It consists of 3 main features:
+INPUT:
+If you're using Logstash with a Elastic stack, the inputs are typically going to be Beats.
+    - Beats
+    - UDP
+    - TCP
+    - HTTP
+    - JDBC
+    - Kafka
+    - S3
+    - Redis
+    - Syslog and more.
+
+FILTER:
+Once you have your data coming in through your desired input, you the get to filter it.
+There are 2 ways to filter your data:
+    - You can parse it, or break it up into its individual components.
+    - Enhancing the data.
+There are several filters you can use in Logstash, a few examples are:
+    - Grok
+    - Mutate
+    - Date
+    - Fingerprint
+    - GeoIP
+    - Useragent
+    - JSON
+    - XML and more.
+
+OUTPUT:
+Lastly you have the output. You got your data in, you've processed it, enriched, parsed, and now you would need to send it to some sort of data storage technology.
+The most popular output with Logstash is Elasticsearch, but Logstash can also be used outside of the Elastic Stack as well. A few examples are:
+    - Elasticsearch
+    - Cloudwatch
+    - Graphite
+    - Kafka
+    - S3 and more.
+
+
+[ELASTICSEARCH]
+Elasticsearch is a Search and Analytics engine. It's the heart of the Elastic Stack.
+It's the search and analytics engine and also the data storage and recovery technology.
+
+There are a few different types of nodes in an Elasticsearch cluster:
+DATA NODE:
+Data nodes are what actually handles the data.
+It stores the data, if you want to do a search or analytics request, it does all of the processing for your and returns that to the client.
+They are the workhorses of the cluster.
+
+MASTER NODE:
+Master nodes are a lot lighter in terms of their resource intensiveness, but the responsibility is paramount.
+They are the coordinators of the entire cluster. They keep track of all of the nodes in the cluster.
+They keep track where the data is, whether it's replicated properly.
+They make sure that there is no particular data node that's working harder than the others.
+
+Typically you want to have more than one master node. One of them will be the elected master node, and others will be eligible if the elected node goes down.
+
+INGEST NODE:
+This is the node that can take data in from Beats. They can process the data with a Pipeline.
+It can use a lot of the same filters as Logstash. It can parse and enrich that data and store it directly into Elasticsearch.
+
+COORDINATING NODE:
+A coordinating node is essentially a node that doesn't have any other roles. It's not a data, master or ingest node.
+It's just a really smart load balancer.
+You might want to put a coordinating node on your Logstash nodes or Kibana nodes so they can feed directly in and out of their local Elasticsearch nodes but those nodes in essence don't actually do anything other than smarty routing requests to the appropriate data and master nodes, because they are aware of the entire cluster.
+Think of coordinating nodes as the type of node you want to send and receive requests from as it's going to smartly load balance those requests out to the rest of the cluster.
+
+MACHINE LEARNING NODE:
+Only available in the premium paid version of Elastic Stack.
+It's a node with machine learning capabilities built into the Elastic Stack, particularly into Elasticsearch and Kibana.
+
+HOW DATA IS STORED IN THE CLUSTER?
+The data nodes stores the data. The data is essentially stored in indexes.
+In order to spread an index out across the cluster, we do that through "sharding".
+There are 2 types of shards:
+    - Primary shards.
+    - Replica shards.
+With Shards and indexes we gain the ability of parallel performance and redundancy.
+
+
+[KIBANA]
+Visualize and manage.
+This is where you can actually visualize all of the data. You can also manage the cluster from Kibana.
+It's the window into not just the data, but also the entire Elastic Stack.
+
+The 3 main applications in Kibana for working with the data are:
+    - Discover.
+    - Visualize.
+    - Dashboard.
+However, there are a lot more applications than just these 3.
+
+DISCOVER:
+It allows you to see your raw data, search and filter through it in real time.
+
+VISUALIZE:
+Visualize takes raw data and converts it into some visual representation.
+Create graphs, charts, data tables, maps and more.
+
+DASHBOARD:
+Once you have all your visualizations figured out, then you can collate them, bring them all together into a single bird's eye view called a dashboard.
+Searches and visualizations in a single pane of glass.
+
+MANAGE:
+Manage is used to troubleshoot, tune, configure, and more.
+There are a few different ways Kibana can manage the cluster:
+    - It can monitor your Elasticsearch and Beats, and even Logstash.
+    - It can handle all of your Logstash pipelines for you.
+    - It allows you to handle all of the user access controls.
+
+
+
+----------------------------------------------- DEPLOYING AND CONFIGURING THE ELASTIC STACK -----------------------------------------------
+[DEPLOYING A MULTI-NODE ELASTICSARCH CLUSTER]
+In this example CentOS 7 is used as the OS for all of the nodes.
+For Deploying an Elasticsearch cluster, you would need to install and configure the software in all the cluster nodes.
+In this case you're going to set a cluster with 1 master and 2 data nodes.
+
+CLUSTER STRUCTURE:
+Cluster name: playground
+All nodes will listen in their local and site local addresses.
+Encrypted cluster network over Site-Local IP address
+SSH & Kibana interface over public IP addresses.
+
+Master node: master-1
+Listen on: https://_local_:9200 & https://_site_:9200
+Roles: Master & Ingest.
+Heap: 768m
+
+Data node: data-1
+Listen on: https://_local_:9200 & https://_site_:9200
+Roles: Data
+Heap: 1g
+
+Data node: data-1
+Listen on: https://_local_:9200 & https://_site_:9200
+Roles: Data
+Heap: 1g
+
+The steps for configuring Elasticsearch are the following:
+Some of the next commands requires elevated privileges. Run the commands as root user.
+
+IMPORT THE ELASTIC GPG KEY:
+Import the key in all of the nodes:
+    rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch     # Import the Elastic Stack GPG key.
+This key is the used for all the Stack package installations.
+
+DOWNLOAD AND INSTALL ELASTICSEARCH FROM AN RPM:
+Download and install Elasticsearch on all of the nodes.
+    curl -O https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.6.0-x86_64.rpm      # Download the Elasticsearch package.
+    rpm --install elasticsearch-7.6.0-x86_64.rpm    # Installs Elasticsearch.
+
+CONFIGURE ELASTICSEARCH TO FORM A CLUSTER & CONFIGURE ELASTICSEARCH TO LISTEN ON MULTIPLE ADDRESSES:
+Enable the Elasticsearch service on all of the nodes:
+    systemctl daemon-reload && systemctl enable elasticsearch.service  # Enables Elasticsearch at boot.
+
+At this point you have each of the nodes on different one-node cluster. You need to configure them to be in one cluster.
+The Elasticsearch configuration file is located at /etc/elasticsearch/elasticsearch.yml.
+
+Master node:
+Open the elasticsearch.yml configuration file and specify the next directives:
+    cluster.name: playground
+    node.name: master-1
+    network.host: [_local_, _site_]                 # These values automatically binds to the localhost and site local addresses of the host.
+    discovery.seed_hosts: ["MASTERNODE_IPADDRESS"]  # Typically you would only need to list the master nodes here. Use the private IP for the example.
+                                                    # This is a list of hosts to which when a node starts up and wants to join the cluster and needs to find the elected master node.
+                                                    # It doesn't hurt to configure this on the master node too.
+    cluster.initial_master_nodes: ["master-1"]      # Here specify the node name not its IP address.
+    # At the bottom of the file, specify the next node roles:
+    node.master: true   # This is the default value, but it's better to explicitly specify it.
+    node.data: false    # The master is not a node data.
+    node.ingest: true   # The master is also an ingest node.
+    node.ml: false      # The master is not a machine learning node.
+
+Data node 1:
+    cluster.name: playground
+    node.name: data-1
+    network.host: [_local_, _site_]
+    discovery.seed_hosts: ["MASTERNODE_IPADDRESS"]
+    cluster.initial_master_nodes: ["master-1"]
+    # At the bottom of the file, specify the next node roles:
+    node.master: false
+    node.data: true
+    node.ingest: false
+    node.ml: false
+
+Data node 2:
+    cluster.name: playground
+    node.name: data-2
+    network.host: [_local_, _site_]
+    discovery.seed_hosts: ["MASTERNODE_IPADDRESS"]
+    cluster.initial_master_nodes: ["master-1"]
+    # At the bottom of the file, specify the next node roles:
+    node.master: false
+    node.data: true
+    node.ingest: false
+    node.ml: false
+
+Set the needed heap size value for the master node (768m) at /etc/elasticsearch/jvm.options:
+    -Xms768m
+    -Xmx768m
+
+START AND TEST AN ELASTICSEARCH CLUSTER:
+Start the cluster by starting Elasticsearch service on all the nodes.
+    systemctl start elasticsearch.service   # Starts Elasticsearch.
+
+You can verify the nodes has been added to the cluster reviewing the cluster logs.
+    less /var/log/elasticsearch/playground.log      # Opens the Elasticsearch cluster log file.
+
+Verify Elasticsearch is properly working by hitting the site:
+    curl localhost:9200                 # Hits the API and return JSON data.
+    curl localhost:9200/_cat            # Provides a list of _cat APIs.
+    curl localhsot:9200/_cat/nodes      # Display the nodes of the cluster.
+    curl localhsot:9200/_cat/nodes?v    # Display the nodes of the cluster on verbose mode.
+The cat APIs allows you to read the information in a CLI-friendly mode, and not just a bunch of JSON content.
+
+If the curl commands returns correct values, then the Elasticsearch cluster is set properly.
+At this point there is no authentication at all.
+
+
+NOTES:
+The following error might happen when joining the data nodes to the ES cluster:
+    less /var/log/elasticsearch/playground.log
+        CoordinationStateRejectedException: join validation on cluster state with a different cluster uuid T6noEdoGT6-0Vnxl4fEuhw than local cluster uuid IYknwsd1TgGZUZzc8YWvFg, rejecting
+
+Workaround:
+Run the following commands:
+    systemctl stop elasticsearch                    # Stop the service on all of the nodes.
+    rm -rf /var/lib/elasticsearch/nodes/*           # Delete the content in all of the nodes.
+    systemctl start elasticsearch                   # Start the service on the master only.
+    tail -f /var/log/elasticsearch/playground.log   # Watch the log while starting data-1 & data-2.
+    systemctl start elasticsearch                   # Start the service on the data-1 node.
+    systemctl start elasticsearch                   # Start the service on the data-2 node.
+These additional steps eliminate the "different cluster uuid" issue and allow the data nodes to join the ES cluster.
+
+
+[SECURING AN ELASTICSEARCH CLUSTER]
+Once you have the Elasticsearch cluster running as needed, you would need to secure it and enabling encryption to the cluster network.
+
+GENERATE A CLUSTER CERTIFICATE:
+First you would need to create a certificate to use for the cluster network.
+
+On all the cluster nodes, create a directory inside "/etc/elasticsearch/" named "certs".
+This is where you're going to put the self-signed generated certificate used for the cluster.
+    mkdir /etc/elasticsearch/certs  # Create the certificate directory.
+
+Create the self-signed certificate using the Elasticsearch util called "elasticsearch-certutil".
+All of the Elasticsearch binaries are placed in "/usr/share/elasticsearch/bin/".
+    /usr/share/elasticsearch/bin/elasticsearch-certutil cert --name playground --out /etc/elasticsearch/certs/playground    # Creates the self-signed certificate.
+                                                                                                                            # For this example, you can leave the password blank.
+
+Check if the certificate is generated:
+    ll /etc/elasticsearch/certs
+
+Since for this example we are going to use a single certificate for all cluster nodes, you would need to copy the generated certificate into the other cluster nodes.
+    cp /etc/elasticsearch/certs/playground /tmp/ && chown cloud_user:cloud_user /tmp/playground     # This step can be skipped if you know the user root's pass on the cluster nodes.
+    scp /tmp/playground USER@DATANODE:/tmp/                                                         # Copy the file to the other cluster nodes.
+
+On the data node where you copied the file, place the file in the correct location "/etc/elasticsearch/certs/".
+If you know the root password or access, you can directly place the certificate in the "certs/" directory.
+    cp /tmp/playground /etc/elasticsearch/certs/ && chown root:elasticsearch /etc/elasticsearch/certs/playground
+
+Modify the cert file's permissions, so the Elasticsearch group can read the file (this on all cluster nodes).
+    chown 640 /etc/elasticsearch/certs/playground
+
+CONFIGURE THE ELASTICSEARCH SECURITY PLUGIN & USER AUTHENTICATION:
+On all the cluster nodes, modify the Elasticsearch config file "/etc/elasticsearch/elasticsearch.yml" with the next properties:
+    xpack.security.enabled: true    # This enable the security plugin in Elasticsearch.
+
+ENABLE TRANSPORT NETWORK ENCRYPTION:
+On all the cluster nodes, modify the Elasticsearch config file "/etc/elasticsearch/elasticsearch.yml" with the next properties:
+    xpack.security.transport.ssl.enabled: true                      # This enable transport level encryption.
+    xpack.security.transport.ssl.verification_mode: certificate     # This since we are using the same cert for each node.
+                                                                    # In a PROD environment, you do want to use node level verification and you have a separate certificate per node.
+                                                                    # So when you generate a certificate, you will provide a hostname and IP address and that certificate will only work on the node matching those values that will give you better security.
+                                                                    # And prevent someone from getting ahold of your certificate to creating their own node and joining your cluster.
+    xpack.security.transport.ssl.keystore.path: certs/playground    # Specify the path to the certificate file.
+    xpack.security.transport.ssl.truststore.path: certs/playground  # Specify the path to the truststore.
+                                                                    # By default, the certutil tool will create a PKCS 12 certificate. This type of certificate is actually a package.
+                                                                    # Inside of this package you will find a CA, a cert, and a private key.
+
+Restart the Elasticsearch service on all of the cluster nodes.
+    systemctl restart elasticsearch     # Restart Elasticsearch service.
+
+SET BUILT-IN USER PASSWORDS:
+When you enable the xpack security, we enable user authentication. This creates a bit of an issue in that there are several of built-in users, such as the "elastic" user (this is the super user).
+These users will now have randomly generated bootstrap passwords. They are put into the Elasticsearch key store as a special bootstrap password value.
+So once the cluster is again running, you would need to use another utility, a set-up-password utility. This is a on-use utility, you only use it in one node, one time for the whole cluster and it basically takes that bootstrap password from the keystore and allows you to set your own password for all of the built-in users.
+
+Try to ping the Elasticsearch service to verify security is enabled.
+    curl localhost:9200/_cat/nodes?v      # This should fail.
+
+Now you would use the set-up-passwords utility to set the passwords.
+    /usr/share/elasticsearch/bin/elasticsearch-setup-passwords interactive   # You can either use the interactive or automatic mode. Automatic will generate random passwords (omit the "interactive" parameter). With interactive you can set the password.
+
+INTERACT WITH A SECURE ELASTICSEARCH CLUSTER:
+With the passwords set up, you can try to reach the Elasticsearch service specifying the user and password.
+    curl locahost:9200/_cat/nodes?v -u elastic      # Supply the password when asked.
+
+
+[INSTALLING AND CONNECTING KIBANA TO AN ELASTICSEARCH CLUSTER]
+Once the Elasticsearch cluster is set and secure, you would install and configure Kibana into it.
+Kibana will be the interface for visualizing/analyzing the data and maintaining/interacting with the cluster.
+
+DOWNLOAD AND DEPLOY KIBANA:
+For this example, Kibana will be installed and deployed into the master-1 node.
+
+On the master node as root user, install Kibana:
+Remember that all Elastic Stack component versions must match.
+    curl -O https://artifacts.elastic.co/downloads/kibana/kibana-7.6.0-x86_64.rpm       # Downloads the Kibana package.
+    rpm --install kibana-7.6.0-x86_64.rpm                                               # Installs Kibana.
+
+CONFIGURE KIBANA TO LISTEN ON A SPECIFIC PORT AND ADDRESS & CONNECT TO A SECURED ELASTICSEARCH CLUSTER:
+For configuring Kibana with the ES cluster, you would need to modify properties in the Kibana's configuration file "/etc/kibana/kibana.yml":
+    vim /etc/kibana/kibana.yml
+
+Specify the next properties:
+    server.port: 8080                   # Specify the desired port for Kibana to listen.
+                                        # For using port 80 you would need to run Kibana as root user. To avoid that you can use 8080.
+    server.host: "IPADDRESS"            # Specify the IP from which you want Kibana to be accessed. For this example the private IP is used.
+    elasticsearch.username: "kibana"    # Since security is enabled on the ES cluster, you would need to specify the credentials for the "kibana" user here.
+    elasticsearch.password: "PASS"
+
+START AND NAVIGATE KIBANA:
+Enable & start Kibana service to start at boot.
+    systemctl enable kibana.service     # Enables Kibana service at boot.
+    systemctl start kibana.service      # Start the Kibana service.
+
+By default, Kibana will log into the /var/log/messages file. However, you can configure Kibana to log into its own log file.
+
+To access Kibana hit the url "http://IP:8080".
+On this example, you need to specify the public IP address of the master node, in which Kibana was installed and configured.
+
+You will face a login screen, if you don't enable security in the ES cluster, you will automatically logged in into Kibana by only hitting the URL.
+You can use the "elastic" user for the log in.
+
+On the side bar, you have several apps to interact within Kibana. One of them is DevTools.
+With Devtools, you can interact with the Elasticsearch REST API.
+Example:
+    GET _cat/nodes?v
+
+
+[COLLECTING AND SHIPPING LOGS WITH FILEBEAT]
+With the ES cluster and Kibana ready, you can go collecting and shipping data into it.
+For this example, we will use the "system" module in the "Filebeat" to collect, ship, parse, and visualize system logs from each of nodes in the "playground" cluster.
+
+The modules provide a nice out-of-the-box quick setup for common log formats and data types.
+
+DOWNLOAD & DEPLOY FILEBEAT:
+The Filebeat client will be deployed on all of the nodes in the cluster.
+As root user:
+    curl -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-7.6.0-x86_64.rpm     # Download the Filebeat package.
+    rpm --install filebeat-7.6.0-x86_64.rpm                                                     # Installs the Filebeat package.
+    systemctl enable filebeat                                                                   # Enables the Filebeat service at boot.
+
+CONFIGURE FILEBEAT TO CONNECT TO KIBANA:
+We will set it to Kibana to preload a set of visualizations in dashboards in Kibana.
+
+Open the filebeat configuration file "/etc/filebeat/filebeat.yml", and modify the next properties:
+    vim /etc/filebeat/filebeat.yml
+On the Kibana section:
+    host: "KIBANAHOSTIP:KIBANAPORT"     # For this example use the private IP of the ES cluster's master node, and port 8080.
+
+CONFIGURE FILEBEAT TO OUTPUT TO ELASTICSEARCH:
+The data from the Filebeat will be parsed with an ingest node pipeline in ES.
+
+Open the filebeat configuration file "/etc/filebeat/filebeat.yml", and modify the next properties:
+    vim /etc/filebeat/filebeat.yml
+On the ES output section:
+    host: ["ESMASTERNODEIP:ESMASTERNODEPORT"]       # For this example use the private IP of the ES cluster's master node, and port 9200.
+                                                    # This is because the master node is the Ingest node too.
+    username: "elastic"                             # Specify the credentials of the "elastic" user here.
+    password: "PASS"
+
+ENABLE THE "system" MODULE:
+Enable the "system" module on all of the nodes.
+    filebeat modules enable system      # Enables the "system" modules.
+
+SET UP FILEBEAT MODULES:
+By running the next command, filebeat will push the configurations for all of the enabled modules.
+NOTE: Before running this command, make sure all of the ES nodes are up and running and your Kibana node is up and running too.
+Otherwise this Filebeat setup will fail.
+    filebeat setup      # Push filebeat configurations for all enabled modules (indexes, Kibana visualizations and dashboards).
+
+START FILEBEAT:
+With the modules set up, you can now start filebeat.
+    systemctl start filebeat        # Start filebeat service.
+
+To validate everything is set correctly so far, you can check if you have Filebeat indexes in ES to see if you are properly ingesting the data.
+On the master node:
+    curl localhost:9200/_cat/indices?v -u elastic       # Display the indices in the ES cluster.
+Make sure there is an index with name "filebeat".
+
+
+[COLLECTING AND SHIPPING SYSTEM TELEMETRY WITH METRICBEAT]
+By deploying Metricbeat client on the cluster nodes, you can collect and analyze the system resource utilization telemetry of them.
+You would need to deploy Metricbeat on all of the nodes you want to collect data. This process is very similar to the one for Filebeat.
+
+DOWNLOAD AND DEPLOY METRICBEAT:
+    curl -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-7.6.0-x86_64.rpm     # Download the Metricbeat package.
+    rpm --install metricbeat-7.6.0-x86_64.rpm                                                       # Install the Metricbeat package.
+    systemctl enable metricbeat.service                                                             # Enable the Metricbeat service to start at boot.
+
+CONFIGURE METRICBEAT TO CONNECT TO KIBANA:
+Open the filebeat configuration file "/etc/metricbeat/metricbeat.yml", and modify the next properties:
+    vim /etc/metricbeat/metricbeat.yml
+On the Kibana section:
+    host: "KIBANAHOSTIP:KIBANAPORT"     # For this example use the private IP of the ES cluster's master node, and port 8080.
+
+CONFIGURE METRICBEAT TO OUTPUT TO ELASTICSEARCH:
+Open the filebeat configuration file "/etc/metricbeat/metricbeat.yml", and modify the next properties:
+    vim /etc/metricbeat/metricbeat.yml
+On the ES output section:
+    host: ["ESMASTERNODEIP:ESMASTERNODEPORT"]       # For this example use the private IP of the ES cluster's master node, and port 9200.
+                                                    # This is because the master node is the Ingest node too.
+    username: "elastic"                             # Specify the credentials of the "elastic" user here.
+    password: "PASS"
+
+CONFIGURE METRICBEAT MODULES:
+Since you already enable the "system" module on the Filebeat configuration, you don't need to enable it again here.
+Verify this by listing the modules:
+    metricbeat modules list     # List out all enabled/disabled modules.
+
+SET UP METRICBEAT MODULES:
+Perform the setup for Metricbeat to push the index templates and index files to ES, the Ingest node pipeline to ES to parse the data, and push some visualizations and dashboards to Kibana.
+    metricbeat setup        # Push Metricbeat configurations for all enabled modules (indexes, Kibana visualizations and dashboards).
+
+START METRICBEAT:
+With the modules set up, you can now start Metricbeat.
+    systemctl start metricbeat        # Start Metricbeat service.
+
+To validate everything is set correctly so far, you can check if you have Metricbeat indexes in ES to see if you are properly ingesting the data.
+On the master node:
+    curl localhost:9200/_cat/indices?v -u elastic       # Display the indices in the ES cluster.
+Make sure there is an index with name "metricbeat".
+
+
+[ANALIZING DATA WITH KIBANA]
+With the cluster set up, and collecting data about the nodes, you can get to use Kibana to analyze and gain insights into the system logs and resource utilization metrics
+
+Open Kibana via a web browser.
+For this example, you would need to use the public IP address of the Master node on port 8080 for reaching Kibana.
+Log in as the "elastic" user.
+
+To review the dashboards for the collected data form Filebeat, select the Dashboards option in the side panel, and specify "Filebeat system" in the search bar.
+You will face different existing dashboards for the metrics collected from Filebeat, such as:
+    - Syslog dashboard.
+    - Sudo commands.
+    - SSH login attempts.
+    - New users and groups.
+    - Autonomous Systems.
+
+To review the dashboards for the collected data from Metricbeat is just the same process. You would only need to specify "Metricbeat system" in the search bar as the different step.
+You will face different existing dashboards for the metrics collected from Filebeat.
+
+
+
+----------------------------------------------- MISCELLANEOUS -----------------------------------------------
+[COMMANDS]
+DEPLOYING A MULTI-NODE ELASTICSEARCH CLUSTER ####################################################
+rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch                                 # Import the Elastic Stack GPG key.
+curl -O https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.6.0-x86_64.rpm     # Download the Elasticsearch package.
+rpm --install elasticsearch-7.6.0-x86_64.rpm                                                    # Installs Elasticsearch.
+systemctl daemon-reload && systemctl enable elasticsearch.service                               # Enables Elasticsearch at boot.
+systemctl start elasticsearch.service                                                           # Starts Elasticsearch.
+less /var/log/elasticsearch/playground.log                                                      # Opens the Elasticsearch cluster log file.
+curl localhost:9200                                                                             # Hits the API and return JSON data.
+curl localhost:9200/_cat                                                                        # Provides a list of _cat APIs.
+curl localhsot:9200/_cat/nodes                                                                  # Display the nodes of the cluster.
+curl localhsot:9200/_cat/nodes?v                                                                # Display the nodes of the cluster on verbose mode.
+
+SECURING AN ELASTICSEARCH CLUSTER #######################################################################################
+/usr/share/elasticsearch/bin/elasticsearch-certutil cert --name playground --out /etc/elasticsearch/certs/playground    # Creates the self-signed certificate.
+                                                                                                                        # For this example, you can leave the password blank.
+/usr/share/elasticsearch/bin/elasticsearch-setup-passwords interactive                                                  # You can either use the interactive or automatic mode. Automatic will generate random passwords (omit the "interactive" parameter). With interactive you can set the password.
+
+INSTALLING AND CONNECTING KIBANA TO AN ELASTICSEARCH CLUSTER ########################
+curl -O https://artifacts.elastic.co/downloads/kibana/kibana-7.6.0-x86_64.rpm       # Downloads the Kibana package.
+rpm --install kibana-7.6.0-x86_64.rpm                                               # Installs Kibana.
+systemctl enable kibana.service                                                     # Enables Kibana service at boot.
+systemctl start kibana.service                                                      # Start the Kibana service.
+
+COLLECTING AND SHIPPING LOGS WITH FILEBEAT ##################################################
+curl -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-7.6.0-x86_64.rpm     # Download the Filebeat package.
+rpm --install filebeat-7.6.0-x86_64.rpm                                                     # Installs the Filebeat package.
+systemctl enable filebeat                                                                   # Enables the Filebeat service at boot.
+filebeat modules enable system                                                              # Enables the "system" modules.
+filebeat setup                                                                              # Push filebeat configurations for all enabled modules (indexes, Kibana visualizations and dashboards).
+systemctl start filebeat                                                                    # Start filebeat service.
+curl localhost:9200/_cat/indices?v -u elastic                                               # Display the indices in the ES cluster.
+
+COLLECTING AND SHIPPING SYSTEM TELEMETRY WITH METRICBEAT ########################################
+curl -O https://artifacts.elastic.co/downloads/eats/metricbeat/metricbeat-7.6.0-x86_64.rpm      # Download the Metricbeat package.
+rpm --install metricbeat-7.6.0-x86_64.rpm                                                       # Install the Metricbeat package.
+systemctl enable metricbeat.service                                                             # Enable the Metricbeat service to start at boot.
+metricbeat modules list                                                                         # List out all enabled/disabled modules.
+metricbeat setup                                                                                # Push Metricbeat configurations for all enabled modules (indexes, Kibana visualizations and dashboards).
+systemctl start metricbeat                                                                      # Start Metricbeat service.
+curl localhost:9200/_cat/indices?v -u elastic                                                   # Display the indices in the ES cluster.
+
+
+[FILES & DIRECTORIES]
+FILES:
+/etc/elasticsearch/elasticsearch.yml    # Elasticsearch configuration file.
+/etc/elasticsearch/jvm.options          # Elasticsearch JVM configuration file.
+/var/log/elasticsearch/CLUSTERNAME.log  # Default Elasticsearch cluster log.
+/etc/kibana/kibana.yml                  # Kibana configuration file.
+/var/log/messages                       # Kibana performs the logging on this default log file.
+/etc/filebeat/filebeat.yml              # Filebeat configuration file.
+/etc/metricbeat/metricbeat.yml          # Metricbeat configuration file.
+
+DIRECTORIES:
+/usr/share/elasticsearch/bin/           # Directory for all Elasticsearch utilities' binaries.
+
+
+[MISCELLANEOUS]
