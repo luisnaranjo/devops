@@ -1,0 +1,401 @@
+[VAGRANT]
+Vagrant is a tool for building and managing virtual machine environments.
+Machines are provisioned on top of a provider (VirtualBox, VMWare, AWC, Docker, etc).
+You can use provisioning tools such as shell scripts, Chef, or Puppet.
+Out of the box are 3 providers that are supported:
+    - VirtualBox.
+    - Hyper-V.
+    - Docker.
+However, you can use custom providers. But you need to ensure they are installed first before use them, and the plugin for that specific provider is installed.
+
+COMMAND vagrant init: Initializes the current directory to be a Vagrant environment by creating a Vagrantfile.
+COMMAND vagrant up: Creates and configures guest machines according to your Vagrantfile.
+COMMAND vagrant destroy: Stops the running and destroys all resources that were created.
+COMMAND vagrant validate: Validates your Vagrantfile.
+COMMAND vagrant provision: Runs any configured provisioners.
+COMMAND vagrant reload: Runs a halt followed by an up.
+COMMAND vagrant status: This will tell you the state of the machines.
+COMMAND vagrant ssh: SSH into a running Vagrant machine.
+
+
+[INSTALLING VAGRANT]
+You can install Vagrant in a variety of OS such as Windows, Linux (Debian, CentOS), MacOSX.
+To install Vagrant in CentOS you can execute command:
+    yum install -y https://releases.hashicorp.com/vagrant/2.2.9/vagrant_2.2.9_x86_64.rpm    # Installs the RPM package of Vagrant.
+You can get the installation packages for all the OSs in https://www.vagrantup.com/downloads
+
+You can verify installation by running:
+    vagrant --version   # Displays the Vagrant version.
+
+
+[VAGRANT COMMANDS]
+COMMAND vagrant init:
+Initializes the current directory to be a Vagrant environment by creating a Vagrantfile.
+Flags:
+    - -h: Display the help.
+    - -f: Overwrite existing Vagrantfile.
+    - -m: Generate a minimal Vagrant template (Vagrantfile with no help comments).
+    - --output FILE: Output path for the box.
+    - --template FILE: Path to custom Vagrantfile template.
+Structure:
+    vagrant init [OPTIONS] [BOXNAME]
+Example:
+    vagrant init                        # Sets a Vagrant environment (Vagrantfile) in current dir.
+    vagrant init hashicorp/precise64    # Sets a Vagrant environment (Vagrantfile) in current dir with the box specified.
+
+COMMAND vagrant up:
+Creates and configures guest machines according to your Vagrantfile.
+Flags:
+    --[no-]provision: Enable or disable provisioning.
+    --provision-with x,y,z: Enable only certain provisioners, by type or by name.
+    --[no-]destroy-on-error: Destroy machine if any fatal error happens (default to true).
+    --[no-]parallel: Enable or disable parallelism if provider supports it.
+    --provider PROVIDER: Back the machine with a specific provider (usually not needed, since Vagrant will detect it automatically based on the Vagrantfile values).
+    --[no-]install-provider: If possible, install the provider if it isn't installed.
+Structure:
+    vagrant up [OPTIONS] [NAME|ID]
+Example:
+    vagrant up      # Configures the guest machines based on Vagrantfile.
+    vagrant up web  # Create only the web virtual machine specified in the Vagrantfile.
+
+COMMAND vagrant destroy:
+Stops the running and destroys all resources that were created.
+Flags:
+    - -f: Destroy without confirmation.
+Structure:
+    vagrant destroy [OPTIONS] [NAME|ID]
+Example:
+    vagrant destroy # Destroy all the guest machines.
+
+COMMAND vagrant validate:
+Validates your Vagrantfile.
+Structure:
+    vagrant validate
+Example:
+    vagrant validate    # Validates the syntax of the Vagrantfile in the current directory.
+
+COMMAND vagrant provision:
+Runs any configured provisioners against the running Vagrant managed machine.
+Flags:
+    - --provision-with x,y,z: Enable only certain provisioners, by type or by name.
+Structure:
+    vagrant provision [OPTIONS] [VM-NAME]
+Example:
+    vagrant provision --provision-with shell    # It will run guest machines using the provisioner shell.
+
+COMMAND vagrant reload:
+Runs a halt followed by an up.
+Flags:
+    - --[no-]provision: Enable or disable provisioning.
+    - --provision-with x,y,z: Enable only certain provisioners, by type or by name.
+Structure:
+    vagrant reload [NAME|ID]
+Example:
+    vagrant reload  # Restart all guests machines.
+
+COMMAND vagrant status:
+This will tell you the state of the machines.
+Structure:
+    vagrant status [NAME|ID]
+Example:
+    vagrant status  # Checks the status of the guest machines.
+
+COMMAND vagrant ssh:
+SSH into a running Vagrant machine.
+Flags:
+    - -c: Execute an SSH command directly.
+    - -p: Plain mode, leaves authentication up to the user.
+Structure:
+    vagrant ssh [OPTIONS] [NAME|ID] [EXTRA-SSH-OPTS]
+Example:
+    vagrant ssh -c 'ls /'   # Runs the ls command via ssh in the default guest machine.
+
+COMMAND vagrant halt:
+Flags:
+    -f: Force shut down (equivalent of pulling power).
+Structure:
+    vagrant halt [OPTIONS] [NAME|ID]
+Example:
+    vagrant halt            # Halt all the environment (all guest machines).
+    vagrant halt default    # Halt only the guest machine default.
+
+
+[VAGRANT FILES]
+A Vagrant file is a file that describes the types of machines that the environment requires and how to go through the process of configuring and provisioning them.
+You only have one file per project. It's recommended to keep these files under source control. This is Infrastructure as Code.
+The Vagrant file uses ruby syntax.
+The 'vagrant up' command will look for a Vagrantfile in the current directory, if it doesn't find any, it will look on the next parent directory, it will repeat this process until it finds a Vagrantfile or until it reaches the '/' directory.
+Vagrant is backwards compatible.
+When working with Docker, by default Vagrant will create a bind mount in the project directory.
+
+STRUCTURE OF THE Vagrantfile:
+Vagrant.configure("2"): Specifies which version of Vagrant it uses.
+
+The next is a code block and it modifies the configuration of Vagrant:
+do |config|
+    config.vm.box = "base"
+end
+
+config.vm.provider PROVIDER: Specify the provider to be used.
+d.image = "IMAGE": Specify the docker image to be used.
+
+EXAMPLE:
+Vagrant.configure("2") do |config|
+    config.vm.provider "docker" do |d|
+        d.image = "ghost"
+        d.ports = ["80:2368"]
+    end
+end
+
+
+[ACCESSING VAGRANT VMS]
+You can also access a virtual machine using the 'ssh' command, you will need to know the published port in the host machine to access it.
+    ssh myuser@localhost -p 2222 -i ~/.vagrant.d/insecure_private_key    # Access the virtual machine using ssh command.
+If you have multiple VMs, each of them will get a different host port for ssh connectivity.
+
+COMMAND vagrant ssh-config:
+This command will display the ssh information for a host.
+Structure:
+    vagrant ssh-config
+Example:
+    vagrant ssh-config  # Display the host ssh information.
+
+
+[DEFINING MULTIPLE MACHINES IN VAGRANT]
+You can define multiple virtual machines in a single Vagrantfile.
+
+
+[VAGRANT PROVISIONING]
+Provisioners in Vagrant allow you to automatically install software, alter configurations, and more on the machine as part of the 'vagrant up' process.
+There are several provisioners you can use such as:
+    - File. This enables you to go and use a file (Like a shell script).
+    - Shell. Allows you to execute shell commands. You can also specify a file.
+    - Chef.
+    - Ansible.
+    - Puppet.
+    - Salt.
+
+
+[VAGRANT BOXES]
+Vagrant boxes are the package format for Vagrant environments.
+They can be used on any platform that Vagrant supports. Versioning is also supported.
+You can download existing Vagrant boxes in https://app.vagrantup.com/boxes/search
+When you install a box file, vagrant unpacks the box and store the contents internally. You can recreate the box file from this internal data using the 'vagrant box repackage' command.
+
+COMMAND vagrant box add:
+Add a box to vagrant. You can add a local box or specify an url.
+Structure:
+    vagrant box add ADDRESS
+
+COMMAND vagrant box list:
+List all the boxes installed in your system. It will also display the box version.
+Structure:
+    vagrant box list
+
+COMMAND vagrant box outdated:
+It tells you whether or not a box is being used in your vagrant environment is out of date or not.
+Structure:
+    vagrant box outdated
+
+COMMAND vagrant box prune:
+Prone out old versions of boxes.
+Structure:
+    vagrant box prune
+
+COMMAND vagrant box remove:
+Remove a box.
+Structure:
+    vagrant box remove NAME
+
+COMMAND vagrant box repackage:
+This command reconstructs the box file based on the configured vagrant box in the system.
+Structure:
+    vagrant box repackage NAME PROVIDER VERSION
+
+COMMAND vagrant box update:
+This command updates an existing box (It will re-download the newest version of the box file).
+This command will not update the environment. If you want to use the new version of the box you would need to destroy the current environment and perform again 'vagrant up'.
+Structure:
+    vagrant box update
+
+BOX VERSIONING:
+Since Vagrant 1.5, boxes support versioning.
+You can update boxes with 'vagrant box update' command.
+    - This will download and install the new box.
+    - This will not magically update running Vagrant environments.
+
+You can constrain a Vagrant environment to a specific version.
+Constrains can be any combination of the following:
+    - = X.
+    - > X.
+    - < X.
+    - >= X.
+    - <= X.
+    - ~> X.
+    config.vm.box_version = X
+
+You can also configure Vagrant to automatically check for updates. By default it's set to 'false':
+    config.vm.box_check_update = true
+
+Vagrant does not automatically prune old versions.
+    vagrant box prune
+
+
+[CREATING A BASE BOX]
+You can create your own vagrant boxes in case existing ones don't cover your needs.
+You would need to create a virtual machine (you can perform this by creating it via VirtualBox).
+You can get the Insecure keys for your image in https://github.com/hashicorp/vagrant/tree/master/keys.
+These keys are the 'insecure' public/private keys offered by vagrant to base box creators for use in the base boxes so that vagrant installations can automatically SSH into the boxes.
+If you're working with a team or company or with a custom box and you want more secure SSH, you should create your own keypair and configure the private key in the Vagrantfile with 'config.ssh.private_key_path'.
+    - Create the user 'vagrant' in the new virtual machine and set its password to 'vagrant'.
+    - Make sure to have the SSH server installed in the new virtual machine.
+    - Set the root password to 'vagrant' too.
+    - Set (if no already set) the vagrant user to have elevated permissions and NOPASSWD to execute administration tasks.
+    - Create the ssh directory for the 'vagrant' user with the correct permissions.
+        mkdir /home/vagrant/.ssh
+        chmod 0700 /home/vagrant/.ssh
+    - Copy the public key for 'vagrant' user into the ssh directory with name 'authorized_keys' and correct permissions:
+        cd /home/vagrant/.ssh
+        wget https://raw.githubusercontent.com/hashicorp/vagrant/master/keys/vagrant.pub
+        mv vagrant.pub authorized_keys
+        chmod 0600 authorized_keys
+    - Make sure both the .ssh directory and its content are owned by the 'vagrant' user.
+        cd ~
+        chown -R vagrant:vagrant .ssh
+    - Configure the ssh service. Insert the line 'AuthorizedKeysFile %h/.ssh/authorized_keys'.
+    - Restart the ssh service.
+        service ssh restart
+    - Install the packages for Linux Headers.
+        apt-get install -y gcc build-essential git linux-headers-$(uname -r) dkms
+    - Install the virtualbox tools.
+        mount /dev/cdrom /mnt
+        cd /mnt
+        ./VBoxLinuxAdditions.run
+    - As a safety matter, run this command to avoid de-fragmentation issues.
+        dd if=/dev/zero of=/EMPTY bs=1M
+        rm -f /EMPTY
+    - Next step is to package the configured virtual machine into a vagrant box (box file). This will generate a 'package.box' file.
+        vagrant package --base VIRTUALMACHINENAME
+        vagrant package --base ubuntu64-base
+    - Import the box file into vagrant. As default, it will set the version to 0 (v0).
+        vagrant box add VAGRANTBOXNAME FILE
+        vagrant box add ubuntu64 package.box
+
+After this you can make use of the newly create vagrant box for set up an environment.
+    vagrant box list            # Lists the local boxes.
+    vagrant init ubuntu64 -m    # Creates the Vagrantfile.
+    vagrant up                  # Spins up the environment.
+    vagrant ssh                 # To verify we can access to the vagrant machine.
+
+
+[VAGRANT BOX COMMANDS]
+COMMAND vagrant box add:
+Add a box to vagrant. You can add a local box or specify an url.
+Flags:
+    - --name BOX: Name of the box.
+Structure:
+    vagrant box add ADDRESSORLOCATION
+Example:
+    vagrant box add --name ubuntu64 package.box     # Creates a box named ubuntu64 base on the file box package.box.
+
+COMMAND vagrant box list:
+List all the boxes installed in your system. It will also display the box version and provider.
+Flags:
+    - -i: Display additional information about the boxes.
+Structure:
+    vagrant box list
+Example:
+    vagrant box list    # Lists all the boxes installed in the system.
+
+COMMAND vagrant box outdated:
+It tells you whether or not a box is being used in your vagrant environment is out of date or not. By default it only shows information for the boxes in use.
+Flags:
+    - --global: Checks all boxes installed.
+Structure:
+    vagrant box outdated
+Example:
+    vagrant box outdated --global   # Display all the outdated boxes installed on the system.
+
+COMMAND vagrant box update:
+This command updates an existing box (It will re-download the newest version of the box file).
+This command will not update the environment. If you want to use the new version of the box you would need to destroy the current environment and perform again 'vagrant up'.
+Flags:
+    - --box BOX: Update a specific box.
+Structure:
+    vagrant box update
+Example:
+    vagrant update --box centos/7   # Updates the centos/7 box.
+
+COMMAND vagrant box prune:
+Prune out old versions of boxes.
+Flags:
+    - -n: Only print the boxes that would be removed.
+Structure:
+    vagrant box prune
+Example:
+    vagrant box prune -n    # It will display all the boxes that can be pruned.
+    vagrant box prune       # Prune the old-version boxes.
+
+COMMAND vagrant box repackage:
+This command reconstructs the box file based on the configured vagrant box in the system. It will generate a new file called 'package.box'.
+Structure:
+    vagrant box repackage NAME PROVIDER VERSION
+Example:
+    vagrant box repackage ubuntu64 virtualbox 0 # Repackages the box 'ubuntu64'.
+
+COMMAND vagrant box remove:
+Remove a box.
+Structure:
+    vagrant box remove NAME
+Example:
+    vagrant box remove ubunt64  # Removes the box ubuntu64.
+
+
+[BOX FILE FORMAT]
+Initially with early versions of vagrant, boxfiles were nothing more than virtualbox exports.
+Now with vagrant supporting multiple providers as well as the ability to go importing box files, these got more complex.
+Box files are just archives compressed via zip or tar.gz.
+    tar xzvf package.box    # Uncompress a box file.
+STRUCTURE:
+    - Vagrantfile.
+    - box-disk001.vmdk.
+    - box.ovf: The command 'vagrant box list -i' gets the information from this file. You can also have a info.json file as a substitute of this file.
+    - metadata.json: This is a JSON file containing the metadata such as:
+        * name.
+        * description.
+        * available versions.
+        * available providers.
+            "provider":"virtualbox"
+        * url to the actual box file.
+        If you don't have a metadata.json file for the box, you still can use it but you will lost the functionality of support versioning or updating.
+
+
+
+----------------------------------------------- MISCELLANEOUS -----------------------------------------------
+[COMMANDS]
+VAGRANT INSTALLATION ####################################################################
+yum install -y https://releases.hashicorp.com/vagrant/2.2.9/vagrant_2.2.9_x86_64.rpm    # Installs the RPM package of Vagrant.
+vagrant --version                                                                       # Displays the Vagrant version.
+
+VAGRANT #####################################################
+vagrant init                                                # Sets a Vagrant environment (Vagrantfile) in current dir.
+vagrant init hashicorp/precise64                            # Sets a Vagrant environment (Vagrantfile) in current dir with the box specified
+vagrant up                                                  # Configures the guest machines based on Vagrantfile.
+vagrant up web                                              # Create only the web virtual machine specified in the Vagrantfile.
+vagrant destroy                                             # Destroy all the guest machines.
+vagrant validate                                            # Validates the syntax of the Vagrantfile in the current directory.
+vagrant provision --provision-with shell                    # It will run guest machines using the provisioner shell.
+vagrant reload                                              # Restart all guests machines.
+vagrant status                                              # Checks the status of the guest machines.
+vagrant ssh -c 'ls /'                                       # Runs the ls command via ssh in the default guest machine.
+vagrant halt                                                # Halt all the environment (all guest machines).
+vagrant halt default                                        # Halt only the guest machine default.
+vagrant ssh-config                                          # Display the host ssh information.
+vagrant box add --name ubuntu64 package.box                 # Creates a box named ubuntu64 base on the file box package.box.
+vagrant box list                                            # Lists all the boxes installed in the system,
+vagrant box outdated --global                               # Display all the outdated boxes installed on the system.
+vagrant update --box centos/7                               # Updates the centos/7 box.
+vagrant box prune -n                                        # It will display all the boxes that can be pruned.
+vagrant box prune                                           # Prune the old-version boxes.
+vagrant box repackage ubuntu64 virtualbox 0                 # Repackages the box 'ubuntu64'.
+vagrant box remove ubunt64                                  # Removes the box ubuntu64.

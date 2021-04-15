@@ -1,0 +1,60 @@
+PROJECT NAME: vagrant-centos-network
+
+
+PRE-REQUISITES:
+The pre-requisites are handled via a bash scripts in the project directory.
+More information can be found in initial comments of file script.
+Bash scripts:
+    - vagrant-fedora-setup.sh: This bash script is focused for Red Hat based systems with dnf package manager.
+Steps performed by bash scripts:
+    - Install VirtualBox.
+    - Install Vagrant.
+    - Future implementation: Install Vagrant plugin (in the host) to install VirtualBox guest additions: vagrant-vbguest.
+Script execution:
+    As root user:
+        ./vagrant-fedora-setup.sh
+    As non-root user:
+        sudo ./vagrant-fedora-setup.sh
+
+
+
+PROJECT STRUCTURE:
+This Vagrant project consists of a private network containing 3 systems.
+Each server will be running CentOS 8 (https://app.vagrantup.com/centos/boxes/8).
+
+Systems definition:
+    System 1:
+        Name:       centos-main
+        Provider:   Virtualbox
+        CPU:        2
+        Memory:     4GB
+        Image:      centos/8
+        IP:         192.168.1.11
+
+    System 2:
+        Name:       centos-node1
+        Provider:   Virtualbox
+        CPU:        2
+        Memory:     4GB
+        Image:      centos/8
+        IP:         192.168.1.12
+
+    System 3 (Currently not implemented due lack of hardware):
+        Name:       centos-node2
+        Provider:   Virtualbox
+        CPU:        2
+        Memory:     4GB
+        Image:      centos/8
+        IP:         192.168.1.13
+
+Network:
+    name (id):      centos-network
+    type:           private
+    dhcp/static:    static
+
+Provisioning:
+An Ansible playbook will be executed at provisioning time to configure the following in all systems:
+    - Update system packages.
+    - Create an user called "naranjo" with elevated privileges (password required).
+Additionally, System 1 (centos-main) will be configured with a GUI.
+The provisioner used for this will be "ansible_local".

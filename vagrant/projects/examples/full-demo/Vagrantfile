@@ -1,0 +1,94 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/bionic64" # Multi-box configuration.
+
+  # PROVISIONING: PUPPET
+  # Since the node (app) is already specified in the manifest, we don't need to include the puppet directive inside the app method.
+  #config.vm.provision "shell", inline: "apt-get update && apt-get install -y puppet"
+  #config.vm.provision "puppet" do |puppet|
+  #  puppet.module_path = "modules"
+  #end
+
+  # PROVISIONING: SALT.
+  # Since the node (app*) is already specified in the formula (top.sls). we don;t need to include the salt directive inside the app method.
+  #config.vm.synced_folder "salt/roots", "/srv/salt"
+  #config.vm.provision "salt" do |salt|
+  #  salt.masterless = true
+  #  salt.run_highstate = true
+  #end
+
+  # Defining the app box.
+  config.vm.define "app" do |app|
+    app.vm.hostname = "app"   # Setting up the guest hostname.
+
+    # DEFAULT FOLDER SHARING IMPLEMENTATION (VIRTUALBOX).
+    app.vm.synced_folder "files", "/var/synced_files",
+      create: true, owner: "vagrant", group: "vagrant", id: "files"
+    app.vm.synced_folder "app", "/var/www/app",
+      create: true, owner: "vagrant", group: "vagrant", id: "app"
+
+    # NFS FOLDER SHARING.
+    # app.vm.synced_folder "files", "/var/nfs_files", type: "nfs", disabled: true,   # This is disabled via the "disabled" option.
+    #   create: true, id: "files",
+    #   nfs_export: true, nfs_udp: true, nfs_version: 3
+    # app.vm.network "private_network", type: "dhcp"   # Static network for NFS to use.
+
+    # RSYNC FOLDER SHARING.
+    # app.vm.synced_folder "files", "/var/rsync_files", type: "rsync", disabled: true,   # This is disabled via the "disabled" option.
+    #   create: true, owner: "vagrant", group: "vagrant", id: "files",
+    #   rsync__auto: true
+
+    # SMB FOLDER SHARING.
+    # app.vm.synced_folder "files", "/var/smb_files", type: "smb", disabled: true,   # This is disabled via the "disabled" option.
+    #   create: true, owner: "vagrant", group: "vagrant", id: "files"
+
+    # NETWORKING: PORT FORWARDING.
+    app.vm.network "forwarded_port", guest: 8080, host: 8081,
+      auto_correct: true, id: "wanderer-app"
+
+    # NETWORKING: PRIVATE NETWORKING.
+    app.vm.network "private_network", ip: "192.168.1.11"
+
+    # PROVISIONING: SHELL
+    #app.vm.provision "shell", path: "scripts/pre.sh"    # Running external bash script for provision. Install nodejs, npm & node_exporter.
+
+    # PROVISIONING: FILE
+    #app.vm.provision "file", source: "configs/services", destination: "/tmp/services"   # Using file provisioner to place unit service file into temporal dir.
+    #app.vm.provision "shell", path: "scripts/post.sh",    # Running external bash script for provision. Moves files from tmp dir to dir for unit service files, and start node_exporter service.
+
+    # PROVISIONING: ANSIBLE
+    #app.vm.provision "ansible_local" do |ansible|
+    #  ansible.playbook = "playbooks/node.yml"
+    #  ansible.become = true
+    #  ansible.become_user = "root"
+    #end
+
+    # PROVISIONING: CHEF
+    #app.vm.provision "chef_solo" do |chef|
+    #  chef.add_recipe "nodejs"
+    #  chef.arguments = "--chef-license accept"
+    #end
+
+    app.vm.provision "docker" do |docker|
+        docker.build_image "/var/www/app", args: "-t app"
+        docker.run "app", args: "-p 8080:8080"
+    end
+
+  end
+
+
+  # Defining the monitoring box for prometheus.
+  config.vm.define "prome" do |prome|
+    prome.vm.hostname = "prome"   # Setting up the guest hostname.
+
+    # NETWORKING: PORT FORWARDING.
+    prome.vm.network "forwarded_port", guest: 9090, host: 9090,
+      auto_correct: true, id: "prometheus"
+
+    # NETWORKING: PRIVATE NETWORKING.
+    prome.vm.network "private_network", ip: "192.168.1.12"
+  end
+
+end

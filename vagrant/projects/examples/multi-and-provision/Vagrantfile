@@ -1,0 +1,25 @@
+# This Vagrantfile is an example of defining multiple virtual machines & provisioning.
+
+Vagrant.configure("2") do |config|
+    # Virtual Machine definition with name web.
+    config.vm.define "web" do |web|
+        web.vm.box = "ubuntu/trusty64"                  # Base image.
+        web.vm.hostname = "web.vagrant.vm"              # Configures the VM's hostname.
+        web.vm.provision = "shell" do |shell|           # Uses the shell provisioner to configure the environment.
+            shell.inline = "apt-get update -y"          # Update the local repo cache.
+            shell.inline = "apt-get install -y apache2" # Install apache2.
+        end
+    end
+
+    # Virtual Machine definition with name db.
+    config.vm.define "db" do |db|
+        db.vm.box = "ubuntu/trusty64"                       # Base image.
+        db.vm.hostname = "db.vagrant.vm"                    # Configures the VM's hostname.
+        db.vm.provision = "puppet" do |puppet|              # Uses the puppet provisioner to configure the environment.
+            puppet.manifests_path = "puppet/manifests"      # Specifies the path of the manifest files.
+            puppet.manifest_file = "default.pp"             # Specify the manifest file.
+            puppet.module_path = "puppet/modules"           # Specifies the path of the modules.
+            puppet.hiera_config_path = "puppet/hiera.yaml" # Specifies the hierarchy configuration file.
+        end
+    end
+end

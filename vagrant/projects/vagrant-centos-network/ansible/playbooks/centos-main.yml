@@ -1,0 +1,41 @@
+---
+- hosts: all
+  become: yes
+  become_user: root
+  vars:
+      # User:
+      myUser: naranjo
+      myGecos: Luis Antonio Naranjo Mora
+      # Graphical:
+      graphicalTarget: /usr/lib/systemd/system/graphical.target
+      defaultTarget: /etc/systemd/system/default.target
+  tasks:
+      - name: Updating system packages.
+        dnf:
+            name: '*'
+            state: latest
+
+      - name: Creating user account.
+        user:
+            state: present
+            name: "{{ myUser }}"
+            groups: wheel
+            comment: "{{ myGecos }}"
+            create_home: yes
+            generate_ssh_key: yes
+            ssh_key_type: rsa
+            ssh_key_bits: 3072
+            update_password: always
+        no_log: true                # Avoid displaying the changes when using verbosity.
+
+      - name: Installing GUI package group.
+        dnf:
+            name: "@Server with GUI"
+            state: latest
+
+      - name: Setting the graphical.target as the default.
+        file:
+            src: "{{ graphicalTarget }}"
+            dest: "{{ defaultTarget }}"
+            state: link
+...

@@ -1,0 +1,1278 @@
+----------------------------------------------- FOUNDATIONAL KNOWLEDGE -----------------------------------------------
+[VIRTUALIZATION]
+Virtualization is the process of creating a virtual version of a tangible thing.
+A virtual machine is simply another machine within or on top of a physical hardware that leverages the existing hardware to create an entire separate, virtualized environment that uses a separate OS despite shared resources.
+
+
+[HYPERVISOR]
+A hypervisor exists to do all the hard work of doing out CPU, RAM, and disk space to the guest OS.
+The guest consists of the virtualized computer, and the host is the physical machine that contains the guest or guests.
+Common hypervisors include KVM, XEN, VMWare, VirtualBox, and Parallels, each of which has its own use cases.
+
+There are 2 types of hypervisors:
+  - Type I Hypervisors: They are added directly to bare metal hosts without an underlying OS.
+  - Type II Hypervisors: They run on top of an OS as a process.
+
+There are also some hypervisors that straddle the line between Type I & II control programs.
+KVM, for example, works on top of a Linux distribution but is a kernel module.
+This effectively makes it a Type I hypervisor that looks and functions through an OS, which means it also qualifies as a Type II.
+
+
+[VAGRANT]
+Vagrant is a tool for building and managing virtual machine environments in a single workflow.
+Vagrant works as a wrapper around a virtualization system.
+
+Vagrant has no preference for which type of hypervisor is used, and is packaged with both VirtualBox (Type II) and Hyper-V (Type I, Windows only).
+It's also packaged with Docker, which isn't an hypervisor at all but, instead, a containers platform.
+Additionally, other hypervisors/container services, and even cloud platforms (called "providers" in Vagrant) can be added by installing the appropriate plugin.
+
+Vagrant can be broken down into a few basic components:
+
+THE "VAGRANTFILE":
+A "Vagrantfile" is a file written in Ruby that describes the desired development environment.
+When writing this file, we have to reference which Vagrant box(es) we want to base our guests on.
+These boxes determine the OS and default packages and configurations. Boxes can be created from scratch or found on Vagrant's website.
+
+VAGRANT COMMAND LINE TOOL:
+Vagrant commands remain the same regardless of the host OS.
+Vagrant commands allows you to spin-up tear down, and otherwise manage your environment.
+
+VAGRANT PLUGINS:
+Vagrant plugins allows us to provision the end state of our hosts.
+There are even plugins that let you set the hostname and DNS configuration for cloud platforms, like AWS's Route 53.
+
+
+
+----------------------------------------------- SETUP -----------------------------------------------
+[INSTALLING VAGRANT ON LINUX]
+Get Vagrant installer from their website.
+  https://www.vagrantup.com/downloads.html
+Example:
+  cd /tmp/
+  wget https://releases.hashicorp.com/vagrant/2.2.5/vagrant_2.2.5_x86_64.rpm
+
+To ensure the file has not been tampered with, we also want to grab the checksum and verify it against HashiCorp's public key:
+Example:
+  wget https://releases.hashicorp.com/vagrant/2.2.5/vagrant_2.2.5_SHA256SUMS.sig
+  wget https://releases.hashicorp.com/vagrant/2.2.5/vagrant_2.2.5_SHA256SUMS
+  vim hashicorp.asc # Copy HashiCorp's public key in this file.
+
+Import the key:
+Example:
+  gpg --import hashicorp.asc
+
+Validate the signature:
+Example:
+  gpg --verify vagrant_2.2.5_SHA256SUMS.sig vagrant_2.2.5_SHA256SUMS
+
+Validate the installer package.
+Example:
+  rpm --checksig vagrant_2.2.5_x86_64.rpm
+
+Install Vagrant:
+Example:
+  sudo yum install vagrant_2.2.5_x86_64.rpm
+
+Confirm the install was successful by running:
+  vagrant --version
+
+Remember that you still need an hypervisor in order to work with Vagrant.
+To install VirtualBox:
+
+Download VirtualBox for Linux from their website and import Oracle's public key:
+  https://www.virtualbox.org/wiki/Linux_Downloads
+Example:
+  cd /tmp
+  wget https://download.virtualbox.org/virtualbox/6.0.10/VirtualBox-6.0-6.0.10_132072_el7-1.x86_64.rpm
+  wget https://www.virtualbox.org/download/oracle_vbox.asc
+  sudo rpm --import oracle_vbox.asc
+
+Confirm the package signature:
+Example:
+  rpm --checksig VirtualBox-6.0-6.0.10_132072_el7-1.x86_64.rpm
+
+Install VirtualBox:
+Example:
+  sudo yum install VirtualBox-6.0-6.0.10_132072_el7-1.x86_64.rpm
+
+Validate VirtualBox is installed by checking it's version.
+  VBManage --version
+
+
+[INSTALLING VAGRANT ON WINDOWS]
+Vagrant is used entirely on the command line. Although we could install Vagrant & VirtualBox on the windows host, the best course of action is to leverage the Vagrant CLI so that it works the same way as it would on other platforms.
+We will install Git to get additional functionality.
+
+INSTALLING GIT:
+Go to the Git website and download Git for Windows.
+  https://git-scm.com/downloads
+
+During installation, select these 4 options:
+  - Git from the command line and also from 3rd-party software.
+  - Use the OpenSSL library option.
+  - Checkout as-is, commit Unix-style line endings option.
+  - Use MinTTY.
+
+INSTALLING VAGRANT:
+Download Vagrant msi file from Vagrant website.
+  https://www.vagrantup.com/downloads.html
+
+Follow the installer steps to finish installation.
+
+After installation, Vagrant will ask you to restart the computer. You can wait until you install VirtualBox for the restart.
+
+INSTALLING VIRTUALBOX:
+Just as with Git & Vagrant, go to VirtualBox website and download the installer.
+  https://www.virtualbox.org/wiki/Downloads
+
+Follow the installer steps to finish installation.
+
+Remember that if you are already using Hyper-V, it must be disabled before you can use VirtualBox.
+
+After all 3 software are installed you can reboot the computer, and verify Vagrant installation with command "vagrant version".
+
+
+[PLUGINS]
+While Vagrant is ready to use out of the box, plugins offer expanded features, including additional providers, provisioners, and quality-of-life features that the core Vagrant offering lacks.
+Adding and managing plugins is done through the "vagrant plugin" command line tool, and most plugin setups are a single-command task.
+Most Vagrant plugins are third party. Use common sense when adding plugins.
+Always read the README file and any information provided, check supported Vagrant versions, and verify that it's a maintained and active project.
+
+Plugins can be added using a single command.
+  vagrant plugin install <PLUGIN>
+Example:
+  vagrant plugin install vbinfo
+
+To list installed plugins you can use:
+  vagrant plugin list
+
+When a new version of a plugin is released, we will need to run the next command against the desired plugin.
+  vagrant plugin update <PLUGIN>
+
+We can search for failing plugins and try to repair them with command:
+  vagrant plugin repair
+
+Proprietary plugins, such as the VMWare provider, also require some additional work right out of the box.
+Since VMWare requires a license to use, we will have to feed Vagrant any licensing information with command:
+  vagrant plugin license <LICENSE-FILE>
+
+To remove a plugin from Vagrant, you can use command:
+  vagrant plugin uninstall <PLUGIN>
+
+There may be times where we must remove all plugins, such as when we're updating Vagrant. In those cases you can use the next command.
+  vagrant plugin expunge
+This command removes all plugins, dependencies, and metadata from the host.
+
+If we want to reinstall the expunged plugins after any changes are made, we can use the next command.
+  vagrant plugin expunge --reinstall
+
+Plugin wiki:
+  https://github.com/hashicorp/vagrant/wiki/Available-Vagrant-Plugins
+
+
+[PROVIDER PLUGINS]
+One of the primary features of Vagrant plugins is the ability to add additional providers for Vagrant, extending its use beyond managing hypervisor-based environments.
+At the time of writing, there are 34 different providers available, not including the three that Vagrant ships with.
+These providers are not just limited to hypervisors but are also cloud platforms, container services, and even other virtualization management tools like Proxmox.
+
+In future, you may want to go beyond simply using VirtualBox. You may want to add support to your usual cloud platform and become capable of working more than just locally.
+For example, you can add the AWS provider with command:
+  vagrant plugin install vagrant-aws
+
+Some examples of provider plugins are:
+  - vagrant-aws.
+  - vagrant-google.
+  - vagrant-azure.
+  - vagrant-hp.
+  - vagrant-digitalocean.
+  - vagrant-linode.
+  - vagrant-rackspace.
+
+
+[ADDITIONAL PLUGINS]
+There are some "quality-of-life" plugins that we can add to our Vagrant installation.
+When working with VirtualBox we can add plugin "vagrant-vbguest" which add the VirtualBox Guest Additions to the guest systems.
+Some examples of these kind of plugins are:
+  - vagrant-vbguest. Adds VirtualBox Guest Additions to guest systems.
+  - vagrant winnfsd. Adds NFS support on Windows hosts.
+  - vagrant-hostmanager. Lets you manipulate the "/etc/hosts" file before provisioning.
+  - vagrant-netinfo. Displays the ports that are mapped to the host.
+  - vagrant-git. Lets you deploy and clone code from Git to your guests.
+
+
+
+----------------------------------------------- CREATING A VAGRANT ENVIRONMENT -----------------------------------------------
+[BOXES]
+With any virtualization, container, or cloud platform, some kind of image needs to be supplied so the deployment can happen.
+In Vagrant, these golden images are called "boxes".
+
+Vagrant boxes provide the golden standard for how we want our virtual machines to deploy.
+While we can add code, alter the networking, and otherwise manipulate the virtual machine once provisioned by Vagrant, a box is the base image from which our work is done.
+Boxes can be user-created or downloaded for free from the Vagrant Cloud box repository (https://app.vagrantup.com/boxes/search).
+
+A Vagrant box can be a simple bare image of a distro.
+It can also be as elaborated as deploying a ready-made Puppet master or full LAMP stack.
+Boxes are provider-limited; however, a box must be made for the certain providers it is used with, although boxes can support multiple providers.
+
+To download (pull down) a box you can use the command:
+  vagrant box add <USER/BOX>
+Example:
+  vagrant box add ubuntu/bionic64
+
+
+[VAGRANTFILE]
+Most of the work you will do with Vagrant for a project or environment will be in a single file known as a "Vagrantfile".
+The "Vagrantfile" describes the overall configuration and provisioning that needs to happen for the desired environment to deploy, so this will include everything from the desired box to the location of your various provisioner files to the networking between multiple virtual machines.
+
+To generate a Vagrant file, you can use the next command in the desired directory for the Vagrant project.
+  vagrant init
+
+The "Vagrantfile" is written in Ruby, but you don't necessarily need to be a Ruby Expert/beginner.
+The "Vagrantfile" is written primarily in variable assignments and simple statements, avoiding the need for any advanced (or intermediate) Ruby skills.
+
+You can validate the syntax of your "Vagrantfile" using the next command.
+  vagrant validate
+You need to run this command in the same directory where the "Vagrantfile" is.
+
+STEPS TO CREATE A VAGRANT FILE IN A PROJECT DIRECTORY:
+Create your project directory and cd into it.
+  mkdir myProject; cd myProject
+
+Generate the Vagrantfile:
+  vagrant init
+
+Using your preferred text editor, edit the Vagrantfile with the code needed.
+  vim Vagrantfile
+
+SIMPLEST POSSIBLE VAGRANTFILE:
+Example:
+  1 Vagrant.configure("2") do |config|
+  2   config.vm.box = "ubuntu/bionic64"
+  3 end
+
+Breaking down line by line, we start with line 1, which contains "Vagrant.configure("2")" functions.
+This tells Vagrant which version we want to use, and all configurations will be contained within this setting.
+"do |config|" lets us name the arguments for the block.
+You'll notice in line 2 that the variable we assign begins with "config" (this is where it comes in). "config" is the name that is always used here.
+Also in line 2, we have the "vm.box". "vm" is an overall namespace used for virtual machine settings.
+"box" is just one of many options we have for configuring the virtual machines.
+"box", however, is mandatory if using a hypervisor-based provider, like VirtualBox.
+
+
+[VAGRANT UP]
+The "vagrant up" command is responsible of setting the environment based on a Vagrant file.
+
+Vagrant has a specific lookup path and load/merge order it follows when we deploy an environment, which allows us to do things like store API keys in a single overall "Vagrantfile".
+
+When we run the command, Vagrant first looks in the current working directory for an existing "Vagrantfile".
+If it doesn't find one there, it continues up the directory tree, until it hits "/Vagrant" directory.
+
+For example, if we were to run "vagrant up" in "/Users/vagrant_user/academy/vagrant/env/lamp", it would run through this series of directories before concluding we have no provided a "Vagrantfile".
+  /Users/vagrant_user/academy/vagrant/envs/lamp
+  /Users/vagrant_user/academy/vagrant/envs
+  /Users/vagrant_user/academy/vagrant
+  /Users/vagrant_user/academy
+  /Users/vagrant_user
+  /Users
+  /
+
+When you do have an existing "Vagrantfile", Vagrant still does not rely on that single "Vagrantfile" alone to determine the final outcome of our environment, and the "Vagrantfile" itself is processed in a particular way.
+First, the box or boxes that are being deployed are determined. Then, Vagrant looks for any "Vagrantfiles" that are packaged with the boxes themselves.
+After this, the "Vagrantfile" in the user's home directory is considered. For Linux & Mac, this is "~/.vagrant.d/Vagrantfile".
+Assuming you have not previously added a "Vagrantfile" in that directory, this file is not automatically generated.
+Generally, the user-level Vagrantfile is ideal for storing universal data, such as API keys.
+Next, the project-level "Vagrantfile" is loaded, and then any multi-machine settings from the resulting "Vagrantfile".
+Finally, provider-specific settings are loaded.
+As this is happening, during each step of the load process, the new file is merged with the one from the previous step, creating a single, working "Vagrantfile", with any duplicate data overwritten as each "Vagrantfile" is loaded.
+So project-level settings will override user-level, and box-level settings. But not multi-machine or provider settings.
+The only time data is not overridden is network data. That is simply appended to the existing network data.
+  Box Vagrantfile
+    User Vagrantfile
+      Project Vagrantfile
+        Multi-machine
+          Provider
+
+
+[ACCESSING THE VM]
+When Vagrant deploys a box (assuming the box is not a private box created for your specific use case) it provides users with an overall "vagrant" user.
+This user has superuser privileges and is provisioned with a private key that can be used to SSH into the host.
+This key is located in a ".vagrant" directory, found in the same directory as the "Vagrantfile" itself.
+The permissions for this directory are locked down to the "root" user, so it's not even visible when you run an "ls" as a regular user.
+However, we can retrieve the private key (and SSH information as a whole) for our "vagrant" user on the virtual host by running command:
+  vagrant ssh-config
+This command outputs a host definition for the virtual machine.
+  Host default
+    HostName 127.0.0.1
+    User vagrant
+    Port 2222
+    UserKnownHostsFile /dev/null
+    StrictHostKeyChecking no
+    PasswordAuthentication no
+    IdentityFile C:/Users/naranjo/Documents/GitHub/vagrant/projects/examples/initial/.vagrant/machines/default/virtualbox/private_key
+    IdentitiesOnly yes
+    LogLevel FATAL
+
+To log in via SSH to a host managed by Vagrant on the local workstation, you can run command:
+  vagrant ssh [HOSTNAME]
+HOSTNAME is the name of the virtual machine provided in the "Vagrantfile".
+Generally this is used when we have a multi-machine setup, but we can provide the hostname for single machine environment as well.
+Example:
+  vagrant ssh default
+
+When using any public box, all we must do to access the virtual machine is log in as the "vagrant" user.
+This can be done from the same directory as the "Vagrantfile" by using the "vagrant ssh" command, or we can log in from anywhere using the credentials provided when we run a "vagrant ssh-config" command.
+
+
+[VM MANAGEMENT]
+To view the status of any given Vagrant environment, we can run the command:
+  vagrant status [HOSTNAME]
+Just as with "vagrant ssh", we can also add the hostname of the machine to view the status of that particular VM for multi-machine environments.
+
+We can also view the status of all VMs on our systems using the "global-status" command.
+  vagrant global-status
+The output of this command might be a little overwhelming, and some of the status reports may even be inaccurate.
+For example, if you shut down a virtual machine managed by Vagrant via the VirtualBox console and never ran a vagrant command against that environment afterward, then any virtual machines from that environment will still be shown as "running".
+We can ensure "global-status" is more accurate by pruning old entries with "--prune" flag.
+  vagrant global-status --prune
+
+The "halt" command performs a graceful shutdown (through the "shutdown" command on *unix systems).
+  vagrant halt
+
+You can start the environment again using "vagrant up" command.
+
+Alternatively, you can perform a "suspend", which saves the virtual environment at the current point-in-time, then stops the machine.
+  vagrant suspend
+When we suspend our virtual machine, however, we are using more disk space than if we were to perform a full shutdown.
+
+You can resume a virtual machine with "resume" command.
+  vagrant resume
+
+To reboot a machine you can use "reload".
+  vagrant reload
+When running this command. Vagrant first performs a graceful shutdown, then brings the machine back up.
+
+When the environment is no longer needed, we can remove it entirely with the "destroy" command.
+  vagrant destroy
+Once we destroy an environment, we cannot get any of the work performed on that environment back, although we can provision it using the "Vagrantfile".
+There are ways to ensure the work is more persistent.
+
+
+[SNAPSHOTS]
+Snapshots are point-in-time images of the virtual machines.
+You can take a snapshot of an entire environment or just of a single server.
+Depending on the snapshot method, you have the option to store multiple snapshots.
+Snapshots are not supported on all providers. When they are not supported, the "vagrant snapshot" command will output an error.
+
+You can use snapshots in one of two ways, and the two ways cannot be mixed.
+You can either "save" and "restore" snapshots, or "push" and pop" them.
+
+SAVE & RESTORE:
+To save an snapshot you can use command:
+  vagrant snapshot save [HOSTNAME] [LABEL]
+Example:
+  vagrant snapshot save default updated
+
+To display the existing snapshots you can use command:
+  vagrant snapshot list
+
+To restore the virtual machine status to the one of a snapshot, you can use command:
+  vagrant snapshot restore [HOSTNAME] [LABEL]
+Example:
+  vagrant snapshot restore default updated
+
+To remove a snapshot you use command:
+  vagrant snapshot delete [LABEL]
+Example:
+  vagrant snapshot delete updated
+when deleting a snapshot, it's recommended to shutdown the virtual machine, so it cuts down the time it takes to delete the snapshot. However, this is not mandatory.
+
+PUSH & POP
+If you are only planning to work with a single snapshot at any given time, you can instead use the "push" & "pop" method.
+With "push" & "pop", you cannot specify any specific VMs, nor can you define the name of the snapshot.
+Instead, a single snapshot is stored, then removed once "popped".
+Note that you cannot use the "push" and "pop" method on a guest where you've "save"d and "restore"d.
+
+To take a snapshot, you use command:
+  vagrant snapshot push
+
+To restore the virtual machine to the snapshot you use command:
+  vagrant snapshot pop
+
+
+
+----------------------------------------------- EXPANDING VAGRANT -----------------------------------------------
+[BASIC SYNCING (USING VIRTUALBOX SYNC IMPLEMENTATION)]
+CLI UPLOAD:
+We have the option to upload files directly from the host to the guest. However, this doesn't keep the files in sync between the 2 servers.
+  vagrant upload <SOURCE> <DESTINATION> [HOSTNAME]
+
+CONFIG.VM.SYNCED_FOLDER:
+The config.vm.synced_folder configuration directive works a little differently than using "vagrant upload" command.
+It allows you to sync folders between the guest and host. Therefore, it can also set mount points from the "Vagrantfile".
+We can have as many synced folders as we need, and Vagrant by default, uses VirtualBox's native folding syncing system to sync.
+
+When we reference a directory on the host to sync with the guest machine, we reference that directory from where it is in reference with the "Vagrantfile".
+As such, the directories to-be synced from the host are often placed in the same directory as the "Vagrantifle".
+This configuration directive might be considered close to a list.
+  config.vm.synced_folder "<HOSTDIR>", "<GUESTDIR>", [OPTION], ...
+Example:
+  config.vm.synced_folder "app", "/var/www/app", disabled: true,
+    create: true, owner: "vagrant", group: "vagrant", id: "app", mount_options: "uid=0"
+First, the configuration directive is declared (config.vm.synced_folder).
+Then source directory in the host, and add a comma.
+Then the destination in the guest system. The configuration ends with no comma.
+We can also add more options to the directive by separate them using commas.
+Options:
+  - create: true | false. Create the application folder itself.
+  - owner: "STRING". Specify the owner of the directory. This defaults to "vagrant".
+  - group: "STRING". Specify the group of the directory. This defaults to "vagrant".
+  - id: "STRING". Specify an overall ID for the synced folders. This is used when managing the mount using "mount" command on the guest.
+  - mount_options: "STRINGOFOPTIONS". Add "mount" options. This always overrides any other settings.
+  - disabled: true | false. Specify whether disable the entire block. This is generally at the end of the first line.
+
+
+[NFS SYNCING]
+As with many Vagrant features, we are not limited to using only the default file syncing sharing solution.
+The Network File System protocol can be enabled using the "type" option.
+To change the syncing implementation, you can use the "type" option on the config.vm.sync_folder directive.
+However, more changes are needed.
+NFS doesn't support all of the same options as the default file sharing mechanism.
+You need to remove both the "group" & "owner" options. In exchange, we have the "nfs_export", "nfs_udp", and "nfs_version".
+Example:
+  config.vm.synced_folder "app", "/var/www/app", type: "nfs",
+    create: true, id: "app",
+    nfs_export: true, nfs_udp: true, nfs_version: 3
+Options:
+  - nfs_export: true | false. Allows Vagrant to update the "/etc/exports" file on the host (you may need to type in your superuser password).
+                              If not set to true, we would have to update it manually.
+  - nfs_udp: true | false. Defaults to UDP as the transport, allowing faster transfer speeds. If you cannot use UDP, set this to false and NFS will use TCP instead.
+  - nfs_version: VERSION. Sets the version of NFS to be used. Default is 3.
+
+After that, you will need to add a static network for NFS to use.
+For this, you can use the "config.vm.network" configuration directive to create a DHCP private network.
+Example:
+  config.vm.network "private_network", type: "dhcp"
+
+You need to make sure the host is able to create an NFS server.
+Windows users should install the plugin "vagrant-winnfsd".
+NFS is already installed in OSX.
+For Linux, install the needed package (nfs-kernel-server for Debian, and nfs-utils on RedHat).
+
+
+[RSYNC SYNCING]
+When a sophisticated offering (such as NFS or SMB) is not available, we can also just use rsync to keep the guest files up to date with our host.
+You can use rsync just by specifying the "type" option on the config.vm.sync_folder directive.
+Unlike with NFS, rsync can work with the "owner", "group" options.
+However, there are some differences in Vagrant's behavior when working with rsync.
+rsync method is generally not recommended since it's not intended to be a constant sync.
+Instead, rsync is run only when the "vagrant up" or "vagrant reload" commands are used, or it's manually updated with "vagrant rsync" command.
+
+There is an auto-sync feature when working with rsync. However, it's recommended to disable it prior to suspending or halting the host.
+We can enable it either first by adding the "rsync__auto" option.
+Then restarting the guest. You can use the "vagrant rsync-reload" command so it watches the source directory for any changes.
+All of rsync options in config directive uses the convection of double underscore (like rsync__auto).
+Example:
+  config.vm.synced_folder  "app", "/var/www/app", type: "rsync",
+    create: true, owner: "vagrant", group: "vagrant", id: "app",
+    rsync__auto: true, rsync__chwon: true, rsync__exclude: ".gitignore", rsync__rsync_ownership: false, rsync__rsync_path: "sudo rsync", rsync__verbose: false, rsync__args: ["--verbose", "--archive"]
+Options:
+  - rsync__auto: true | false. Enables auto-sync option (constant sync).
+  - rsync__chown: true | false. Disables the owner and group settings currently used.
+  - rsync__exclude: "EXCLUSION_PATTERN". Works like .gitignore file. Any file or directory listed here will not be synced between the host and guest.
+  - rsync__rsync_ownership: true | false. It doesn't set the ownership of the synced directories, but rather determines how the ownership is set.
+                                          By default, should Vagrant need to check the ownership of the destination directory, it will happen separately from the sync itself.
+                                          However, if you're using rsync version 3.1.0 or later on both host and guest, rsync can be enabled to do this instead.
+  - rsync__rsync_path: "PATH". Sets the location of rsync if the "sudo rsync" command is not in the path env variable.
+  - rsync__verbose: true | false. Enable verbose output.
+  - rsync__args: ["OPTION", "OPTION", ...]. Pass any existing rsync flags or parameters.
+
+
+[SMB SYNCING]
+Windows & OSX hosts offer one final syncing option in SMB.
+From the Vagrant side of things, there is a minimal setup to get SMB working as long as your host system is already prepared.
+The Server Message Block (SMB) syncing is only available on Windows & Mac hosts.
+For Windows host, PowerShell version 3 or later needs to be installed.
+Just like with rsync, you can switch to the smb porotocol by simply adding the type option.
+If you have an outsite SMB host to redirect to Vagrant you can use "smb_host" option.
+There are also 2 additional options "smb_password" & "smb_username". But generally, you don't want to include these in the Vagrant file.
+If needed, it's better to use the user-scoped Vagrantfile (~/.vagrant.d/Vagrantfile).
+Example:
+  config.vm.synced_folder "app", "/var/www/app", type: "smb",
+    create: true, owner: "vagrant", group: "vagrant", id: "app"
+Options:
+  - smb_host: "HOSTNAMEORIP". Allows you to set an outsider SMB host.
+  - smb_user: "user". Allows you to specify the SMB user.
+  - smb_password: "pass". Allows you to specify the SMB password.
+
+
+[NETWORKING: PORT MANAGEMENT]
+CONFIG.VM.NETWORK CONFIGURATION DIRECTIVE:
+The config.vm.network is a configuration directive that allows us to access our guest in ways other than SSH by providing the option to forward ports, as well as create private and public networks.
+
+PORT FORWARDING:
+In order to map guest ports to the host system, we use the option "forwarded_port" in the "config.vm.network" configuration directive.
+  config.vm.network "forwarded_port", guest: <GUESTPORT>, host: <HOSTPORT>
+Example:
+  config.vm.network "forwarded_port", guest: 8080, host: 8081
+The "guest" and "host" options let us set which port is forwarding where.
+While there are no limits on which IP on the guest you forward to your host, the host parameter only accepts ports above 1024 (unless you run Vagrant as root, which is not recommended).
+
+When the port forwarding is configured, the ports bind to all interfaces, meaning any other devices on your forwarded port.
+In most instances where you're working from a local station, this is acceptable.
+But if you need to limit the scope to only specific IPs, we can leverage the "guest_ip" and "host_ip" options.
+Example:
+  config.vm.network "forwarded_port", guest: 8080, host: 8081,
+    guest_ip: "1.1.1.1", host_ip: "0.0.0.0"
+
+By default, anything sent via the TCP protocol is what is forwarded through the port.
+You can change the protocol using the "protocol" option. If you need to accept both, you would need to create two separate rules.
+Example:
+  config.vm.network "forwarded_port", guest: 8080, host: 8081,
+    protocol: tcp
+
+In case a port is already being used, Vagrant would output an error.
+However you can also have Vagrant reassign the host port with the "auto_correct" option.
+You can also assign a name to a rule, which can be viewed in VirtualBox.
+Example:
+  config.vm.network "forwarded_port", guest: 8080, host: 8081,
+    auto_correct: true, id: "wanderer-app"
+
+To check which ports are being forwarded, you can use command:
+  vagrant port
+
+
+[NETWORKING: SETTING MULTIPLE MACHINES]
+To work with multiple machines in a single "Vagrantfile", you need to essentially create a "Vagrantfile within a Vagrantfile" for each one, with each "Vagrantfile" being a block of code in the existing "Vagrantfile".
+
+To define a machine block in our "Vagrantfile", we use the "config.vm.define" method (a method is a repeatable set of code, similar to a function).
+In the method, we define a name for the machine.
+  config.vm.define "MACHINENAME" do |MACHINENAME|
+Example:
+  config.vm.define app do |app|
+This mimics the "Vagrant.configure("2") do |config|" at the start of the "Vagrantfile".
+And as with our "Vagrantfile", any setting used in this method block will use the name in the pipes (|app|) as the namespace for the configurations.
+
+Multi-machine machine configurations are the last things added to the overall cached "Vagrantfile" used to ultimately provision our guests, which means everything from the overall "Vagrantfile" is also included in the provisioning.
+In other words, anything outside of the machine blocks is applied to all machines, and applies before any configurations in those machine blocks.
+
+When we provision the guests with a "vagrant up", all guests will be provisioned.
+If there is a particular machine you don't want to bring up with the greater infrastructure, you can add  "autostart: false" options to the method "config.vm.define".
+Example:
+  config.vm.define "app", autostart: false do |app|
+
+If you want to define a default machine to use when no individual machine is provided in the "vagrant" command, you can do it with the option "primary: true" in the method "config.vm.define".
+But note this means "vagrant up", "vagrant reload", and other commands will no longer manage the greater environment as a whole.
+Example:
+  config.vm.define "app", primary: true do |app|
+
+
+[NETWORKING: PRIVATE NETWORKING]
+With Vagrant, you also have the option to generate a private IP for the server, allowing anything within the network access to the guest.
+This includes guests generated via the "Vagrantfile", so the entire environment will work as a private network.
+
+The simplest way is to set a DHCP private network.
+To get a private network up-and-running, apply the "config.vm.network "private_network"" configuration declaration.
+Example:
+  app.vm.network "private_network", type: "dhcp"
+
+You can also specify which IP you want the guests to use.
+While Vagrant itself doesn't restrict what IP you assign to the guests, you do want to ensure it's not an IP already in use, and it should come from one of the reserved IP blocks:
+  - 10.0.0.0 - 10.255.255.255
+  - 172.16.0.0 - 172.31.255.255
+  - 192.168.0.0 - 192.168.255.255
+To set an IP, you just need to switch the "type" option to "ip" and provide the desired IP address.
+This can be either IPv4 or IPv6. Although, note that when using IPv6, the entire /64 subnet will be reserved. This can be changed with the "netmask" setting.
+IPv6 is not supported over DHCP.
+
+
+[NETWORKING: PUBLIC NETWORKING]
+Only create public networks if you know who you're granting access to your host.
+Public networking with Vagrant is very provider-dependent, but with VirtualBox, you are creating a bridged networking that will allow users on the greater network to which you are bridged access to your guest server.
+
+Creating a bridged network is a simple process, assuming you can use DHCP.
+To create a public network, all you have to do is add the next configuration declaration.
+  NAMESPACE.vm.network "public_network"
+Example:
+  app.vm.network "public_network"
+You have the option to assign it an IP address with the "ip" option as with private networks.
+
+
+[PROVISIONING]
+With provisioning, you can install packages, configure settings, upload files, and more at the time you deploy the environment so you're not using the unaltered base box but instead, one more suited to your needs.
+Provisioning can be done through a simple shell script, or by using one of the many default provisioners that leverage existing configuration management solutions to manage the guests.
+
+Provisioning is set up so it only brings the guests under enforcement during the initial "vagrant up".
+A machine that has been already provisioned and was only suspended or shut down must use the "--provision" flag during "reload" or "up" to actually run the provisioner.
+
+Provisioners relies in the hostname.
+
+You use the config directive "NAMESPACE.vm.provision" to call out a provisioner.
+
+SUPPORTED PROVISIONERS:
+  - Shell.
+  - Ansible.
+  - Ansible local.
+  - Chef Zero.
+  - Chef client.
+  - Chef Solo.
+  - Chef Apply.
+  - Docker.
+  - File.
+  - CFEngine.
+  - Puppet Apply.
+  - Puppet Agent.
+  - Salt.
+
+
+[PROVISIONING: SHELL PROVISIONER]
+The most basic manner with which we can provision guest servers is with old-fashioned shell scripts.
+These can either be written into the "Vagrantfile" or stored in the environment directory and have Vagrant run them as needed.
+Scripts in Vagrant are run as the "vagrant" user with elevated privileges (i.e., with sudo), so we can leave out the "sudo".
+Example:
+  config.vm.define "app" do |app|
+    ...
+    app.vm.provision "shell", inline: "apt-get install -y nodejs npm"
+  end
+
+To avoid feed in massive scripts in the middle of the Vagranfile, we have two options:
+  - Embed the script elsewhere in the file (Using variables) such as the top.
+  - Save the script in a separate file.
+
+To embed a script, we can set a variable, then simply feed the script into that variable.
+We can then call that variable as a value for the "inline" setting.
+Example:
+  $script = <<-SCRIPT
+  apt-get install -y nodejs npm -y
+  SCRIPT
+  ...
+  app.vm.provision "shell", inline: $script
+
+To call an external file for the shell script you use the "path" option.
+Example:
+  app.vm.provision "shell", path: "scripts/pre.sh"
+
+Options:
+  - inline: "COMMANDS". Allows you to specify the shell commands.
+  - path: "PATHTOSCRIPT". Allows you to specify the path of an external script file.
+  - privileged: true | false. Specify whether to run the script with superuser privileges.
+  - reboot: true | false. Trigger reboot after running the script.
+  - env: ["key1=val1", "key2=val2", ...]. Allows you to add environment variables the use them in the script.
+
+
+[PROVISIONING: FILE]
+Vagrant offers a simple "file" provisioner, generally used to add configuration files.
+It takes only 2 options, "source" and "destination", and works differently from the "synced_folder" option in that it only uploads during provisioning and doesn't maintain an active sync of the files.
+Example:
+  app.vm.provision "file", source: "configs/services", destination: "/tmp/services"
+
+Unlike the "Shell" provisioner, the "File" provisioner doesn't work with elevated privileges.
+For system location files where you need elevated privileges to write, you would need to move the configuration files to a temporary location, then use the Shell provisioner again to finish the process.
+
+Although not powerful on its own, when paired with the Shell provisioner, the "file" provisioner let us spin up fully configured environments without having to know anything about configuration management.
+
+
+[PROVISIONING: ANSIBLE PROVISIONER]
+Ansible is an automation tool that allows us to automate tasks across the infrastructure.
+These tasks are written in YAML-structure files, called playbooks, and are run against groups of servers defined in an inventory file.
+
+Vagrant currently has two provisioner options:
+  - Ansible.
+  - Ansible local.
+The plain Ansible provisioner should be used when you're already using Ansible from your workstation to control your infrastructure.
+If you would rather keep Ansible off the workstation, then Ansible Local is most likely the best option, which will install Ansible on the guest and use it to provision itself.
+While both have their own set of general configuration options, the Ansible provisioners share a common set of options you can use to set your guest.
+
+You can create a method block for Ansible itself.
+Any options needed for Ansible configuration then go in this block.
+Formatting should follow the "ansible.key = "value"" format.
+At the very least, you need to specify a playbook.
+Example:
+  app.vm.provision "ansible_local" do |ansible|
+    ansible.playbook = "playbooks/node.yml"
+  end
+
+So how Ansible will know to work with the guest machine since Ansible normally works from an inventory?
+While we do have the option to specify an inventory file (or create inventory groups inline), Vagrant automatically generates an inventory file based on the "Vagrantfile" in case we fail to provide one.
+
+By default, Ansible works with the "ansible" user, not with the "vagrant" user, and this user doesn't have the escalated privileges it needs to install packages.
+Ansible offers the ability to become another user (such as root) to address this, and Vagrant lets us tap into this (or any "ansible-playbook" command setting) through its shared Ansible options.
+These options let us set inventory files, define Ansible Galaxy settings, and more, including setting the "become" user.
+Example:
+  app.vm.provision "ansible_local" do |ansible|
+    ansible.playbook = "playbooks/node.yml"
+    ansible.become = true
+    ansible.become_user = "root"
+  end
+
+ANSIBLE PROVISIONER OPTIONS:
+ask_become_pass: true | false. Ask password for "become" user.
+ask_vault_pass: true | false. Ask Vault password.
+force_remote_user: true | false. When set to true, run commands as "ansible" user.
+host_key_checking: true | false. Require SSH host key checking.
+raw_ssh_arg: ["arg1", "arg2"]. Pass in OpenSSH client options.
+
+ANSIBLE_LOCAL PROVISIONER OPTIONS:
+install: true | false. Autoinstall Ansible on guest.
+install_mode: "MODE". Install with package manager "default", "pip", or "pip_args_only".
+provisioning_path: "PATH". Path to store Ansible files on guest.
+tmp_path: "PATH". Path to store temporary Ansible files.
+
+COMMON (ANSIBLE & ANSIBLE_LOCAL) OPTIONS:
+become: true | false. Run commands as another user.
+become_user: "USER". Define which user to run commands as.
+config_file: "PATH". The location of the Ansible configuration file.
+extra_vars: ["key1=var1", "key2=var2", ...]. Pass in additional variables. Can be a file, script, or hash.
+groups: {app => ["app1", "app2"]}. Set inventory groups for inventory file.
+inventory_path: "PATH". Set inventory file, directory, or script.
+raw_arguments: ["arg1", "arg2", ...]. Set raw ansible-playbook arguments.
+verbose: true | false. Enable verbose logging.
+
+
+[PROVISIONING: CHEF PROVISIONER]
+Chef provides infrastructure automation wherein users create end-state "recipes" that configure fleets of servers.
+Servers can be assigned roles, and recipes can be applied on a by-role or by-server basis.
+Chef also offers robust development kit, ChefDK, that can also be installed in place of the Chef itself.
+
+Vagrant offers 4 different Chef provisioners:
+  - Chef Solo.
+  - Chef Zero.
+  - Chef Client.
+  - Chef Apply.
+
+As with the Ansible provisioner, the Chef provisioners all share a common set of options as well.
+These options focus on the uploading and managing of recipes, roles, and environments, as well as general Chef settings, such as logging and reporting.
+
+If you needed to port more of the Chef configurations over, such as roles and data bags, you would follow a similar process, creating "roles" and "data_bag" directories in the project directory.
+Then adding the related files in the same structure they would normally be uploaded on the Chef Infra Server itself.
+
+Unlike with Ansible, Vagrant Chef expects a certain directory structure to use.
+It expects you to store the recipes and cookbooks in an overall cookbooks directory.
+
+To create a method block for Chef, you use the following:
+  NAMESPACE.vm.provision "chef_solo" do |chef|
+  end
+You can use "add_recipe" option to add a recipe.
+To accept the license, you can use the "arguments" option.
+Example:
+  app.vm.provision "chef_solo" do |chef|
+    chef.add_recipe "nodejs"
+    chef.arguments = "--chef-license accept"
+  end
+
+Between Chef and the full ChefDK, Chef provides a robust, full-featured option for configuration management and infrastructure automation.
+
+CHEF SOLO:
+Chef Solo is a lightweight version of Chef, wherein the "chef-client" is used to execute recipes without a Chef server.
+This is the provisioner suggested for any users (specially new ones).
+Options:
+  - cookbooks_path: "PATH". Location of cookbook directory.
+  - data_bags_path: "PATH". Location of data bag directory.
+  - environments_path: "PATH". Location of environment directory.
+  - nodes_path: "PATH". Location of JSON node objects.
+  - recipe_url: "URL". The URL of an external recipe archive.
+  - roles_path: "PATH". Location of roles directory.
+  - synced_folder_type: TYPE. What protocol to use to sync files.
+
+CHEF ZERO:
+Chef Zero installs a lightweight version of the Chef Infra Server temporarily on the guest to execute recipes during provisioning.
+This is the next step up from the Chef Solo option, providing slightly more advanced functionality.
+Options:
+  - cookbooks_path: "PATH". Location of cookbook directory.
+  - data_bags_path: "PATH". Location of data bag directory.
+  - environments_path: "PATH". Location of environment directory.
+  - nodes_path: "PATH". Location of JSON node objects.
+  - recipe_url: "URL". The URL of an external recipe archive.
+  - roles_path: "PATH". Location of roles directory.
+  - synced_folder_type: TYPE. What protocol to use to sync files.
+
+CHEF CLIENT:
+The Chef Client provider should be used when you have an existing Chef Infra Server you want your Vagrant environment to connect to.
+The majority of its configuration is around creating this connection.
+Options:
+  - client_key_path: "PATH". Location of client public key.
+  - validation_client_name: "KEYNAME.pem". Name of the key.
+
+CHEF APPLY:
+Chef Apply applies single recipes to a host.
+The Chef Apply provisioner is suggested only for advanced Chef users.
+Options:
+  - recipe: "package[apache2]". Raw data of recipe.
+  - upload_path: "PATH". Temporary location of generated recipe on guest.
+
+COMMON OPTIONS:
+install: true | false. Attempt Chef install on guest.
+log_level: "LEVEL". Set log level for Chef.
+product: "PRODUCT". Whether to download Chef or ChefDK.
+version: "VERSION". The version of Chef to install.
+
+COMMON "RUNNER" OPTIONS:
+arguments: "ARGS". Additional arguments.
+encrypted_data_bag_secret_key_path: "PATH". Path to the key to unencrypt encrypted data bags.
+environment: "ENV". Set environment for guest(s).
+json: {"hash" => "key"}. Add custom node attributes.
+node_name: "HOSTNAME". Set name that Chef will know the guest by.
+verbose_loggin: true | false. Enable/Disable verbose Chef loggin.
+enable_reporting: true | false. Enable/Disable Chef reporting.
+
+
+[PROVISIONING: PUPPET PROVISIONER]
+Puppet is a configuration management solution built around the idea of a single "master" Puppet Server that enforces end-state descriptions, called "manifests", on a fleet of hosts.
+Manifests can be stored in modules to configure an entire application or service.
+
+Puppet is a configuration management and automation platform that leverages end-state configurations known as manifests (or collection of manifests called modules) to provision hosts.
+
+Vagrant offers 2 different Puppet provisioners:
+    - Puppet Apply.
+    - Puppet Agent.
+
+Once you configure the Vagrantfile to work with Puppet, Vagrant will look for a default manifest at "manifests/default.pp" and use this to make changes to the guests.
+
+Unlike previous provisioners, the Puppet Apply and Puppet Agent provisioners don't share a common options library.
+Additionally, Vagrant doesn't auto/install Puppet on the guest, the best option for now is to use the shell provisioner to install the "puppet" package, then use the Puppet Apply provisioner to do the rest.
+The provisioner knows to use the "default.pp" file, so the only additional configuration needed could be the "modules" directory.
+If we were using Hiera or other related options, we would need to do the same, defining the appropriate file or directory in the configuration.
+Example:
+    config.vm.provision "shell", inline: "sudo apt-get update && sudo apt-get install -y puppet"
+    config.vm.provision "puppet" do |puppet|
+        puppet.module_path = "modules"
+    end
+
+PUPPET APPLY:
+Puppet Apply runs Puppet modules and manifests against the guest without a master Puppet Server.
+Options:
+    - facter: {vagrant => true}. Set Facter facts.
+    - hiera_config_path: "PATH". Location of Hiera config on host.
+    - manifest_file: "PATH". Location of default manifest on host.
+    - manifest_path: "PATH". Location of manifests directory on host.
+    - module_path: "PATH". Location of modules directory on host.
+    - environment: "ENV". Set the environment.
+    - environment_path: "ENVPATH". Location of environment files on host.
+    - environment_variable: {key => "val"}. Set environment-specific variables.
+    - options: "OPTIONS". Set additional Puppet arguments.
+    - synced_folder_type: TYPE. Set synced file protocol.
+
+PUPPET AGENT:
+Puppet Agent set up a connection to a Puppet Server, which then applies modules and manifests based on its existing setup.
+Options:
+    - binary_path: "PATH". Location of Puppet binary on guest.
+    - client_cert_path: "PATH". Location of client certificate on host.
+    - client_private_key_path: "PATH". Location of private key on host.
+    - facter: {vagrant => true}. Set Facter facts.
+    - options: "OPTIONS". Set additional puppet agent options.
+    - puppet_node: "HOSTNAME". Set guest's node name.
+    - puppet_server: "HOSTNAME". Hostname of the Puppet Server.
+
+
+[PROVISIONING: SALT PROVISIONER]
+Salt is a configuration management, orchestration, and automation solution wherein users create end-state "formulas" that describe their desired system.
+These formulas can then be used in orchestration states, or Salt's "beacon" and "reactor" event-driven automation tool.
+Vagrant offers only a single Salt provisioner, but is capable of running both masterless Salt and using a Salt master.
+
+You would need to create a directory to store the formulas, pillar data, and configurations.
+Vagrant expects this to be a primary "salt" directory, with subdirectories for each system.
+Specifically, we want to add a "root" subdirectory that will store the formulas we normally keep in "/srv/salt".
+
+Since the Salt provisioner can run with or without a master, if we choose to run it masterless, we also need to provide an updated minion configuration, setting the minion to run masterless.
+The Salt provisioner will expect this to be in "salt/minion".
+Specifically, we need to set the "file_client" option to "local", ensuring the minion will not attempt to connect to a master.
+
+Unlike with previous provisioners, we need to sync the "salt/roots" directory to "/srv/salt" on the guest.
+
+To ensure Salt runs masterless, we need to set the "masterless" option.
+We also need to set "run_highstate" to "true" so our highstate is run upon provisioning.
+Example:
+    config.vm.provision "salt" do |salt|
+        salt.masterless = true
+        salt.run_highstate = true
+    end
+Otherwise, most of the configuration should be done by syncing the appropriate files and letting Salt do the work.
+
+SALT INSTALLATION:
+Options:
+    - install_master: true | false. Install the master. Not available on Windows.
+    - no_minion: true | false. Install the  minion. Not available on Windows.
+    - install_syndic: true | false. Install "salt-syndic". Not available on Windoes.
+    - version: "VERSION". The version of Salt to install.
+
+SALT MASTER:
+Options:
+    - master_config: "PATH". Location of minion config on host.
+    - master_key: "PATH". Location of minion key on host.
+
+SALT MINION:
+Options:
+    - minion_config: "PATH". Location of minion config on host.
+    - minion_key: "PATH". Location of minion key on host.
+    - minion_id: "HOSTNAME". Minion hostname.
+    - grains_config: "PATH". Location of grain configuration on host.
+    - masterless: true | false. Run with/without Salt master.
+
+SALT OTHER:
+Options:
+    - run_highstate: true | false. Whether to run highstate upon provisioning.
+    - pillar: {"key" => "val"}. Additional pillar data.
+    - orchestrations: ['orch.formula']. Orchestration state to run. Requires a master.
+    - log_level: "LOGLEVEL". Set the log level.
+    - verbose: true | false. Set verbose logging.
+
+
+[PROVISIONING: DOCKER PROVISIONER]
+Unlike the Docker provider, the Docker provisioner doesn't deploy containers on the host but rather configures Docker and manages containers on the guest.
+So if we need to develop not just the application but the larger server that supports it, we can.
+
+When used with a typical virtual machine guest, the Docker provisioner allows us to deploy containers, build images, and otherwise manage the Docker setup on the guest server.
+This gives the ability to take an infrastructure-level look at the applications and fleet, compared to the Docker provider, which only gives access to the container themselves, deployed on the workstation.
+
+At its most basic, the Docker provisioner can be used to simply install Docker on the guest, so if we added "app.vm.provision "docker"" to the "app" method block, Docker would automatically be installed on the guest.
+Example:
+    app.vm.provision "docker" do |docker|
+    end
+We then have the option to go on to specify an image or images, but since we want to build an image, we're instead going to look not at the "images" option but "build_image", which will build an image based on a provided Dockerfile.
+Example:
+    app.vm.provision "docker" do |docker|
+      docker.build_image "/var/www/app"
+    end
+While this builds the image,  it doesn't deploy the container itself.
+To deploy the container, we need to know the container name, you need to use "args" option alongside "build_image" to specify additional parameters.
+Then use the app tag within the "run" parameter to launch the container.
+Example:
+    app.vm.provision "docker" do |docker|
+      docker.build_image "/var/www/app", args: "-t app"
+      docker.run "app", args: "-p 8080:8080"
+    end
+
+DOCKER OVERALL:
+Options:
+    - images: ["img1", "img2"]. Docker images to pull.
+    - pull_images: ["img1", "img2"]. Docker images to pull. Same as "images" option.
+    - post_install_provisioner "prov" do |prov|
+      end                                        # Add post-Docker-installation provisioning.
+    - run: "CONTAINER". Launch a container.
+    - build_image: "PATH". Build image based on Dockerfile.
+
+DOCKER.RUN:
+Options:
+    - image: "IMAGE". Image to base the container on.
+    - cmd: "cmd to run -a". Command to run within the container.
+    - args: "-p 8080:8080". Additional docker run arguments.
+    - daemonize: true | false. Set Docker to run as a daemon.
+    - auto_assign_name: true | false. Automatically supply container name.
+    - restart: true | false. Container restart policy.
+
+DOCKER.BUILD_IMAGE:
+Options:
+    - args: "-t name". Provide additional docker build arguments.
+
+
+[BOXES]
+Vagrant boxes are the package format for Vagrant environments. You can find base boxes at app.vagrantup.com, and to pull in a box, you need to run the "vagrant box add" command and provide the name of the box.
+Example:
+    vagrant box add ubuntu/bionic64
+
+To list the boxes currently download on the system, use:
+    vagrant box list
+
+When you need to know if a box needs an update. You can check that with the command:
+    vagrant box outdated
+
+To update a box, you use:
+    vagrant box update
+Note you'll need to destroy and re-provision any guests you have using the updated box for the changes to take effect on true environments.
+
+To remove any unneeded, older version of a box, you use:
+    vagrant box prune
+
+To remove a box entirely, you use:
+    vagrant box remove <BOX>
+
+[BOXES: THE BOX FILE]
+A Vagrant box file (which is packaged as "PACKAGENAME.box") generally comprises 3 components:
+    - The box file.
+    - The metadata.
+    - The box information.
+
+BOX FILE:
+The box file is a compressed (tar, gzip, zip, etc) file containing the base image specific to the desired provider.
+Vagrant doesn't handle this file directly, once packaged (instead it's passed to the provider itself).
+
+METADATA:
+The metadata comprises a JSON-formatted documents that contains the name of the box, it's descriptions, the version, available providers, and any box URL(s).
+
+BOX INFORMATION:
+The optional box information contains output used during a "vagrant box list -i". However, this is rarely used.
+
+
+[BOXES: PACKAGING AN EXISTING MACHINE]
+When a base box is only missing a few tools or features, instead of creating a new one from scratch, it can be more efficient to alter and repackage an existing one via the "vagrant package" command.
+Example:
+    vagrant box add puppet.box --name puppet
+
+EXAMPLE OF REPACKAGING:
+Create your new environment directory.
+    mkdir puppet-box && cd puppet-box
+
+Initialize an environment using the "ubuntu/bionic64" image.
+A shortcut to generating this particular Vagrantfile is to specify the box in the "vagrant init" command itself.
+    vagrant init ubuntu/bionic64
+
+Run a "vagrant up" to run the environment.
+    vagrant up
+
+Log in to the host via SSH.
+    vagrant ssh
+
+Perform the needed actions inside the guest. In this case, install Puppet from PuppetLabs Puppet 6 repository.
+    wget https://apt.puppetlabs.com/puppet6-release-bionic.deb
+    sudo dpkg -i puppet6-release-bionic.deb
+    sudo apt-get update && sudo apt-get install -y puppet agent
+And exit the guest.
+
+Package the existing VirtualBox virtual machine automatically.
+    vagrant package --output puppet.box
+In case you need to package it with a Vagrantfile or metadata information, you can use the "--vagrantfile" and "--include" options respectively.
+
+Add the newly created box.
+vagrant box add puppet.box --name puppet.
+
+To test it, destroy the existing box, update the Vagrantfile, and then redeploy the environment.
+    vagrant destroy
+    vim Vagrantfile
+
+        Vagrant.configure("2") do |config|
+          config.vm.box = "puppet"
+        end
+
+    vagrant up
+
+Check your changes are there on the new guest.
+    vagrant ssh
+    puppet --version.
+
+
+[BOXES: CREATING A BASE BOX]
+In instances where the base boxes provided in the Vagrant box repository are not acceptable, we can always create our own custom base boxes.
+This process will be different for every provider, but there are some general commonalities across all options.
+
+Most providers, including VirtualBox, allow users to set the memory size in the Vagrantfile.
+Because of this, it's best to start small so users experience minimal impact when they use the default box.
+512MB is the recommended setting.
+
+PROCESS OF CREATIING A BASE BOX:
+VM configuration:
+    - Low default memory (512 recommended).
+    - Dynamically allocated hard disk space.
+    - Disable peripherals.
+
+Set root user's password to default one "vagrant".
+
+Configure vagrant user:
+    - set password to "vagrant".
+    - Enable passwordless sudo.
+    - Disable any require tty settings.
+    - Use Vagrant public key:
+        su - vagrant
+        mkdir .ssh
+        wget https://raw.githubusercontent.com/hashicorp/vagrant/master/keys/vagrant.pub
+        mv vagrant.pub .ssh/authorized_keys
+        sudo chmod 700 .ssh
+        sudo chmod 600 .ssh/authorized_keys
+
+Back in your project directory, create the box metadata by adding at least the provider in the "metadata.json" file:
+    {
+        "provider": "virtualbox"
+    }
+
+Create a Vagrantfile to package with the box that contains the MAC address for the VM and syncs the environment directory to "/vagrant" on the guest.
+    vim Vagrantfile
+
+        Vagrant.configure("2") do |config|
+          config.vm.base_mac = "080027E5E466"
+          config.vm.synced_folder ".", "/vagrant"
+        end
+
+Package the VM, metadata, and Vagrantfile with the "vagrant package" command.
+Note we need to specify that "name" of the VM in VirtualBox when we use the "--base" option to generate a base box.
+    vagrant package --output debian.box --base DebianBox --include metadata.json --vagrantfile Vagrantfile
+
+You will get a package in your working directory. To add it to Vagrant, you need to run "vagrant box add".
+    vagrant box add debian.box --name Debian-Test-Box
+
+Test out the new box by creating a new Vagrant environment with it.
+    mkdir debian-box-test && cd debian-box-test
+    vagrant init Debian-Test-Box && vagrant up
+
+Log in to the new guest via SSH to validate.
+    vagrant ssh
+
+
+[VAGRANT SHARE]
+While sharing with a greater public network can be effective when sharing among local teams, there may be times when you need to share with a greater public.
+Vagrant Share allows users to share their environment with the grater world.
+
+Vagrant Share leverages "ngrok", which exposes private networks to the public internet through the use of secure tunnels.
+ngrok is an enterprise solution, but free users can have one active tunnel at a time.
+
+Vagrant Share provides the HTTP, SSH, and "general" sharing, each with its own set of benefits and drawbacks.
+
+HTTP sharing allows users to access to you host via URL generated by ngrok, and anyone using this URL can access the HTTP endpoint(s) of your guest so longs as there is a designated forwarded port.
+Vagrant is not required by anyone accessing your environment via this URL.
+
+SSH sharing allows SSH access to the actual guest through the "vagrant connect --ssh" command using a public key generated during the share process.
+
+If we want to provide access to an expose port that is neither HTTP(s) or SSH, we can use "general" sharing via the "vagrant connect" command itself.
+This allows users to access to your guest as though it were another computer on a local area network.
+
+Vagrant Shares comes with its own set of concerns, however, while ngrok provides end-to-end TLS for non-HTTP connections and uses encrypted SSH keys, you are still providing global access to a guest using most likely default Vagrant keys.
+As such, when using Vagrant Share, security through obscurity is considered the best practice. So only provide the links or connection information to those who absolutely need it.
+
+Finally, this section requires a bit of a caveat, as of the most recent release of ngrok, Vagrant Share is partially broken.
+
+TO START WORKING WITH VAGRANT SHARE:
+You need to create an ngrok account in https://dashboard.ngrok.com/signup.
+Install ngrok by unzipping the file and moving the binary to the appropriate location.
+Add the authorization token provided by ngrok on their website:
+    ngrok authtoken TOKEN
+Install the "vagrant-share" plugin.
+    vagrant plugin install vagrant-share
+Remove vbguest, which currently conflicts with Vagrant Share.
+    vagrant plugin uninstall vagrant-vbguest
+
+
+[VAGRANT SHARE: HTTP SHARING]
+The default Vagrant Share mode, HTTP sharing creates a publicly accessible URL endpoint to the HTTP(S) server.
+Allowing even non-Vagrant users access to the guest's web server.
+Be sure to use CTRL+C to quit when finishing sharing.
+  vagrant share --http | --https
+Note https is locked via a pay wall.
+
+
+[VAGRANT SHARE: SSH SHARING]
+Less secure than HTTP sharing, SSH sharing lets public users access the Vagrant guest via an automatically added public key whose private key is shared with users we wish to work with.
+This key is also password protected with a password set by the environment's creator.
+
+To share an environment with SSH, you do:
+  vagrant share --ssh
+
+However, note that output is currently broken at this time.
+Were this working, we would be granted a list of keywords we could then use to connect via the "vagrant connect" command.
+  vagrant connect --ssh word1_word2:word3_word4
+We would then be able to log in using the private key and password provided when we generated the share.
+
+
+[VAGRANT SHARE: VAGRANT CONNECT]
+If you need to share a port outside of the SSH or HTTP protocol, we can use the "vagrant share --full" options.
+  vagrant share --full
+  This will expose all ports to users who connect via the "vagrant connect" command.
+
+Unlike when connecting with SSH, however, vagrant connect won't drop you directly into the guest.
+Instead, an IP address should be provided that we can use to connect to the host at any port using whatever method we require.
+
+This is the least secure option when working with Vagrant share.
+
+
+[ADVANCED VAGRANT: WINDOWS CONSIDERATIONS]
+Windows users (either as the host or the guest) may find Vagrant is slightly more difficult to wrangle than *nix users.
+If planning on using Windows, beyond the considerations mentioned in the video, you may also wish to familiarize yourself with the following Vagrantfile and Vagrant CLI options.
+
+Users of Windows hosts may need to adjust SSH connection information as needed.
+For this, we have both the "config.vm.winrm" and "config.vm.winssh" options, which configures access to the guest using either WinRM or the native Windows OpenSSH client, respectively.
+  - config.vm.winrm:  Sets configuration to access guest over WinRM.
+                      Can set password, host, port, username, timeout, and retry settings.
+  - config.vm.winssh: Sets up native Windows OpenSSH use.
+                      Can set default shell, agent, forwarding configurations, keep alive, etc.
+
+If using a Windows guest, there are two additional CLI options you may want to consider:
+  - vagrant powershell. Will open up a PowerShell prompt in which we can then use PowerShell commands.
+  - vagrant rdp. Starts an RDP client on the guest, letting us connect via a remote desktop session.
+
+Windows users will also want to pay attention to any providers and plugins they use in the event any configuration settings vary for the OS.
+
+
+[ADVANCED VAGRANT]
+VAGRANT PUSH:
+Vagrant Push lets users upload their applications to a remote location, such as FTP or Heroku, which are the default options.
+
+MACHINE TRIGGERS:
+Additional functionality to be run before or after certain "vagrant" commands.
+For example, if you want to ensure you preserve needed logs and results before a "vagrant destroy", we can add a trigger to ensure the files are properly backed up to the localhost before that "destroy" command is run (without having to actually run anything but "vagrant destroy").
+
+PLUGIN DEVELOPMENT:
+If you know Ruby or are aching to learn more, you can write your own Vagrant plugins using Ruby and packaged with RubyGems.
+HashiCorp provides a pretty good development guide to get you started and covers a number of use cases wherein you'll want to write additional plugins.
+  https://www.vagrantup.com/docs/plugins/development-basics.html
+
+
+
+----------------------------------------------- MISCELLANEOUS -----------------------------------------------
+[COMMANDS]
+GENERAL:
+vagrant --version                       # Display Vagrant version.
+
+PLUGINS:
+vagrant plugin install <PLUGIN>         # Install a plugin.
+vagrant plugin list                     # List installed plugins.
+vagrant plugin update <PLUGIN>          # Updates a plugins to its latest version.
+vagrant plugin repair                   # Searches for failing plugins and try to repair them.
+vagrant plugin license <LICENSE-FILE>   # Adds required license information.
+vagrant plugin uninstall <PLUGIN>       # Removes the plugin from Vagrant.
+vagrant plugin expunge                  # Removes all plugins, dependencies, and metadata from the host.
+vagrant plugin expunge --reinstall      # Re-installs all installed plugins.
+
+ACCESSING/MANAGING THE VM:
+vagrant ssh-config                      # When run inside project directory, it displays virtual machine's ssh information.
+vagrant ssh [VM]                        # Allows you to access the virtual machine.
+vagrant status [VM]                     # Displays the status of the virtual machine.
+vagrant global-status                   # Displays the status of all virtual machines on the system.
+vagrant global-status --prune           # Displays the status of all virtual machines on the system. More accurate since it prunes old entries.
+vagrant halt                            # Gracefully shutdown a virtual machines. Run it inside project directory.
+vagrant up                              # Can also be used to start the environment's virtual machines. Run it inside project directory.
+vagrant suspend                         # Suspends virtual machines. Run it inside project directory.
+vagrant resume                          # Resume a suspended virtual machine. Run it inside project directory.
+vagrant reload                          # Reboot a virtual machine. Run it inside project directory.
+vagrant destroy                         # Destroy the environment's virtual machines. Run it inside project directory.
+
+VAGRANT FILE:
+vagrant init                            # Generates a Vagrantfile.
+vagrant validate                        # Validates the syntax of the Vagrantfile.
+
+FOLDER SYNCING:
+vagrant upload <SOURCE> <DEST> [HOSTNAME] # Upload files/dirs from host system to guest system.
+vagrant rsync                             # Manually updates the rsync method in folder syncing.
+vagrant rsync-reload                      # Enables constant sync between host and guest. Only effective if rsync__auto is enabled in config.vm.synced_folder config directive.
+
+NETWORKING:
+vagrant port                              # Display the forwarded ports.
+
+PROVISIONING:
+vagrant up|reload --provision             # Force provision.
+
+BOXES:
+vagrant box add ubuntu/bionic64         # Pulls down the a ubuntu bionic box.
+vagrant box list                        # List the boxes downloaded on the system.
+vagrant box outdated                    # Display the outdated installed boxes on the system.
+vagrant box update                      # Update a box.
+vagrant box prune                       # Removes any outdated versions of a box installed on the system.
+vagrant box remove <BOX>                # Remove a box.
+vagrant package --output puppet.box     # Package an existing guest from current environment.
+
+SHARING:
+vagrant share --http | --https          # Http(s) sharing.
+vagrant share --ssh                     # Share the environment with ssh.
+vagrant share --connect                 # Allows you to connect to the shared environment.
+vagrant share --full                    # Expose all ports to users who connect via the "vagrant connect" command.
+
+[CONFIGURATION DIRECTIVES]
+config.vm.box                           # Configures the box to use.
+config.vm.synced_folder                 # Configures folder sharing.
+config.vm.network                       # Configures networking.
+config.vm.define                        # Define a machine block.
+app.vm.provision                        # Config directive for provisioning.
+
+
+[FILES & DIRECTORIES]
+FILES:
+~/.vagrant.d/Vagrantfile                                    # File considered by vagrant up command to create the merged Vagrantfile. Universal settings should be here.
+/projectDir/.vagrant/machines/HOSTNAME/PROVIDER/private_key # Virtual Machine default private key.
+
+DIRECTORIES:
+/projectDir/.vagrant/                   # Directory that contains the VM SSH key information.
