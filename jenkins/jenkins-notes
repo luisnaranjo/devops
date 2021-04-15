@@ -1,0 +1,702 @@
+----------------------------------------------- JENKINS FUNDAMENTALS -----------------------------------------------
+[CI/CD PRINCIPLES & PRACTICES -- CI/CD]
+CONTINUOUS INTEGRATION (CI):
+Continuous integration (CI) is the development practice of frequently merging code changes done by developers.
+Continuous integration (CI) is a critical part of any DevOps pipeline.
+Code is merged constantly throughout the day.
+Automated tests are executed to verify the build.
+Rinse and repeat.
+
+How does it looks like:
+Usually a CI server is involved.
+    - Jenkins.
+    - Hudson.
+    - CircleCI.
+A developer commits a code change.
+The CI server sees the change and automatically performs the build.
+Automated tests are executed against the build.
+Developers are notified if the build fails.
+
+Why do continuous integration:
+Early detection of certain types of bugs.
+Eliminate the scramble to integrate just before a big release.
+Makes frequent releases possible.
+Makes continuous testing possible.
+Encourages good coding practices.
+
+CONTINUOUS DELIVERY (CD):
+Continuous delivery (CD) is the practice of continuously maintaining code in a deployable state. Code is always in a deployable state.
+Most of the time you can use the terms continuous delivery and continuous deployment interchangeably.
+
+
+[CI/CD PRINCIPLES & PRACTICES -- CONTINUOUS DEPLOYMENT]
+Continuous deployment is the practice of frequently deploying small code changes to production. Code is always in a deployable state.
+Code is deployed to production frequently. Deploying code to production multiple times a day is common.
+Deployments to production are routine and commonplace.
+
+Continuous Deployment takes the code that you have created through the CI/CD process and automates the deployment step.
+    - Infrastructure: The infrastructure should support automated deployments.
+    - Checkpoints: Automated deployment strategies often have checkpoints that allow verification.
+    - Smoke testing: Deployment testing should be performed as soon as possible to ensure success.
+    - Roll back: The infrastructure should support automated deployments.
+
+WHAT DOES CONTINUOUS DELIVERY & DEPLOYMENT LOOK LIKE:
+Code goes through a series of stages:
+    - Automated builds.
+    - Automated testing.
+    - Manual acceptance testing (QA).
+The result is a deployable artifact or package.
+Deployments to production is automated.
+The deploy can be rolled back using an automated process.
+
+WHY DO CONTINUOUS DELIVERY AND DEPLOYMENT:
+Faster time-to-market.
+Fewer problems caused by the deployment process.
+Lower risk.
+Reliable rollbacks.
+Fearless deployments.
+
+
+[CI/CD PRINCIPLES & PRACTICES -- TEST DRIVEN DEVELOPMENT]
+In Test Driven Development (or TDD), test are written first. Usually these are unit tests that satisfy software requirements.
+Then code is written to make the tests pass.
+
+TEST TYPES:
+In addition to unit testing, there are other test types that are external to the developer. These are used to validate the end product.
+
+Smoke tests:
+This is a quick test to ensure that the most important functions of a build are working, or that the build is stable.
+
+Functional tests:
+Does it do what is supposed to do?
+
+Acceptance testing:
+Does the end product meet the requirements that are outlined in the design document? Is the software acceptable to the end user?
+
+Unit tests:
+This is the testing of individual parts or units of the software. A unit is the smallest testable part of the software.
+
+
+[JENKINS INSTALLATION -- RUNNING JENKINS WAR FILE]
+You can run Jenkins using the .war file instead of running it as a OS service.
+For this you would need to perform the next steps:
+
+Install pre-requisites (java runtime package):
+sudo apt-get update && sudo apt-get install openjdk-8-jre
+
+Download the Jenkins WAR file:
+wget http://mirrors.jenkins.io/war-stable/latest/jenkins.war
+
+Execute the WAR file via java command:
+java -jar jenkins.war --httpPort=80 --prefix=/dashboard
+
+
+[JENKINS INSTALLATION -- VIA SYSTEM PACKAGE MANAGER (AS A DAEMON)]
+Install the repository.
+    wget -O /etc/yum.repos.d/jenkins.repo http://pkg.jenkins-ci.org/redhat/jenkins.repo
+    rpm --import https://jenkins-ci.org/redhat/jenkins-ci.org.key
+
+Install the Java and Jenkins packages.
+    yum install -y java
+    yum install -y jenkins
+
+Start the Jenkins service (for systemd systems use 'systemctl start jenkins.service').
+    service jenkins start
+
+Enable the Jenkins service at boot (for systemd systems, you can use "systemctl enable jenkins" command).
+    chkconfig jenkins
+
+Get the admin password.
+    cat /var/lib/jenkins/secrets/initialAdminPassword
+
+INSTALL SUGGESTED PLUGINS:
+This provides a curated list of plugins. These plugins provide the "standard" features expected of a default installation.
+No intervention is required. Simply select "install suggested plugins" and wait for installation to complete.
+Plugins can always be added/removed form the plugins manager in the Jenkins GUI.
+
+SELECT PLUGINS TO INSTALL:
+This provides a list of plugins so that you can choose which to install. Unnecessary plugins for your installation can be excluded.
+Plugins can be always be added/removed from the plugins manager in the Jenkins GUI.
+
+
+[JENKINS INSTALLATION -- ALTERNATE CONFIGURATIONS]
+DOCKER CONTAINER:
+The Jenkins Master can be run in a docker container. This process consists of installing docker and then pulling the Jenkins container.
+Build Agent containers can also be provisioned.
+
+ALTERNATE OS:
+Jenkins can run anywhere that Java will run:
+    - Windows.
+    - Linux.
+    - MacOS.
+    - Solaris.
+    - Etc.
+Jenkins can be containerized and run in cloud environments.
+
+JENKINS X:
+Jenkins X leverages Kubernetes and containers to create build environments as needed, and on the fly.
+This is not specifically a Jenkins installation., but is a way of configuring Jenkins so that it operates in a "cloud-native" fashion.
+
+
+[JENKINS GUI]
+BUILDS / JOB STATUS:
+This is the are where you will see the current status of builds/jobs that have been run.
+
+MENU:
+This is the location where configuration and view options will be listed. From here you can navigate to other pages where additional settings are available.
+When changing to one of the items in this list a "breadcrumb" trail will be created showing your location relative to this starting menu.
+
+BUILD QUEUE:
+In this area you will see the current build queue. Jobs that are running, or will run, are listed here.
+
+EXECUTOR STATUS:
+In this area you will see the number and status of the build executors. It's the number of available build pipelines on each build agent.
+
+SYSTEM CONFIGURATION:
+The system configuration settings can be accessed under the label "Manage Jenkins" in the menu. Here you can make changes to build tools and the underlying system, view logs, and access the CLI.
+User settings are not located under this heading. They are in another location in the "Menu".
+
+JOB CONFIGURATION:
+Depending on the job type that is selected, this screen is used to configure the job. Tabs along the top correspond to sections in the job's configuration.
+If you are using a Jenkinsfile then this screen is mostly overridden by the contents of the Jenkinsfile.
+
+
+[JENKINS PLUGINS]
+MANAGING PLUGINS:
+The Plugin Manager is available from the "Manage Jenkins" menu. It's used to install, update, and delete plugins on the system.
+Tabs across the top are used to see updates, locate available plugins, manage installed plugins, and perform advanced operations such as install plugins that are otherwise not available in the normal way.
+
+UPDATING PLUGINS:
+Plugins which are managed by the Plugin Manager (plugins that were installed via the Available tab) that have been updated since installation will show up in the "Updates" tab.
+From here you can update a managed plugin by selecting the plugin and then selecting the appropriate action. Plugins can also be downgraded to a previous version.
+
+ADDING PLUGINS:
+The "Available" tab can be used to install managed plugins. Using the filter we can look for a specific plugin. Plugins are separated by categories.
+Under "Advanced" tab you will find the "Upload Plugin" option. This can be used to upload plugins that are not available in the normal Jenkins repository.
+In addition, you can configure an alternate update site. This allows you to manage your own plugins on an internal site.
+
+You can also add a plugin by adding the file in the server under the directory /var/lib/jenkins/plugins. Make sure the file is owned by the user "jenkins".
+You would need to restart Jenkins in order to make effect.
+NOTE: You may need to manually correct dependencies if needed.
+
+
+[FREESTYLE JOBS -- BASIC JOB STRUCTURE]
+GENERAL:
+This tab contains the items that prep the build, such as:
+    - Build retention policy.
+    - Build promotion.
+    - Build parameters.
+    - Throttling settings.
+Most of the items in this section are related to prebuild activities that are not specifically part of the running of the build.
+
+SOURCE CODE MANAGEMENT:
+This tab contains the settings that are related to your source code management system. This can be Git, Subversion, Mercurial, or any other system that has a compatible plugin.
+This section provides a location for job-specific repository information to be provided.
+
+BUILD TRIGGERS:
+This tab is the location for configuring build triggers. Triggers provide the ability to start jobs remotely, after another job is finished building, using Git hook (after a commit to SCM) or by polling SCM for changes.
+
+BUILD ENVIRONMENT:
+This tab is used to configure the build environment. This includes setting environment variables, secrets, setting time stamps in the logs, and preconfiguring build tools such as Grade or ANT.
+
+BUILD:
+The steps defined here make up the build process. This can be the invocation of a build tool, or running a shell script based on the available environment that was previously configured.
+
+POST-BUILD ACTIONS:
+This is the section where processes that take place after the build are configured. This includes fingerprinting and archiving of build artifacts, Git commits, email notifications, and build workspace retention.
+
+
+[FREESTYLE JOBS -- PARAMETERS]
+Parameters are arguments that are passed to jobs when they are built. Think of these as command-line arguments.
+There are several types of parameters that can be passed.
+
+
+[FREESTYLE JOBS -- NOTIFICATIONS]
+With automated build processes you need a way to be informed of what events are occurring in the Jenkins build processes. This is where notifications are important.
+You can, through the use of the relevant plugins, configure Jenkins to notify via e-mail, SMS, or internal messaging systems when events occur.
+Successful builds, failed builds, job triggers, etc. are some of the notable events that you may whish to be notified about.
+
+
+[AGENTS AND DISTRIBUTED BUILDS -- SETTING UP A BUILD AGENT]
+A build agent is used to provide more resources or specialized resources for a build.
+The term build agent can refer to the installed instance of Jenkins, on a second machine separate form the Jenkins master. Or as, is most often the case, it can refer to the entire remote "slave" machine.
+Like the Jenkins master, the build agent can be any machine that can run Java. If you have a build that has specific requirements, then you can use a build agent to run the build operation on a machine that is configured for the requirements of a specific build.
+
+ON THE JENKINS SLAVE:
+Install first Java.
+    yum install -y java
+
+Create the Jenkins user.
+    useradd -d /var/lib/jenkins jenkins
+    su - jenkins
+
+Create an authorized_keys file.
+    cd /var/lib/jenkins
+    mkdir .ssh && chmod 700 .ssh/
+    touch authorized_keys && chmod 600 authorized_keys
+
+Create a password for the user Jenkins.
+    passwd jenkins
+
+ON THE JENKINS MASTER:
+Switch to Jenkins user and generate an ssh key.
+    su - jenkins
+    ssh-keygen
+
+Copy the public ID from the Master to the Slave.
+    ssh-copy-id jenkins@slave.example.com
+
+ON THE JENKINS WEB INTERFACE:
+Add the Jenkins slave.
+    Manage Jenkins -> Manage Nodes -> New Node -> Add a name, Select 'Permanent Agent' -> Ok.
+
+Fulfill the needed fields.
+    - No. executions: 2
+    - Remote root directory: /var/lib/jenkins
+    - Labels if needed.
+    - Needed usage.
+    - Launch method: Launch slave agents using SSH.
+        * Host: slave hostname.
+        * Credentials. Select Jenkins -> Kind -> SSH Username with private key. -> User: Jenkins
+                                                                                -> Private key: From the Jenkins master ~/.ssh
+    - Host key verification strategy: Manually trusted key verification strategy.
+Click save.
+
+Make sure to mirror the same needed packages in the Master and the Slave (Packer, Git, etc).
+
+
+[AGENTS AND DISTRIBUTED BUILDS]
+DISTRIBUTING A BUILD:
+Distributing a build refers to the process of executing the build job remotely. This can be another machine that has the requirement environment to build a particular job, such as if a piece of software requires the Windows operating system.
+Build agents can use labels. These labels can be used to manage where a build is processed. This is done by applying a filter to the build location in the job configuration.
+Additional configuration needs to be applied, to determine what is done with the build results (where the product of the build is stored or archived, for example).
+
+MONITORING BUILD AGENTS:
+Jenkins performs health checks on remote build agents, and can indicate if the agent is able to process more build jobs. The monitoring plugin allows notifications to be configured for monitoring alerts.
+Health charts are available for the build agents via the monitoring plugin.
+
+
+[SCM, BUILD TOOLS & TEST REPORTS]
+LEVERAGING SCM IN BUILDS:
+Source Code Management (SCM) is the primary tool used for ensuring code changes are tracked and that the continuous delivery pipeline is kept intact.
+Code Collaboration via SCM is used to ensure that teams are not blocking other teams, and that integration processes are being performed on smaller units of code so that they take less time.
+Leveraging SCM to provide triggers for builds, either by polling or by webhooks, allows you to automate the process of building and testing via Jenkins.
+
+CONFIGURING BUILD TOOLS:
+A build tool is something that performs the steps necessary to build software in an automated fashion. Build tools must be configured to provide the environment they require to perform the build.
+Jenkins has the ability to automate some of the build tool configuration, and most tools are configured via settings exposed by the build tools plugin.
+
+TESTING AND TEST REPORTS:
+Testing in Test Driven Development (TDD) is the process of validating a unit of work in a piece of software. This is usually a function or method in the software.
+Jenkins is capable of running the software tests to validate that a piece of software is working before running the build.
+This automated testing system allows properly written code to have an assurance that it's as bug free as possible prior to being built and committed.
+Test reports are the product of a test suite, such as JUnit. These tools that are used for software testing produce text files that indicate the status of the software.
+Jenkins can interpret these text files and produce a visual representation of the test results.
+
+
+[UPSTREAM, DOWNSTREAM, AND TRIGGERS]
+ARTIFACTS:
+An artifact is the product of a build. It can be the completed software, or a shared library that is used by other builds.
+Each build produces its own artifacts and these need to be tracked to the build that produced them.
+
+FINGERPRINT:
+A fingerprint is the MD5 checksum of the artifact. The process of fingerprinting must be enabled in the job configuration, in the "Post-build Actions" section.
+
+LINKINS JOBS:
+In cases where the artifact from one build is used in another build, you may want to run the second build anytime that you change the first build.
+In an automated build environment, you would link these jobs together using a trigger, to ensure that the second build passes tests and can be built successfully.
+
+AUTOMATING JOBS VIA JENKINSFILE:
+This is a fundamental process in Continuous Integration/Continuous Delivery (CI/CD). Running jobs should be automatic, with no intervention from a user.
+All jobs should have a trigger that causes them to run a build. This trigger could be a commit to a source code repository, a linked job, or a reoccurring scheduled build.
+All parts of the job should be created in such a way that they don't require intervention. All testing and processing should be created in a way that allows it to be completed and, based on its state, determined if the build should continue.
+
+A Jenkinsfile allows you to automate the build process. The addition of the Jenkinsfile to the code repository for a project allows you to instruct Jenkins to scan the repository and discover the configuration for the build.
+This means that your project can leverage source code management to maintain its own configuration and benefit from change tracking.
+The Jenkinsfile describes pipelines.
+
+
+[JENKINS ON THE CLI]
+USING THE JENKINS API:
+The Jenkins API is a REST interface that is accessed by sending POST requests to a server's IP address and port. This can be leveraged to run jobs, copy or create jobs, and retrieve information about jobs in a programmatic fashion.
+This can be useful in external data retrieval for monitoring systems or creating status displays for the Jenkins instance.
+The Jenkins API can be configured to be more secure, and care should be taken to ensure that it doesn't expose a security issue when it's being used.
+This is one of the vectors that should be considered when creating a secure Jenkins environment.
+Examples:
+    curl -u USERNAME:APITOKEN http://JENKINSMASTERURL/job/JOBNAME/build                                     # Trigger a build on the specified job (project).
+    curl -u USERNAME:APITOKEN http://JENKINSMASTERURL/job/JOBNAME/config.xml                                # Retrieve the job's configuration in xml format.
+    curl -X POST -u USERNAME:APITOKEN http://JENKINSMASTERURL/job/JOBNAME/config.xml -d "@apiconfig.xml"    # Configure the job with the data specified in the xml passed.
+
+USING THE JENKINS CLI:
+The Jenkins command line interface (CLI) is provided via a java (jar) file that is included in the Jenkins package. This allows you to address the CLI for command execution form a program.
+This CLI is extensive, and additional commands can be added via plugins. The CLI by default uses the same port that is defined for JNLP agents.
+The CLI client can connect via HTTP, WebSockets, or SSH. This last option makes it important that SSH Keys are set for users that are responsible for administration of the Jenkins master.
+The CLI can perform the same tasks as the API, such as starting and creating builds, but it's more functional and extensive than the API.
+
+The CLI is provided as a jar file that is located in the jnlpJar directory on the Jenkins Master.
+The CLI also uses the API token that can be generated for your user form the user configuration section, under your user account on the master.
+
+
+
+----------------------------------------------- JENKINS PIPELINES -----------------------------------------------
+[JENKINS PIPELINES]
+A Jenkins pipeline or simply Pipeline, is a set of plugins that provide the functionality required to facilitate continuous delivery in Jenkins.
+This allows software to be taken from source code management (SCM) all the way to delivery, and allows the software to be maintained in a state in which it's ready to deploy.
+
+There are several advantages to using Pipelines for your workflow:
+    - They allow you to express your job as code, and this means that they can be maintained alongside the code in SCM.
+    - Pipelines are durable and can survive Jenkins restarts, either planned or unplanned.
+    - They can be paused to wait for input. This means that if processing requires direct approval it can be coded into the Pipeline.
+    - Pipelines can incorporate intelligent logic into job execution, which includes the use of conditionals and loops.
+    - They are extensible, allowing for custom extensions to the language in which they are written.
+
+THE BLUE OCEAN PIPELINES EDITOR:
+In the classical graphical user interface (Jenkins GUI), Pipelines can be defined in the Pipeline project type. This project type has an area in which the Pipeline code can be entered directly.
+In this instance, the resulting Jenkinsfile is stored on the Jenkins' master in the build's home directory.
+The classic GUI becomes more difficult to use once the Pipeline becomes more complicated, or very large with multiple stages and steps.
+
+The Blue Ocean editor is designed to give you a guided way to set up a Pipeline project.
+It ensures that you are connected to a Source Code Manager and then provides graphical steps that can be used to create, update, and produce builds for your project.
+If you aren't familiar with the structure of a Jenkinsfile, this is an excellent tool that can be used to learn more about the structure of a Pipeline.
+
+
+[SCRIPTED PIPELINES]
+Scripted Pipelines tend to follow an imperative model. This means that they describe how something should be accomplished. They are based on a programming language named Groovy.
+This provides a very versatile environment nd presents more flexibility and choice for when you want to have total control over the Pipeline.
+Scripted Pipelines are only limited by the Groovy programming language. A Scripted Pipeline is a fully-featured and extensible Groovy programming environment.
+
+
+[DECLARATIVE PIPELINES]
+A declarative Pipeline is not as concerned with how we get a result, but what the result is. This means that the available results are more limited.
+As such, Declarative Pipelines are less flexible but are simpler to write. In a Declarative Pipeline, you don't create the small steps in the process.
+Instead, you indicate what the desired result will be. In a Declarative Pipeline, you use the Pipeline DSL (Domain Specific Language), which specifies directives that the script executes.
+
+
+[GROOVY AND DSL]
+Groovy is a fully-featured scripting language that is a subset of Java. It can be used inside the steps of a Pipeline, allowing you to make your Pipeline flow.
+And it adds functionality to the Pipeline that you would not otherwise have access to. Groovy and the Scripted Pipeline were the original way that Pipeline in Jenkins was implemented.
+This created an issue in which there was a bit of a learning curve, and not all Pipelines require Groovy.
+
+Groovy can lead to more complicated Pipelines, and this was the reason for the Declarative Pipeline, which uses Domain Specific Language (DSL).
+DSL limits the choices that you have, and is very opinionated. This means that there is less to learn, and for simple Pipelines (that don't need error handling, for instance) DSL can be a better choice.
+
+
+[AUTOMATING PIPELINES]
+JENKINS FILE BASICS:
+Jenkins files are used inside of source code repositories to provide the configuration for a job.
+A Jenkins file is read from top to bottom and contains sections that indicate what configuration is contained in that section.
+A section is started with a keyword and then enclosed in brackets.
+
+Jenkins files and the configurations that they contain are intended to be versioned with the code that they build.
+Jenkins can be configured to "look" for this configuration in the repositories and use it to create builds.
+
+Usually, a Jenkins file is named 'Jenkinsfile' in the source code repository.
+
+PIPELINE TRIGGERS:
+A trigger is a process that causes a pipeline job to run. This is normally associated with a change in the code or a scheduled run of a build that kicks off a pipeline.
+
+SCM polling:
+SCM polling is when Jenkins is configured to check the Source Code Management solution on a schedule, and then run if the code has changed.
+
+WebHooks:
+A WebHook is an event that is generated by a commit in a repository that then notifies Jenkins that there has been a change. This event triggers a run of the pipeline job.
+
+Build schedule:
+A build schedule configures Jenkins to build the job at a specific time, regardless of the state of the source code.
+This doesn't require an external event or a change in code to trigger the pipeline build.
+
+MULTIBRANCH PIPELINE:
+In a multibranch pipeline, Jenkins is given a URL for a Source Code Management repository. Once it has access to the repository, it scans all of the repository's branches looking for Jenkinsfiles.
+For every branch that contains a Jenkinsfile, a job will be created. Upon initial creation, these jobs will run and the status of the job will be updated.
+
+
+[ADVANCE JENKINSFILES -- GLOBAL LIBRARIES]
+A Global Library/Shared Library is shared groovy code that can be used inside of Pipelines.
+
+Libraries that are configured at the top, or Global, level are considered trusted code and don't run in a sandbox. This code is available to all jobs on the system.
+Libraries that are configured at the 'folder' level are non-trusted code and run inside of a groovy sandbox. These libraries are only available to the folder for which they are configured.
+
+If a Library is configured to "Load implicitly", it's loaded automatically for every job that is in scope for the library (folder or global).
+If not, it must be loaded with the @Library() directive.
+
+
+[ADVANCE JENKINSFILES -- VARIABLES AND CREDENTIALS]
+VARIABLES:
+Variables can be used in Pipelines. Variables have a scope, meaning that they are only valid in the block in which they are declared.
+Variables that are declared at the top level are available to the entire pipeline.
+Example:
+    pipeline{
+        agent any
+
+        def globalvar = 'globalvalue'    # Global variable.
+        stages{
+            ...
+        }
+    }
+
+Variables that are declared at the stage level are available only within that stage.
+Example:
+    pipeline{
+        agent any
+        stages{
+            stage('local'){
+                def localvar = 'localvalue'     # Local variable.
+                steps{
+                    ...
+                }
+            }
+        }
+    }
+
+CREDENTIALS:
+Credentials are secrets that Jenkins will obfuscate so that they are not exposed in logs or Jenkinsfiles.
+Example:
+Code:
+    withCredentials([usernamePassword (credentialsId: 'someID', passwordVariable: 'upass', usernameVariable: 'uname')]){
+        echo "uname"
+        echo "upass"
+    }
+Output:
+    Started by user
+    Building in workspace /home/Jenkins/workspace/example
+    [example]$ /bin/sh -xe /tmp/hudson34534245234.sh
+    + echo ********
+    + echo ********
+    Finished: SUCCESS
+
+
+[ADVANCE JENKINSFILES -- DOCKER]
+DOCKER IN PIPELINES:
+Docker can be used in Pipelines as a build agent. This can be done to prevent software bloat on the build server.
+The dependencies are deployed in the container and then removed once the build completes.
+Example:
+    pipeline{
+        agent{
+            docker{
+                image: 'node:7-alpine'
+            }
+        }
+
+        stages{
+            stage('build'){
+                sh 'npm run build'
+                ...
+            }
+        }
+    }
+
+A Docker container image can also be the product of a Pipeline. This allows Jenkins to be the deployment tool for Kubernetes, as well as production Docker Swarms.
+Example:
+    ...
+    stage('build_image'){
+        steps{
+            script{
+                docker.build REGISTRY + IMAGE_NAME
+            }
+        }
+    }
+
+
+
+----------------------------------------------- JENKINS ADMINISTRATION -----------------------------------------------
+[SECURITY]
+Jenkins security, by default, is much like the Wild West was: anything goes. Logged in users can do anything and all users are administrators.
+
+AUTHENTICATION VS AUTHORIZATION:
+Authentication:
+    - Verifies who you are.
+    - Can be LDAP.
+    - Can be Active Directory.
+    - Default is Jenkins onboard DB.
+
+Authorization:
+    - It verifies what you can do.
+    - What roles do you have?
+    - What groups are you a member of?
+    - What are your user permissions?
+
+AUTHENTICATION:
+A security real determines where authentication occurs.
+Jenkins security realms (Availability depends on installed plugins):
+    - LDAP/Active Directory: This is used in larger organizations where a central directory is used for user authentication or single sign-on.
+    - Servlet Container: This uses the underlying container in which Jenkins is running to apply permissions. (Jetty).
+    - Underlying OS (master): This uses the OS on which Jenkins is installed to determine identity.
+    - Jenkins own database: This is a database of users that is a part of Jenkins. It's the default.
+
+AUTHENTICATION:
+Anyone Can Do Anything:
+Everyone has full control, even users that are not logged in. This is similar to "logged in users can do anything", but allows anonymous rights as well.
+
+Legacy mode:
+Admins can do anything, but logged in users without admin rights are read-only users.
+
+Matrix-Based Security:
+This allows granular control as opposed to all or nothing. This can be extended to allow ACLs on each project.
+
+
+[MATRIX-BASED SECURITY]
+There are 2 types of Matrixes in Jenkins:
+    - Matrix-based security: Matrix-based security presents a table of permissions. Applies to Jenkins in general.
+    - Project-Based Matrix Security: This is similar to Matrix-based security, but it presents Project Level ACLs (Access Control Lists).
+NOTE: There is no "deny" option for Authorization in Jenkins, so be careful of what "allow" permissions you provide to users. For example, providing admin permission it will override any other not given permission.
+
+
+[FOLDERS]
+Projects can be logically sorted into folders.
+Depending on settings, permissions can be inherited from parents objects (enabled by default). This is important, since Jenkins permissions are a union of all permissions and there is no explicit deny.
+    Global permissions -> Folder permissions -> Project permissions.
+
+In order to work with folder permissions, you would need to enable it on Jenkins' Global Security. Same as with project permissions.
+
+
+[ROLES AND GROUPS]
+ROLES:
+Role-Based Access Control (RBAC) functionality can be added via a plugin (Role-based Authorization Strategy plugin).
+
+GROUPS:
+When Jenkins is using an external database that has group assignment, Jenkins can leverage that for its authorization strategy.
+
+
+[CREDENTIALS]
+CREDENTIAL TYPES:
+Credentials in Jenkins are provided by plugins.
+There are several types of credentials in Jenkins. Some processes require certain types of credentials.
+The most common are:
+    - Username with password.
+    - SSH username with private key.
+    - Secret text.
+
+CREDENTIALS SECURITY:
+Credentials are encrypted at rest on the master instance. Credentials used in jobs are only referenced by their GUID and the output is masked in the logs.
+
+
+[VIEWS]
+Views can be used to logically group projects.
+Views are used to filter the information presented in the Jenkins dashboard. This can assist in more easily locating relevant projects and can be utilized by administrators to obfuscate projects to which a user doesn't have access.
+
+CONFIGURING VIEWS:
+View properties can be selected to provide only the required information to the user. Views can be created for a user, and then assigned as the user's default view.
+
+
+[AGENT ACCOUNTS]
+BASIC AGENTS:
+An agent is a worker that runs on a node.
+Most often the agent is run via a Master -> Agent connection. This type is initialized by the master, and receives updates from the agent. Most often this is over SSH.
+
+AGENT CONFIGURATION:
+Most often the agent is configured to mirror the master. The home directory, user account, and other configurations are all the same.
+It's possible, however, to configure accounts on the agents that are specific to that agent.
+
+AGENT -> MASTER:
+Agents located behind firewalls may not be accessible to the master.
+In some cases, the master may not have access to the agent. This can be due to firewalls, etc. This type of agent can be deployed via JNLP and it can report back to the master.
+This requires special configuration, as the master is not able to launch builds on these agents.
+
+AGENT -> MASTER SECURITY:
+Agent -> Master Access Controls. Agents are capable of running commands on the master. This can be due to plugins or archival processes.
+It's important that the permissions granted to agents be reviewed and configured so that there is not a security concern.
+
+
+[UPGRADING JENKINS]
+UPGRADE METHODS:
+Jenkins is run from a .war file, and the version of this file is the version of Jenkins.
+If Jenkins was installed via a package manager, it can be upgraded/updated via the package manager as well.
+If Jenkins was manually installed, or you want to run a version that is not in your package manager repo, you can manually update the war file.
+
+UPGRADE CONSIDERATIONS:
+Upgrading Jenkins can have an effect on plugins that are used in current projects. Some plugins may be deprecated or incompatible with the upgraded version of Jenkins.
+In some cases, the way that Jenkins stores data on disk changes. Updating to the new method can be destructive and not allow for a rollback of the upgrade.
+
+
+[BACKING UP JENKINS]
+Currently, there is not an active plugin project that will create a full backup of the Jenkins instance.
+However, if you want to create a backup for your configurations, there are many available plugins.
+
+USING PLUGINS:
+Jenkins have several backup plugins available in the Plugin Manager.
+These plugins can backup and restore your Jenkins installation, but keep in mind that some of these have not been updated in several years and are not well maintained.
+Always run test backups and restores.
+
+MANUAL BACKUP:
+By default, all of Jenkins content is located in "/var/lib/jenkins". This means that this directory is a good target for a cron job that runs a script to create a full backup of this directory.
+Since Jenkins has a cron functionality, you could also configure Jenkins project on the master that runs a script to back up the Jenkins files.
+
+
+[AGENTS]
+UPDATING AGENTS:
+Jenkins doesn't have a built-in system for Agent updates.
+Build Tools versions and installations on agents can be handled by plugins, but agent management is not something that Jenkins is able to manage.
+It may be advisable to implement a configuration management solution to handle the agents.
+
+DISPOSABLE AGENTS:
+In reality an agent should be fungible, meaning replaceable.
+If you take the view that agents should be deployed as code as needed, you can leverage technologies that allows you to automatically configure agents so that they are always up to date.
+
+
+[EMAIL NOTIFICATIONS]
+In a Continuous Delivery system, it's necessary to have prompt feedback on build status.
+Daily sanity check builds might be scheduled for after hours to allow larger builds to run with out impairing system resources.
+
+EMAIL PLUGINS:
+Jenkins has many available email plugins for use, depending on your needs. Email notifications can and should be included as part of all builds, even the successful builds.
+Different messages can be sent to committers who might have broken the build and subscribers who just need to know the build's status.
+
+
+[NOTIFICATION PLUGINS]
+Jenkins has integrations for almost all Enterprise messaging platforms.
+This allows almost instant notification of build status. This is also very important for Continuous Deployment scenarios when notification speed is a consideration.
+
+Once the plugin has been enabled and installed it will need to be configured for your specific use case.
+This might mean that the messaging user needs to be allowed to send messages, or that access needs to be provided to the messaging platform.
+
+
+[ALERTING ON STATUS]
+VISUAL ALERTS:
+Wall boards are effective ways to display status visually at a glance.
+
+AUDIO/VISUAL ALERTS:
+Jenkins also has plugins for more direct alert mechanisms.
+Through plugins Jenkins can provide audible alerts as well as triggers for visual indicators of build status.
+Status messages can be routed to devices that are capable of producing physical alerts.
+
+
+[LOGGING]
+Logging is an essential part of Jenkins administration, as it allows you to gain insight into the system operations when you are not immediately present.
+
+LOG TYPES:
+Jenkins System Log:
+The system log can be configured in the Jenkins interface, and provides information about the Jenkins installation itself.
+In this log you will see the Jenkins startup process as well as messages from the plugin manager and tools installers.
+Default location:
+        /var/log/jenkins.log
+
+Jenkins Build logs:
+Build logs, which are seen in the Jenkins UI as "console output", are the verbose processing output of a Jenkins build.
+These are stored in the folder with the build, and can be accessed at the following URL:
+    BUILD_URL/consoletext
+They can also be accessed via the file location noted below:
+    JENKINS_HOME/jobs/JOB_NAME/builds/BUILD_NUMBER/log
+
+
+
+----------------------------------------------- MISCELLANEOUS -----------------------------------------------
+[COMMANDS]
+JENKINS ON THE CLI ######################################################################################
+curl -u USERNAME:APITOKEN http://JENKINSMASTERURL/job/JOBNAME/build                                     # Trigger a build on the specified job (project).
+curl -u USERNAME:APITOKEN http://JENKINSMASTERURL/job/JOBNAME/config.xml                                # Retrieve the job's configuration in xml format.
+curl -X POST -u USERNAME:APITOKEN http://JENKINSMASTERURL/job/JOBNAME/config.xml -d "@apiconfig.xml"    # Configure the job with the data specified in the xml passed.
+
+
+[FILES & DIRECTORIES]
+FILES:
+Jenkinsfile                                         # Usual name for the automated Jenkins pipeline in the source code repository.
+/var/log/jenkins/jenkins.log                        # Default system log location.
+JENKINS_HOME/jobs/JOB_NAME/builds/BUILD_NUMBER/log  # Build-specific log
+
+DIRECTORIES:
+/var/lib/jenkins/plugins/               # Jenkins' plugin directory.
+/var/lib/jenkins/workspace/             # Default Jenkins directory for workspaces.
+/var/lib/jenkins/jobs/                  # Default Jenkins directory for jobs (Projects). This includes job configs and build artifacs.
+/var/lib/jenkins/jobs/JOBNAME/builds/   # Directory containing all build artifacts for each build execution ran in the specific job (project).
+
+[MISCELLANEOUS]
