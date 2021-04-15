@@ -1,0 +1,2 @@
+# Ignoring "misc" directory under any level of subdirectories.
+**/misc
