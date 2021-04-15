@@ -1,0 +1,16 @@
+# Example of implementing an init container.
+# This example will consists of an app container and an init container.
+# The init container will just halt the process 30 seconds before resuming.
+
+apiVersion: v1
+kind: Pod
+metadata:
+    name: init-container-pod
+spec:
+    containers:                 # App containers.
+    - name: nginx
+      image: nginx:1.19.1
+    initContainers:             # Init containers.
+    - name: delay
+      image: busybox
+      command: ['sleep', '30']

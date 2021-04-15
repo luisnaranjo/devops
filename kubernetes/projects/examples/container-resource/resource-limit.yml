@@ -1,0 +1,16 @@
+# Example of specifying container resources limits.
+# CPU: 250 units (out of 1000).
+# Memory: 128MB.
+
+apiVersion: v1
+kind: Pod
+metadata:
+    name: my-pod-resource-limit
+spec:
+    containers:
+    - name: busybox
+      image: busybox
+      resources:
+          limits:
+              cpu: "250m"
+              memory: "128Mi"

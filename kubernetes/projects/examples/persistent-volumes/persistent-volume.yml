@@ -1,0 +1,17 @@
+# Example of a Persistent Volume.
+# This PV will use the Storage Class "localdisk" with a Reclaim Policy of "Recycle".
+# This PV will storage the data in the host where the Pod will be located under "/var/output".
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: my-pv
+spec:
+    storageClassName: localdisk
+    persistentVolumeReclaimPolicy: Recycle
+    capacity:
+        storage: 1Gi
+    accessModes:
+    - ReadWriteOnce
+    hostPath:
+        path: /var/output

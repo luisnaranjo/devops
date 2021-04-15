@@ -1,0 +1,361 @@
+----------------------------------------------- INTRODUCTION -----------------------------------------------
+[KUBERNETES]
+Kubernetes is a tool for automated management of containerized applications, also known as a container orchestration tool.
+You can find plenty of information and documentation on Kubernetes at the official Kubernetes site:
+    https://kubernetes.io
+
+The end goal of Kubernetes is to automate your application infrastructure and make it easy to manage.
+
+
+[CONTAINERS]
+Kubernetes is all about managing containers.
+Containers wrap software in independent, portable packages, making it easy to quickly run software in a variety of environments.
+
+When you wrap your software in a container, you can quickly and easily run it almost anywhere.
+That makes containers great for automation.
+
+Containers are a bit like virtual machines, but they are smaller, lighter, and start up faster.
+This means that automation can move quickly and efficiently with containers.
+
+
+[ORCHESTRATION]
+With containers, you can run a variety of software components across a cluster of generic servers.
+This can help ensure high availability and make it easier to scale resources.
+
+This raises some questions:
+    - How can I ensure that multiple instances of a piece of software are spread across multiple servers for high availability?
+    - How can I deploy new code changes and roll them out across the entire cluster?
+    - How can I create new containers to handle additional load (scale up)?
+These kind of tasks can all be done manually, but that's just a lot of work.
+The answer is to use an orchestration tool to automate these kinds of management tasks. That's what kubernetes does.
+
+
+
+----------------------------------------------- BUILDING A CLUSTER -----------------------------------------------
+[KUBERNETES CLUSTER EXAMPLE]
+For having a Kubernetes cluster example you can use 3 servers.
+    - The Kube Master. This will be the master node of the cluster in which you have several components.
+        * Docker.
+        * Kubeadm
+        * Kubelet
+        * Kubectl
+        * Control Plane.
+    - Kube Node 1. A working node of the cluster, this will consists of some components.
+        * Docker.
+        * Kubeadm.
+        * Kubelet.
+        * Kubectl.
+    - Kube Node 2. Another working node of the cluster with same components as Kube Node 1.
+        * Docker.
+        * Kubeadm.
+        * Kubelet.
+        * Kubectl.
+
+DOCKER:
+The container runtime. By itself, Kubernetes doesn't provide a container runtime. It needs one in order to run containers.
+
+KUBEADM:
+kubeadm is an additional tool that simplifies the process of setting up a Kubernetes cluster.
+
+KUBELET:
+kubelet is an agent that manages the process of running containers on each node.
+
+KUBECTL:
+kubectl is the command tool that allows you to interact with the cluster.
+
+CONTROL PLANE:
+The control plane is a series of different services that form Kubernetes master structure that allows Kubernetes master to control the cluster.
+
+
+[INSTALLING DOCKER]
+Docker is the container runtime. A container runtime is the software that actually run the containers.
+Kubernetes supports several other containers runtimes (such as rkt and containerd).
+
+The first step in setting a new cluster is to install a container runtime such as Docker.
+
+EXAMPLE OF INSTALLATION IN UBUNTU:
+    # Add the Docker repository GPG key:
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+
+    # Add the Docker repository.
+    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+
+    # Reload the apt sources list.
+    sudo apt-get update
+
+    # Install Docker.
+    sudo apt-get install -y docker-ce=18.06.1~ce~3-0~ubuntu
+
+    # Prevent auto-updates for the Docker package.
+    sudo apt-mark hold docker-ce
+
+You can verify the installation by running:
+    sudo docker version
+
+
+[INSTALLING KUBEADM, KUBELET & KUBECTL]
+Next step is installing the Kubernetes components.
+
+KUBEADM:
+This is a tool which automates a large portion of the process of setting up a cluster.
+
+KUBELET:
+The essential component of Kubernetes that handles running containers on a node.
+Every server that will be running containers needs kubelet.
+
+KUBECTL:
+The command-line tool for interacting with the cluster once it is up.
+
+EXAMPLE OF INSTALLATION IN UBUNTU:
+    # Add the Google repository GPG key:
+    curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+
+    # Add the kubernetes repo list.
+    cat << EOF | sudo tee /etc/apt/sources.list.d/kubernetes.list
+    deb https://apt.kubernetes.io/ kubernetes-xenial main
+    EOF
+
+    # Reload the apt sources list.
+    sudo apt-get update
+
+    # Install the packages.
+    sudo apt-get install -y kubelet=1.15.7-00 kubeadm=1.15.7-00 kubectl=1.15.7-00
+
+    # Prevent auto-updates for the packages.
+    sudo apt-mark hold kubelet kubeadm kubectl
+
+You can verify installation by running:
+    kubeadm version
+
+
+
+[BOOTSTRAPING THE CLUSTER]
+Once you have all pre-requisites, you can now build the cluster.
+
+First you will need to initialize the cluster on the Kube Master server:
+    sudo kubeadm init --pod-network-cidr=10.244.0.0/16
+OPTIONS:
+    - --pod-network-cidr: This special setting is used for the "flannel" networking plugin.
+
+Set up "kubeconfig" for the local user on the Kube Master.
+This will allow you to use "kubectl" command when logged in to the master.
+    mkdir -p $HOME/.kube
+    sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+    sudo chown $(id -u): $(id -g) $HOME/.kube/config
+
+The "kubeadm init" command should have provided you a "kubeadm join" command.
+It will look something like this, with real values for CONTROLLER_IP, TOKEN, and HASH.
+    sudo kubeadm join CONTROLLER_IP:6443 --token TOKEN --discovery-token-ca-cert-hash HASH
+Copy the "kubeadm join" command from the Kube Master console and run it with "sudo" on both Kube Node 1 & Kube Node 2.
+
+Verify that the cluster is set up properly.
+From the Kube Master, get a list of nodes with "kubectl" command.
+    kubectl get nodes
+The output should display all 3 nodes (1 master and 2 worker nodes).
+It's expected that at this point they will have the "NotReady" status.
+
+
+[CONFIGURING NETWORKING WITH FLANNEL]
+Once Kubernetes cluster is set up, you would need to configure cluster networking in order to make the cluster fully functional.
+Kubernetes supports a variety of networking solutions to provide networking between containers.
+You can use Flannel for that.
+
+For networking to work, you will need to turn on "net.bridge.bridge-nf-call-iptables" on all of your cluster nodes.
+    echo "net.bridge.bridge-nf-call-iptables=1" | sudo tee -a /etc/sysctl.conf
+    sudo sysctl -p
+
+On the Kube Master, use kubectl to install Flannel using YAML template.
+    kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
+Verify that all the nodes now have the status of "Ready".
+    kubectl get nodes
+You should see all three of your servers listed, and all should have a STATUS of "Ready".
+It may take a few moments for all nodes to enter the "Ready" status.
+
+It's also a good idea to verify that the Flannel pods are up and running.
+By running the next command, you'll get a list of system pods.
+    kubectl get pods -n kube-system
+
+
+
+----------------------------------------------- BASIC KUBERNETES CONCEPTS -----------------------------------------------
+[CONTAINERS & PODS]
+Pods are the smallest and most basic building block of the Kubernetes model.
+A pod consists of one or more containers, storage resources, and a unique IP address in the Kubernetes cluster network.
+
+---------------------------------------------
+| NODE                                      |
+---------------------------------------------
+---------------------   ---------------------
+| POD (10.244.0.1)  |   | POD (10.244.0.2)  |
+---------------------   ---------------------
+-------------           -------------
+| CONTAINER |           | CONTAINER |
+-------------           -------------
+-------------
+| CONTAINER |
+-------------
+
+---------------------
+| NODE              |
+---------------------
+---------------------
+| POD (10.244.0.3)  |
+---------------------
+-------------
+| CONTAINER |
+-------------
+
+In order to run containers, Kubernetes schedules pods to run on servers in the cluster.
+When a pod is scheduled, the server will run the containers that are part of that pod.
+
+
+[CLUSTERING & NODES]
+Nodes are an essential part of the Kubernetes cluster.
+They are the machines your cluster's container workloads are executed.
+
+Kubernetes implements a clustered architecture. In a typical production environment, you will have multiple servers that are able to run your workloads (containers).
+These servers which actually run the containers are called "nodes".
+
+A Kubernetes cluster has one or more "control servers" which manage and control the cluster and host the "Kubernetes API".
+These control servers are usually separate from worker nodes, which run applications within the cluster.
+
+-----------------------------
+| CONTROLLER                |
+-----------------------------
+| Kubernetes API            |
+| Other control components  |
+-----------------------------
+
+-------------
+| WORKER    |
+-------------
+| Pod       |
+| Pod       |
+-------------
+
+
+[NETWORKING IN KUBERNETES]
+When using Kubernetes, it's important to understand how Kubernetes implements networking between pods (and services) in the cluster.
+The Kubernetes networking model involves creating a "virtual network" across the whole cluster.
+This means that every pod on the cluster has a unique IP address, and can communicate with any other pod in the cluster, even if that other pod is running on a different node.
+
+Kubernetes supports a variety of networking plugins that implement this model in various ways.
+
+
+[KUBERNETES ARCHITECTURE AND COMPONENTS]
+A Kubernetes cluster is made up of multiple individual components running on the various machines that are part of the cluster.
+With "kubeadm", many of the next components are run as pods within the cluster itself.
+
+CONTROL PLANE:
+The control plane components manage and control the cluster. The control plane is what conforms the kube master. And so, this is conformed by the next 4 components:
+    - etcd. It provides distributed, synchronized data storage for the cluster state.
+    - kube-apiserver. Serves the Kubernetes API, the primary interface for the cluster. This is a web REST API. "kubectl" commands calls this API.
+    - kube-controller-manager. Bundles several components into one package. It does all the "behind-scene" work of controlling the cluster.
+    - kube-scheduler. Schedules pods to run on individual nodes.
+
+KUBELET:
+In addition to the control plane, each node also has the "kubelet".
+The kubelet is the agent that executes containers on each node. This runs as a service on each node.
+You can check its status with the systemctl command.
+    sudo systemctl status kubelet
+
+KUBE-PROXY:
+Each node also has the "kube-proxy", that handles network communication between nodes by adding firewall routing rules.
+
+
+
+----------------------------------------------- DEPLOYING TO KUBERNETES -----------------------------------------------
+[KUBERNETES DEPLOYMENTS]
+Pods are a great way to organize and manage containers, but what if you want to spin up and automate multiple pods?
+Deployments are a great way to automate the management of your pods.
+A deployment allows you to specify a desired state for a set of pods.
+The cluster will then constantly work to maintain that desired state.
+
+EXAMPLES:
+Scaling: With a deployment, you can specify the number of replicas you want, and the deployment will create (or remove) pods to meet that number of replicas.
+
+Rolling updates: With a deployment, you can change the deployment container image to a new version of the image.
+                 The deployment will gradually replace existing containers with the new version.
+Self-Healing: If one of the pods in the deployment is accidentally destroyed, the deployment will immediately spin up a new one to replace it.
+
+
+[KUBERNETES SERVICES]
+While deployments provide a great way to automate the management of your pods, you need a way to easily communicate with the dynamic set of replicas managed by a deployment.
+This is where services come in.
+
+Services are another important component of deploying apps with Kubernetes.
+Services allow you to dynamically access a group of replica pods.
+Replica pods are often being created and destroyed, so what happens to other pods or external entities which need to access those pods.
+
+A service creates an abstraction layer on top of a set of replica pods.
+You can access the service rather than accessing the pods directly, so as pods come and go, you get uninterrupted, dynamic access to whatever replicas are up at the time.
+
+
+
+----------------------------------------------- MICROSERVICES -----------------------------------------------
+[MICROSERVICES]
+Microservices provide many benefits in the design and management of applications, but they also introduce a lot of complexity.
+
+One of the best ways to demonstrate the value of Kubernetes is in managing microservice application.
+Microservices are small, independent services that work together to form a whole application.
+
+Many applications are assigned with a "monolithic" architecture, meaning that all parts of the application are combined in one large executable.
+Microservice architecture breaks the application up into several small services.
+
+ADVANTAGES OF MICROSERVICES:
+    - Scalability: Individual microservices are independently scalable.
+                   If your search service is under a large amount of load, you can scale that service by itself, without scaling the whole application.
+
+    - Cleaner code: When services are relatively independent, it's easier to make a change in one area of the application without breaking things in other areas.
+
+    - Reliability: Problems in one area of the application are less likely to affect other areas.
+
+    - Variety of tools: Different parts of the application can be built using different tools, languages, and frameworks.
+                        This means that the right tool can be used for every job.
+
+Implementing microservices means deploying, scaling, and managing a lot of individual components.
+Kubernetes is a great tool for accomplishing all of this.
+
+
+
+----------------------------------------------- MISCELLANEOUS -----------------------------------------------
+[COMMANDS]
+NODES ###############################
+kubectl get nodes                   # Get a list of nodes in the cluster.
+kubectl describe node NODE_NAME     # Get detailed information about an specific node.
+
+PODS ################################
+kubectl get pods                    # List running pods.
+kubectl get pods -n kube-system     # Get a list of the system pods running in the cluster.
+kubectl get pods --all-namespaces   # Get a list of running pods from all namespaces.
+kubectl get pods -o wide            # Get a list of running pods with additional information
+kubectl describe pod nginx          # Get more information about the "nginx" pod
+kubectl delete pod nginx            # Delete the "nginx" pod.
+
+DEPLOYMENTS #####################################
+kubectl get deployments                         # Get a list of the deployments.
+kubectl describe deployment nginx-deployment    # Get more information about a deployment.
+
+SERVICES ############################
+kubectl get svc                     # Get a list of services in the cluster.
+kubectl get services                # Get a list of services in the cluster. Same as the previous one.
+kubectl delete service SERVICENAME  # Deletes the specified service.
+
+NAMESPACE ###########################
+kubectl create namespace NAMESPACE  # Creates the specified namespace.
+
+OTHER ###################################
+kubectl create -f FILE.yml              # Runs a kubernetes environment depending on the kube components specified in FILE.yml.
+kubectl -n NAMESPACE create -f FILE.yml # Runs a kubernetes environment depending on the kube components specified in FILE.yml in the specified namespace.
+sudo systemctl status kubelet           # Check the status of the "kubelet" service.
+kubectl exec POD -- COMMAND             # Allows you to execute the given command inside the POD.
+
+
+[FILES & DIRECTORIES]
+FILES:
+
+DIRECTORIES:
+
+
+[MISCELLANEOUS]

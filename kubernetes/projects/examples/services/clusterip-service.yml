@@ -1,0 +1,17 @@
+# Example of a ClusterIP service.
+# This service will manage the Pods that are part of the nginx-deployment specified in definition file ../deployment.yml.
+
+apiVersion: v1
+kind: Service
+metadata:
+    name: my-clusterip-svc
+spec:
+    type: ClusterIP     # ClusterIP type is the default.
+    selector:
+        app: nginx-deploy       # It will manage the Pods with this label.
+    # You can specify as many ports as needed.
+    ports:
+    - name: http        # Name of the port specification. It can be any name.
+      protocol: TCP
+      port: 80          # Port the service will be listening.
+      targetPort: 80    # Port the service will be routing traffic to on the backend Pods.

@@ -1,0 +1,15 @@
+# Example of using nodeSelector for Pod scheduling.
+# This example will specify in which nodes with given labels the Pod can be scheduled on.
+# Node label:
+#   special: true
+
+apiVersion: v1
+kind: Pod
+metadata:
+    name: nodeselector-pod
+spec:
+    containers:
+    - name: nginx
+      image: nginx
+    nodeSelector:
+        special: "true"

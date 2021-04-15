@@ -1,0 +1,23 @@
+# Example of a liveness-probe implementation in a Pod.
+# This demostration will spin up a container and will run liveness probe with the 'httpGet' action to verify if the container is running as expected.
+# The liveness probe will be executed every 5 seconds, and will wait 5 seconds after the container creation to start executing the probe.
+# Image: nginx.
+# Type of probe: Liveness.
+# Probe action: Get
+# Path: /
+# Port: 80
+
+apiVersion: v1
+kind: Pod
+metadata:
+    name: liveness-pod-http
+spec:
+    containers:
+    - name: nginx
+      image: nginx:1.19.1
+      livenessProbe:
+          httpGet:
+              path: /
+              port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5

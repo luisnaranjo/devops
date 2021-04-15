@@ -1,0 +1,16 @@
+# Example of specifying container resources via a resource request.
+# CPU: 250 units (out of 1000).
+# Memory: 128MB.
+
+apiVersion: v1
+kind: Pod
+metadata:
+    name: my-pod-resource-request
+spec:
+    containers:
+    - name: busybox
+      image: busybox
+      resources:
+          requests:
+              cpu: "250m"     # 1/4 of CPU.
+              memory: "128Mi" # 128MB.

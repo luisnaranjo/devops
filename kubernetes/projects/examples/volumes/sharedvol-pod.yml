@@ -1,0 +1,26 @@
+# Example of a shared volume between containers in a single Pod.
+# The volume type used in this Pod is "emptyDir".
+# In this example, a Pod (the main one) will write a message to a text file every 5 seconds.
+# A second Pod (sidecar one) will display the content of this file every 5 seconds. This will be sent to STDOUT. Therefore it will be picked by K8s logs.
+
+apiVersion: v1
+kind: Pod
+metadata:
+    name: sharedvol-pod
+spec:
+    containers:
+    - name: busybox
+      image: busybox
+      command: ['sh', '-c', 'while true; do echo Hello world! > /output/output.txt; sleep 5; done']
+      volumeMounts:
+      - name: my-sharedvol
+        mountPath: /output
+    - name: sidecar
+      image: busybox
+      command: ['sh', '-c', 'while true; do cat /input/output.txt; sleep 5; done']
+      volumeMounts:
+      - name: my-sharedvol
+        mountPath: /input
+    volumes:
+    - name: my-sharedvol
+      emptyDir: {}      # The curly braces are needed here since in YAML you must specify a value.

@@ -1,0 +1,15 @@
+# Example of a PersistentVolumeClaim.
+# This PVC will match to use the PV "my-pv".
+# It will request for a capacity of 100Mi.
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    name: my-pvc
+spec:
+    storageClassName: localdisk
+    accessModes:
+    - ReadWriteOnce
+    resources:
+        requests:
+            storage: 100Mi

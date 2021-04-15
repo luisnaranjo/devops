@@ -1,0 +1,18 @@
+# Example of a DaemonSet.
+
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+    name: my-daemonset
+spec:
+    selector:
+        matchLabels:
+            app: my-daemonset       # Select which Pods the DaemonSet will manage by matching this label.
+    template:
+        metadata:
+            labels:
+                app: my-daemonset   # The label that match for the DaemonSet Selector.
+        spec:
+            containers:
+            - name: nginx
+              image: nginx:1.19.1

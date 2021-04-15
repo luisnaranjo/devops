@@ -1,0 +1,9 @@
+# Example of an storage class.
+# This class will be named "localdisk", with the "no-provision" k8s provisioner.
+
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+    name: localdisk
+provisioner: kubernetes.io/no-provisioner
+allowVolumeExpansion: true      # To allow PVC resizing.

@@ -1,0 +1,26 @@
+# Example of a NetworkPolicy specification.
+# This network policy will be applied to an specific Pod (via podSelector) for all Ingress and Egress.
+# The Pod is selected via the label "app=nginx".
+# This NetworkPolicy will allow only the Ingress traffic from the namespace with label "team=np-test" for the TCP 80 port.
+# Any other traffic will be discarded.
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+    name: my-networkpolicy
+    namespace: np-test
+spec:
+    podSelector:
+        matchLabels:
+            app: nginx
+    policyTypes:
+    - Ingress
+    - Egress
+    ingress:
+    - from:
+      - namespaceSelector:
+          matchLabels:
+              team: np-test     # The label of the namespace.
+      ports:
+      - protocol: TCP
+        port: 80

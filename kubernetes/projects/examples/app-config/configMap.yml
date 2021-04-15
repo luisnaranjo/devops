@@ -1,0 +1,19 @@
+# Example of a ConfigMap specification.
+# You can have multiple subkeys inside a key.
+# ConfigMap name: my-configmap
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: my-configmap
+data:
+    key1: value1
+    key2: value2
+    key3: |
+        subkey:
+            morekeys: data
+            evenmore: some more data
+    key4: |
+        You can also do
+        multi-line
+        data.

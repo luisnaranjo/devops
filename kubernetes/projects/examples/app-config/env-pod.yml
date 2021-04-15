@@ -1,0 +1,28 @@
+# Example of an implementation of application configuration using ConfigMap & Secret as environment variables.
+# This will consists of a simple Pod echoing the values returned from the ConfigMap and the Secret.
+# Pod name: env-pod
+# Container name: busybox.
+# Container image: busybox
+# ConfigMap name: my-configmap
+# Secret name: my-secret
+
+apiVersion: v1
+kind: Pod
+metadata:
+    name: env-pod
+spec:
+    containers:
+    - name: busybox
+      image: busybox
+      command: ['sh', '-c', 'echo "ConfigMap: $CONFIG_MAP_VAR, Secret: $SECRET_VAR"']
+      env:
+      - name: CONFIG_MAP_VAR
+        valueFrom:
+            configMapKeyRef:
+                name: my-configmap
+                key: key1
+      - name: SECRET_VAR
+        valueFrom:
+            secretKeyRef:
+                name: my-secret
+                key: secretkey1

@@ -1,0 +1,27 @@
+# Example of a deployment definition.
+# This deployment consists of 3 replica Pods running an nginx container.
+# Pod labels:
+#   app: nginx-deploy
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: nginx-deployment
+    labels:
+        app: nginx
+spec:
+    replicas: 3
+    selector:
+        matchLabels:
+            app: nginx-deploy
+    template:
+        metadata:
+            # Since the deployment manage the Pod names, there is no point to specify the Pod name here.
+            labels:
+                app: nginx-deploy
+        spec:
+            containers:
+            - name: mynginx
+              image: nginx:1.7.9
+              ports:
+              - containerPort: 80

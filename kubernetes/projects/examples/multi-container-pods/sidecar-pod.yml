@@ -1,0 +1,25 @@
+# Example of a multi-container pod with interaction between containers.
+# This pod will consists of 2 containers running.
+# One container will write some data into a log file.
+# The second container will output the log file to STDOUT, so Kubernetes can manage the logs.
+apiVersion: v1
+kind: Pod
+metadata:
+    name: sidecar-pod
+spec:
+    containers:
+    - name: busybox
+      image: busybox
+      command: ['sh', '-c', 'while true; do echo logs data > /output/output.log; sleep 5; done']    # It will print 'logs data' to output.log file every 5 seconds.
+      volumeMounts:
+      - name: shared-vol
+        mountPath: /output
+    - name: sidecar
+      image: busybox
+      command: ['sh', '-c', 'tail -f /input/output.log']
+      volumeMounts:
+      - name: shared-vol
+        mountPath: /input
+    volumes:
+    - name: shared-vol
+      emptyDir: {}

@@ -1,0 +1,20 @@
+# Example of a Pod using a volume.
+# The volume type used in this Pod is "hostPath".
+
+apiVersion: v1
+kind: Pod
+metadata:
+    name: volume-pod
+spec:
+    restartPolicy: Never    # Just run one time.
+    containers:
+    - name: busybox
+      image: busybox
+      command: ['sh', '-c', 'echo Success! > /output/success.txt']
+      volumeMounts:
+      - name: my-volume
+        mountPath: /output      # Path in the container.
+    volumes:
+    - name: my-volume
+      hostPath:
+          path: /var/data       # Actual path in the cluster node running this Pod.

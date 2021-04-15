@@ -1,0 +1,18 @@
+# Example of a RoleBinding for a Service Account.
+# This RoleBinding binds the role "pod-reader" to the service account "my-serviceaccount".
+# Role: pod-reader
+# SA: my-serviceaccount
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+    name: sa-pod-reader
+    namespace: default
+subjects:
+    - kind: ServiceAccount
+      name: my-serviceaccount
+      namespace: default
+roleRef:
+    kind: Role
+    name: pod-reader
+    apiGroup: rbac.authorization.k8s.io

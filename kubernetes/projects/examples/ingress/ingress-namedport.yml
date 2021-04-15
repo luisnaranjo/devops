@@ -1,0 +1,19 @@
+# Example of an Ingress definition for a service.
+# This example uses a Service named port rather than a Service port number.
+# Service: my-clusterip-svc (Definition in ../services/clusterip-service.yml).
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+    name: my-ingress-namedport
+spec:
+    rules:
+    - http:
+        paths:
+        - path: /somepath
+          pathType: Prefix
+          backend:
+              service:
+                  name: my-clusterip-svc
+                  port:
+                      name: http

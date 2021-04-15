@@ -1,0 +1,120 @@
+[KUBERNETES]
+Kubernetes is an open source container orchestration tool. It was developed by Google.
+Kubernetes is container runtime-agnostic.
+Features provide everything needed for deploying containerized applications.
+    - Container deployments & Rollout control.
+    - Resource Bin Packing.
+    - Built-in service discovery & Autoscaling.
+    - Heterogeneous Clusters.
+    - Persistent storage.
+    - High availability features.
+
+[CONFIGURING KUBERNETES]
+Initialize Kubernetes Master.
+    kubeadm init --pod-network-cidr=10.24.0.0/16
+
+Set the kube config in user.
+    mkdir -p $HOME/.kube
+    sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+    sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+Install Flannel:
+    kubectl -n kube-system apply -f https://raw.githubusercontent.com/coreos/flannel/bc79dd1505b0c8681ece4de4c0d86c5cd2643275/Documentation/kube-flannel.yml
+
+You can add other servers to join the cluster.
+    kubeadm join IP:PORT --token TOKEN --discovery-token-ca-cert-hash HASH
+
+Verify all nodes are set in the cluster. From master:
+    kubectl get nodes
+
+
+[KUBERNETES | PODS]
+A pod is the simplest building block within Kubernetes. Pods represents processes that are running on the cluster.
+They encapsulate application containers, store resources as well as the unique network IP.
+They represent a unit of a deployment, a single instance of an application within Kubernetes.
+To create a pod, we use the 'kubectl create' command followed by the '-f' flag and the definition file.
+    kubectl create -f pod.yml   # Creates a pod based on the definition file.
+
+COMMAND kubectl get pods:
+List any created pod.
+Structure:
+    kubectl get pods
+Example:
+    kubectl get pods    # Lists the pods.
+
+COMMAND kubectl delete:
+Delete a pod.
+Structure:
+    kubectl delete PODNAME
+Example:
+    kubectl delete my-pod       # Deletes the pod.
+
+
+[KUBERNETES | REPLICA SETS]
+By themself, you can't update replica sets.
+You can also create a replica set with the 'kubectl create -f FILE' command.
+    kubectl create -f replicaset.yml    # Creates a replica set based on the definition file.
+
+COMMAND kubectl get replicasets:
+List any created replica set.
+Structure:
+    kubectl get replicasets
+Example:
+    kubectl get replicasets    # Lists the replica sets.
+
+COMMAND kubectl scale:
+Scale a replica set with the replica number specified.
+Structure:
+    kubectl scale --replicas=NUMBER replicaset/REPLICASETNAME
+Example:
+    kubectl scale --replicas=4 replicaset/my-replicaset     # Scale my-replicaset to 4 replicas.
+
+COMMAND kubectl delete replicaset:
+Delete a replica set.
+Structure:
+    kubectl delete replicaset REPLICASETNAME
+Example:
+    kubectl delete replicaset my-replicaset       # Deletes the replica set.
+
+
+[KUBERNETES | DEPLOYMENTS]
+Deployments have a notion of lifecycle.
+You can also create a deployment with the 'kubectl create -f FILE' command.
+    kubectl create -f deployment.yml    # Creates a deployment based on the definition file.
+
+COMMAND kubectl get deployments:
+List any created deployment.
+Structure:
+    kubectl get deployments
+Example:
+    kubectl get deployments    # Lists the deployments.
+
+COMMAND kubectl scale:
+Scale a deployment with the replica number specified.
+Structure:
+    kubectl scale --replicas=NUMBER deployment/DEPLOYMENTNAME
+Example:
+    kubectl scale --replicas=4 deployment/nginx-deployment     # Scale nginx-deployment to 4 replicas.
+
+COMMAND kubectl delete deployment:
+Delete a deployment.
+Structure:
+    kubectl delete deployment DEPLOYMENTNAME
+Example:
+    kubectl delete deployment nginx-deployment       # Deletes the deployment.
+
+
+
+----------------------------------------------- MISCELLANEOUS -----------------------------------------------
+[COMMANDS]
+kubectl create -f pod.yml                                       # Creates a pod based on the definition file.
+kubectl get pods                                                # Lists the pods.
+kubectl delete my-pod                                           # Deletes the pod.
+kubectl create -f replicaset.yml                                # Creates a replica set based on the definition file.
+kubectl get replicasets                                         # Lists the replica sets.
+kubectl scale --replicas=4 replicaset/my-replicaset             # Scale my-replicaset to 4 replicas.
+kubectl delete replicaset my-replicaset                         # Deletes the replica set.
+kubectl create -f deployment.yml                                # Creates a deployment based on the definition file.
+kubectl get deployments                                         # Lists the deployments.
+kubectl scale --replicas=4 deployment/nginx-deployment          # Scale nginx-deployment to 4 replicas.
+kubectl delete deployment nginx-deployment                      # Deletes the deployment.

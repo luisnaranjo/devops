@@ -1,0 +1,13 @@
+# Example of implementing a restart policy in a Pod definition.
+# Restart Policy type: Always.
+
+apiVersion: v1
+kind: Pod
+metadata:
+    name: rp-never-pod
+spec:
+    restartPolicy: Never
+    containers:
+    - name: busybox
+      image: busybox
+      command: ['sh', '-c', 'sleep 10; This is a command that will fail']      # For validation.

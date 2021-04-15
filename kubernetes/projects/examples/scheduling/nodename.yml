@@ -1,0 +1,11 @@
+# Example of using nodeName for Pod scheduling.
+
+apiVersion: v1
+kind: Pod
+metadata:
+    name: nodename-pod
+spec:
+    containers:
+    - name: nginx
+      image: nginx
+    nodeName: k8s-worker1
