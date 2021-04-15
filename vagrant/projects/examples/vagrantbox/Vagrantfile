@@ -1,4 +1,4 @@
 Vagrant.configure("2") do |config|
-    config.vm.box = "ubuntu/trusty64"   # It will create a virtual machine based on butuntu/trusty64.
+    config.vm.box = "ubuntu/trusty64"   # It will create a virtual machine based on ubuntu/trusty64.
     config.vm.synced_folder = ".", "/vagrant"   # It will create a mount point from host machine current dir and guest host /vagrant dir.
 end

@@ -19,7 +19,7 @@ Vagrant.configure("2") do |config|
             puppet.manifests_path = "puppet/manifests"      # Specifies the path of the manifest files.
             puppet.manifest_file = "default.pp"             # Specify the manifest file.
             puppet.module_path = "puppet/modules"           # Specifies the path of the modules.
-            puppet.hiera_config_path = "puppet/hiera.yaml" # Specifies the hierarchy configuration file.
+            puppet.hiera_config_path = "puppet/hiera.yaml"  # Specifies the hierarchy configuration file.
         end
     end
 end

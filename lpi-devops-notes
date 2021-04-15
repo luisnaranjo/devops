@@ -9,14 +9,15 @@ Out of the box are 3 providers that are supported:
     - Docker.
 However, you can use custom providers. But you need to ensure they are installed first before use them, and the plugin for that specific provider is installed.
 
-COMMAND vagrant init: Initializes the current directory to be a Vagrant environment by creating a Vagrantfile.
-COMMAND vagrant up: Creates and configures guest machines according to your Vagrantfile.
-COMMAND vagrant destroy: Stops the running and destroys all resources that were created.
-COMMAND vagrant validate: Validates your Vagrantfile.
-COMMAND vagrant provision: Runs any configured provisioners.
-COMMAND vagrant reload: Runs a halt followed by an up.
-COMMAND vagrant status: This will tell you the state of the machines.
-COMMAND vagrant ssh: SSH into a running Vagrant machine.
+COMMANDS:
+vagrant init: Initializes the current directory to be a Vagrant environment by creating a Vagrantfile.
+vagrant up: Creates and configures guest machines according to your Vagrantfile.
+vagrant destroy: Stops the running and destroys all resources that were created.
+vagrant validate: Validates your Vagrantfile.
+vagrant provision: Runs any configured provisioners.
+vagrant reload: Runs a halt followed by an up.
+vagrant status: This will tell you the state of the machines.
+vagrant ssh: SSH into a running Vagrant machine.
 
 
 [INSTALLING VAGRANT]
@@ -181,7 +182,7 @@ There are several provisioners you can use such as:
 Vagrant boxes are the package format for Vagrant environments.
 They can be used on any platform that Vagrant supports. Versioning is also supported.
 You can download existing Vagrant boxes in https://app.vagrantup.com/boxes/search
-When you install a box file, vagrant unpackes the box and store the contents internally. You can recreate the box file from this internal data using the 'vagrant box repackage' command.
+When you install a box file, vagrant un-packs the box and store the contents internally. You can recreate the box file from this internal data using the 'vagrant box repackage' command.
 
 COMMAND vagrant box add:
 Add a box to vagrant. You can add a local box or specify an url.
