@@ -42,7 +42,7 @@ Post-processors tend to be closely tied to the builder (we wouldn't use the Amaz
 COMMUNICATOR:
 All of this work is done via Packer through the use of a communicator.
 If working exclusively on *nix-based hosts, you don't have to worry about this. SSH is the default communicator and works in the majority of instances.
-However, if you're using Packer provision on Windows, you would need to switch this to the "winrm"communicator.
+However, if you're using Packer provision on Windows, you would need to switch this to the "winrm" communicator.
 Communicators determine how Packer talks to the machine during image creation.
 
 COMMAND:
@@ -132,6 +132,7 @@ So this JSON object:
     {
         "builders": [
         {
+            "type": "amazon-ebs",
             "ami_name": "packer-test",
             "region": "us-east-1",
             "instance_type": "t2.micro"
@@ -193,7 +194,7 @@ Get the binary file from HashiCorp's website using curl or wget.
 Unzip the compressed file.
     unzip packer.zip
 
-Move the resulting binary to the appropriate place, which can be /usr/bin, to share across users or anywhere within the desired user's $PATH setting.
+Move the resulting binary to the appropriate place, which can be "/usr/bin", to share across users or anywhere within the desired user's $PATH setting.
     sudo mv packer /usr/bin
 
 Confirm that Packer is working and see a command list.
@@ -210,7 +211,7 @@ Then you need to check that "Get-ExecutionPolicy" is not restricted.
 If it is, set it to "Bypass".
     Set-ExecutionPolicy Bypass -Scope Process
 
-Install Chocolaatey with:
+Install Chocolatey with:
     Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
 
 Exit PowerShell, then relaunch it.
@@ -610,7 +611,7 @@ This structure, combined with the ability for Packer to read multiple HCL files 
 
 With HCL you can use different files for building blocks. But you need to use the ".pkr.hcl" extension!
 
-When building an Packer project based on HCL, you need to specify the whole directory in case you are working with multiple .pkr.hcl files.
+When building a Packer project based on HCL, you need to specify the whole directory in case you are working with multiple .pkr.hcl files.
     packer build .
     packer build /home/user/packer/hcl
 
