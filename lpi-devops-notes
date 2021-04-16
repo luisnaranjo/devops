@@ -375,7 +375,7 @@ STRUCTURE:
 [PACKER]
 Packer is a tool for automating the creation of machine images.
 Packer is an open source tool for creating identical machine images for multiple platforms using a single configuration.
-It run on every major OS.
+It runs on every major OS.
 It allows you to create machine images for multiple platforms in parallel using a single configuration file.
 Package doesn't replace configuration management. It works in parallel with it.
 A machine image is a single static unit that contains a pre-configured OS.
@@ -385,19 +385,20 @@ PACKAGE TEMPLATES:
 Templates in Packer are JSON files.
 Template components:
     - builders. Builder component is an array. Builders are used to specify what type of image will be creating (AMI AWS, Docker Image, etc).
+    - provisioners. This is an array. Specify how to configure the machine image. You can use a variety of configuration managers (Puppet, Chef, Ansible, shell scripts).
+    - post-processor. Actions executed once the build is completed (tagging or publishing a docker image).
     - description. This is optional. String to provide a description.
     - min_packer_version. This is optional. Minimal Packer Version you can use.
-    - post-processor. Actions executed once the build is completed (tagging or publishing a docker image).
-    - provisioners. This is an array. Specify how to configure the machine image. You can use a variety of configuration managers (Puppet, Chef, Ansible, shell scripts).
     - variables. You can pass variables at runtime. Key-Value pairs.
 
-COMMAND packer build: Runs all the builds in order and generate a set of artifacts.
-COMMAND packer fix: Find backwards incompatible parts and brings them up to date. Changes will be send to STDOUT.
-COMMAND packer inspect: Reads a template and outputs the various components that the template defines.
-COMMAND packer validate: Validates the syntax and configuration of a template.
+COMMANDS:
+packer build: Runs all the builds in order and generate a set of artifacts.
+packer fix: Find backwards incompatible parts and brings them up to date. Changes will be send to STDOUT.
+packer inspect: Reads a template and outputs the various components that the template defines.
+packer validate: Validates the syntax and configuration of a template.
 
 BUILDERS:
-The builder is responsible for creating machines and generating images.
+The builder is responsible for creating machines and generating images on/for the target platform.
 Example of Builders are:
     - Amazon AMI.
     - Azure Resource Manager.
@@ -432,7 +433,7 @@ Example of Post-Processors are:
 
 [INSTALLING PACKER]
 Set the current directory to '/usr/local/bin' to place the binary file there.
-    cd /usr/bin/local/
+    cd /usr/local/bin/
 
 Download the packer zip file.
     wget https://releases.hashicorp.com/packer/1.6.1/packer_1.6.1_linux_amd64.zip
@@ -464,16 +465,17 @@ Use cases:
     - Setting up ephemeral mount points.
     - Configuring network devices.
 
-COMMAND cloud-init init: Initializes cloud-init and performs initial modules. This command is generally run by the OS on the system.
-COMMAND cloud-init modules: Activates modules using a given configuration key. This command is generally run by the OS on the system.
-COMMAND cloud-init single --name MODULENAME: Runs a single module.
-COMMAND cloud-init dhclient-hook: Runs the dhclient hook to record network info.
-COMMAND cloud-init features: List defined features. This command is not always present.
-COMMAND cloud-init analyze: Analyzes cloud-init log and data.
-COMMAND cloud-init devel: Runs development tools.
-COMMAND cloud-init collect-logs: Collects and tar all cloud-init debug info.
-COMMAND cloud-init clean: Removes logs and artifacts so cloud-init can re-run.
-COMMAND cloud-init status: Reports cloud-init status or wait on completion.
+COMMANDS:
+cloud-init init: Initializes cloud-init and performs initial modules. This command is generally run by the OS on the system.
+cloud-init modules: Activates modules using a given configuration key. This command is generally run by the OS on the system.
+cloud-init single --name MODULENAME: Runs a single module.
+cloud-init dhclient-hook: Runs the dhclient hook to record network info.
+cloud-init features: List defined features. This command is not always present.
+cloud-init analyze: Analyzes cloud-init log and data.
+cloud-init devel: Runs development tools.
+cloud-init collect-logs: Collects and tar all cloud-init debug info.
+cloud-init clean: Removes logs and artifacts so cloud-init can re-run.
+cloud-init status: Reports cloud-init status or wait on completion.
 
 CLOUD INIT AVAILABILITY:
 The cloud init comes installed in the Ubuntu Cloud Images and images available on EC2, Azure, GCE, etc.
@@ -510,8 +512,8 @@ Using cloud-config syntax, the user can specify certain things in a human friend
 Begins with #cloud-config or Content-Type:text/cloud-config when using a MIME archive.
 
 Upstart Job:
-Content is placed into a file in /etc/init, and it will be consumed by upstart as any other upstart job.
-It begins iwht #upstart-job or Content-Type:text/upstart-job when using a MIME archive.
+Content is placed into a file in "/etc/init", and it will be consumed by upstart as any other upstart job.
+It begins with #upstart-job or Content-Type:text/upstart-job when using a MIME archive.
 
 Cloud Boothook:
 This content is boothook data. It's stored in a file under /var/lib/cloud and then executed immediately.
