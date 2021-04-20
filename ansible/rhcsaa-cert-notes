@@ -1,12 +1,9 @@
 [YAML]
-YAML is a mark-up language used for formatting data.
-YAML is generally considered easier for humans to read.
-Ansible Playbooks use YAML syntax.
-YAML is composed of key-value pairs, lists and dictionaries.
+YAML is a mark-up language used for formatting data. YAML is generally considered easier for humans to read.
+Ansible Playbooks use YAML syntax. YAML is composed of key-value pairs, lists and dictionaries.
 
 LIST:
-List items are designated with a single hyphen (-) and a space.
-Each list item should have the same indentation.
+List items are designated with a single hyphen (-) and a space. Each list item should have the same indentation.
 Example:
     - colours:
      - red
@@ -22,13 +19,12 @@ Example:
       brand: MyBrand
       model: XF-D
       year: 2020
-
 You can have dictionaries of list, list of dictionaries, and any combination.
 
-Files open with three hyphens (---) on the first line and close with three periods (...).
+YAML files open with three hyphens (---) on the first line and close with three periods (...).
 
 It's frequently useful when working on Ansible playbooks to format input with line breaks.
-The pipe and right angle bracket (| and >) may be used to allow for line breaks within YAML.
+The pipe and right angle bracket (| and >) may be used to allow for line breaks within YAML (multi-line values).
     - Pipe (|):
         It will not ignore newlines in the input.
         Example:
@@ -50,16 +46,14 @@ The pipe and right angle bracket (| and >) may be used to allow for line breaks 
             #Interpreted as:
             2001 2002
 
-YAML has a small set of special characters:
-You must use double quotes to escape a special character.
+YAML has a small set of special characters. You must use double quotes to escape a special character:
     []
     {}
     :
     >
     |
 
-YAML auto-convert Boolean values.
-If you want a literal "Yes", you must use quotes.
+YAML auto-convert Boolean values. If you want a literal "Yes", you must use quotes.
 
 Floating Point Numbers are taken as numeric unless quoted.
 
@@ -67,16 +61,13 @@ Hash (#) is used for comments.
 
 
 [ANSIBLE]
-Ansible interacts with remote hosts over SSH.
-There is no Ansible agent software required.
+Ansible interacts with remote hosts over SSH. There is no Ansible agent software required.
 
 The remote system user can be different from the system user on the control host, but Ansible will need the user's name and password in order to access remote hosts.
 Typically, an 'ansible' user is configured on all Ansible managed systems, and a pre-shared key is used for authentication.
-
 To be effective, it is often necessary for the remote user to have privileges to run commands as root.
 
-The -k flag allows for a sudo password prompt for maximum security.
-Another option is to allow sudo with no password for the ansible user.
+The -k flag allows for a sudo password prompt for maximum security. Another option is to allow sudo with no password for the "ansible" user.
 
 
 [ANSIBLE CORE COMPONENTS]
@@ -90,18 +81,15 @@ Another option is to allow sudo with no password for the ansible user.
 
 
 [INVENTORIES]
-An inventory is a list of hosts that Ansible manages.
-Inventories are how Ansible can locate and run against multiple systems.
-Inventories can be static or dynamic.
-
+An inventory is a list of hosts that Ansible manages. Inventories are how Ansible can locate and run against multiple systems. Inventories can be static or dynamic.
 By default, Ansible uses /etc/ansible/hosts as its inventory, but this is configurable.
-Inventory may be provided in /etc/ansible/hosts or another file using:
-    ansible -i FILENAME
+Inventory may be provided in /etc/ansible/hosts or another file using the "-i" flag at command line:
+    ansible -i INVENTORYFILENAME
 
 Inventory location may be specified as follows:
     - /etc/ansible/hosts. This is the default.
     - Specified by CLI. ansible -i FILENAME.
-    - Can be set in ansible.cfg
+    - Can be set in ansible.cfg (Ansible configuration file).
 
 Inventories may be formatted as an INI file or as a YAML file. File formats are interchangeable.
 You can also provide a directory containing many inventory files. In this way, you can specify multiple inventory files at once.
@@ -111,20 +99,18 @@ It's also possible to define groups of hosts, host or group level variables, and
 Hosts can be part of multiple groups.
 There are a number of variables that may be used within the inventory to control how Ansible connects to and interacts with target hosts.
 
-Patterns can be used to specify similarly named hosts.
-    lab[1:2].example.com
+Patterns can be used to specify similarly named hosts. Example:
+    lab[1:2].example.com    # Defines lab1.example.com & lab2.example.com hosts.
 
 STATIC INVENTORIES:
-They are inventories with static list of hosts.
-They can be specified either by INI or YAML format.
+Static inventories are inventories with static list of hosts. They can be specified either by INI or YAML format.
 They are maintained by hand, and are easy to manage for static configuration.
 
 DYNAMIC INVENTORIES:
-Inventories generated by an executable (bash script, python script, etc).
-Ansible runs the script and gets back a list of hosts.
-The script returns JSON containing inventory information to STDOUT.
+Dynamic invenroties are the ones generated by an executable (bash script, python script, etc). Ansible runs the script and gets back a list of hosts.
+The script must return JSON data containing inventory information to STDOUT.
 Dynamic inventories are good for use with cloud resources subject to sudden change.
-Executable file must accept following the next parameters:
+The executable file must accept following the next parameters:
     --list
     --host HOSTNAME
 Don't forget to make the file executable.
@@ -137,30 +123,23 @@ Example of using dynamic inventories:
     ansible all -i dynamic.py -m ping
 
 VARIABLES IN INVENTORIES:
-Ansible recommends that variables not be defined in inventory files.
-They should be stored in YAML files located relative to the inventory file.
+Ansible recommends that variables shouldn't be defined in inventory files. They should be stored in YAML files located relative to the inventory file.
 The next directories should be present in the same directory as the inventory file:
     - group_vars: The directory for groups-variable files. Group-variable files should be named after the group they represent.
-    - host_vars: The directoy for hosts-variable files. host-variable files should be named after the hostname they represent.
-Files named by host or group and may end in yml or yaml.
+    - host_vars: The directory for hosts-variable files. host-variable files should be named after the hostname they represent.
+These variable files are named by the host or group they represent and may end in ".yml" or ".yaml".
 Variable files are YAML or INI formatted files containing variable assignments.
 
 
 [MODULES]
-Modules are essentially tools for particular tasks.
-Almost all modules take parameters.
-Can be run from the command line or within a playbook.
+Modules are essentially tools for particular tasks. Almost all modules take parameters, and can be run from the command line or within a playbook.
 There are a significant number of modules for many kinds of work.
-They return JSON data.
-Custom modules can be written (in Python).
+They return JSON data. Custom modules can be written (in Python).
 
 
 [VARIABLES]
-Variable names should be letters, numbers, and underscores.
-Variables should always start with a letter.
-They can be scoped by a group, a host or even in a playbook.
-Typically used for configuration values and various parameters.
-Variables can also be used to store the return value of executed commands.
+Variable names should be letters, numbers, and underscores. Variables should always start with a letter. They can be scoped by a group, a host or even in a playbook.
+Typically used for configuration values and various parameters. Variables can also be used to store the return value of executed commands.
 There are a number of predefined variables used by Ansible.
 
 PLACES TO DEFINE VARIABLES:
@@ -173,12 +152,11 @@ PLACES TO DEFINE VARIABLES:
     - Inventories.
 
 VARIABLE USE:
-For safety, always use double quoting when working with variables.
+For safety, always use double quoting when working with variables. Example:
     - debug: msg="Look! I'm using my variable {{ myVar }}".
 
 DICTIONARY VARIABLES:
-Ansible variables may also be dictionaries.
-YAML formatting allows for python style dictionaries to be used as variables.
+Ansible variables may also be dictionaries. YAML formatting allows for Python style dictionaries to be used as variables.
 
 Declaration:
     employee:
@@ -215,9 +193,8 @@ There are two ways facts are collected:
     - Using the setup module with an ad-hoc command: ansible all -m setup
     - Facts are gathered by default when playbook is executed.
 
-The setup module can retrieve fact on a per-target basis.
-Facts are collected by default on playbook execution, but this is configurable using gather_facts:[yes|no].
-Facts can be cached between playbook executing. However, this is not the default behavior.
+The setup module can retrieve facts on a per-target basis. Facts are collected by default on playbook execution, but this is configurable using gather_facts:(yes|no).
+Facts can be cached between playbook executions. However, this is not the default behavior.
 
 HOW TO USE FACTS:
 Any collected facts can be accessed through variables: {{ ansible_default_ipv4.address }}
@@ -234,8 +211,7 @@ Custom facts can be set up using the facts.d directory in the target hosts:
 
 
 [PLAYS]
-The goal of a play is to map a group of hosts to some well-defined roles.
-A play may use one or more modules to achieve a desired end state on a group of hosts.
+The goal of a play is to map a group of hosts to some well-defined roles. A play may use one or more modules to achieve a desired end state on a group of hosts.
 
 
 [PLAYBOOK]
@@ -266,9 +242,7 @@ Some commonly used settings:
 
 
 [ANSIBLE AD-HOC COMMANDS USAGE]
-You can run ansible either ad-hoc or as a playbook.
-Both methods have the same capabilities.
-An ad-hoc command is similar to a single bash command.
+You can run Ansible either ad-hoc or as a playbook. Both methods have the same capabilities. An ad-hoc command is similar to a single bash command.
 
 USE CASES:
     - Operational commands. Examples:
@@ -293,17 +267,15 @@ EXAMPLE:
 
 
 [PLAYBOOK USAGE]
-Playbooks are effective for deployments, routine tasks, system deployment.
-Playbooks are similar to bash scripts.
+Playbooks are effective for deployments, routine tasks, system deployment. Playbooks are similar to bash scripts.
 
 COMMAND:
     ansible-playbook.
 
 
 [REGISTER]
-Register is a keyword that saves results of a command to a variable.
-You can use variables to retrieve the results of running commands.
-    register: var   #var is the variable name in which the data is stored.
+Register is a keyword that saves results of a command to a variable. You can use variables to retrieve the results of running commands.
+    register: var   # var is the variable name in which the data is stored.
 The variable can be referenced within the play.
     It returns many attributes, but it can be set to display only certain values.
 
@@ -327,8 +299,7 @@ Example:
 
 [CONDITIONALS & LOOPS IN CONTROL PLAY EXECUTION]
 HANDLERS:
-Handlers are tasks that may be flagged to run using the 'notify' keyword.
-The 'notify' keyword will only flag the handler if a task block make changes.
+Handlers are tasks that may be flagged to run using the 'notify' keyword. The 'notify' keyword will only flag the handler if a task block make changes.
 The calls made in the notify section correspond to the handler definitions in the play setup.
 'Listen' is a keyword that sets a value that may be used to call a handler as well. Example:
     listen: web handler
@@ -336,8 +307,7 @@ Usage of notify:
     notify: "web handler"
 
 CONDITIONALS:
-Conditional uses Jinja2 expressions to control playflow.
-The 'when' keyword allows for conditional tasks.
+Conditional uses Jinja2 expressions to control playflow. The 'when' keyword allows for conditional tasks.
 It's also possible to define changed conditions using the 'changed_when' keyword.
 Example:
     ---
@@ -351,9 +321,8 @@ Example:
           # - ansible_hostname == "Debian"
 
 LOOPS:
-'with_items' loop through a task for each object provided.
-The {{ item }} variable is used for each iteration of the loop.
-There is also a with_files keyword that iterates through files.
+'with_items' loop through a task for each object provided. The {{ item }} variable is used for each iteration of the loop.
+There is also a 'with_files' keyword that iterates through files.
 Loops are affiliated with individual tasks, however, a task may be an include directive containing several tasks. This allows for looping over many tasks.
 Example:
     ---
@@ -379,8 +348,7 @@ FAILED_WHEN (FAILURE CONDITIONAL):
 BLOCK:
 'block' groups are used to have Ansible attempt a task and take action depending on the success or failure of that task.
 It's similar to a try/catch block in programming languages.
-The 'rescue' block runs on a failure.
-The 'always' block (this block is optional) always runs.
+The 'rescue' block runs on a failure. The 'always' block (this block is optional) always runs.
 Example:
     ---
     - hosts: localhost
@@ -398,10 +366,9 @@ Example:
 
 
 [TAGS]
-It is possible to run specific tasks in playbooks using 'tags'.
-Each task may have one or more tags.
+It is possible to run specific tasks in playbooks using 'tags'. Each task may have one or more tags.
 
-Tags may be provided when ansible-playbook runs using the '--tags' flag which will have Ansible only run tasks that are tagged as specified.
+Tags may be provided when 'ansible-playbook' command runs using the '--tags' flag which will have Ansible only run tasks that are tagged as specified.
 Conversely, '--skip-tags' may be used with ansible-playbook command to skip plays that match provided tags.
 
 Command example:
@@ -428,13 +395,11 @@ Playbook example:
 
 [TEMPLATES]
 Templates are jinja 2 template files with Ansible variables inside that are substituted on play execution.
-Templates give the ability to provide a skeletal file that can be dynamically completed using variables.
-The most common template use case is configuration management.
-Templates are generally used by providing a template file on the ansible control node, and then using the template module within your playbook to deploy the file to a target server or group.
+Templates give the ability to provide a skeletal file that can be dynamically completed using variables. The most common template use case is configuration management.
+Templates are generally used by providing a template file on the Ansible control node, and then using the template module within your playbook to deploy the file to a target server or group.
 
 Template files use the .j2 file extension (for jinja 2). And are processed using the Jinja2 template language.
 Template files have access to the same variables that the play that calls them does.
-
 Templates are deployed using the 'template' module.
 
 TEMPLATE FILES:
@@ -461,26 +426,22 @@ An example of the template module used in a playbook:
 
 
 [ROLES]
-Roles provide a way of automatically loading certain var_files, tasks, and handlers based on a known file structure.
+Roles provide a way of automatically load certain var_files, tasks, and handlers based on a known file structure.
 Roles also make sharing of configuration templates easier.
-Roles require a particular directory structure, and at least one of the directories must exist and contain a 'main.yml'.
-Unused directories need not exist.
+Roles require a particular directory structure, and at least one of the directories must exist and contain a 'main.yml' file. Unused directories doesn't need to exist.
 
 Ansible checks for finding roles in the following places:
     - $PWD/roles.
     - /etc/ansible/roles.
 
 VARIABLES:
-Variables defined within a role (using the defaults or vars directories) may be accessed across roles.
-Role handlers has the same behavior.
+Variables defined within a role (using the 'defaults' or 'vars' directories) may be accessed across roles. Role handlers has the same behavior.
 You may still pass variables on the command line with the '-e' flag for use in a role. (These variables override all others in terms of precedents).
 Best practice dictates that you properly namespace your variables when working with a role to avoid conflicts.
 
 NESTING:
-Roles may include other roles using the dependencies keyword.
-Dependent roles are applied prior to the role dependent on them.
-A role using the same parameters will not be applied more than one time.
-This can cause complication with role dependencies.
+Roles may include other roles using the 'dependencies' keyword. Dependent roles are applied prior to the role dependent on them.
+A role using the same parameters will not be applied more than one time. This can cause complication with role dependencies.
 Having 'allow_duplicates: true' defined in 'meta/main.yml' within a role will allow the role to be applied more than once.
 
 ROLE DIRECTORY STRUCTURE:
@@ -494,21 +455,19 @@ sample_role/
 └─ meta/
 
 DIR TASKS:
-The tasks directory contains the main list of tasks to be executed by the role.
-This directory must include a 'main.yml' if that directory is being used.
+The 'tasks' directory contains the main list of tasks to be executed by the role. This directory must include a 'main.yml' file if that directory is being used.
 You can think of 'main.yml' as the entry point for the tasks section of the role.
 
 DIR HANDLERS:
-The handlers directory contains handlers, which may be used by the role or even anywhere outside of this role.
-The directory is entered via a 'main.yml' within the directory.
+The 'handlers' directory contains handlers, which may be used by the role or even anywhere outside of this role.
+The directory is entered via a 'main.yml' file within the directory.
 More on handlers:
     - Handlers are essentially tasks that may be flagged to run using the 'notify' keyword.
     - The 'notify' keyword will only flag the handler if a task block makes changes.
     - A handler will only be triggered once even if they are notified by multiple tasks.
 
 DIR VARS:
-The vars directory contains variables used within the role.
-The vars directory is entered via a 'mail.yml'.
+The vars directory contains variables used within the role. The vars directory is entered via a 'main.yml' file.
 The vars directory is one of three primary ways to interact with variables within a role (aside from convectional variable use such as inventory).
 The other two ways are:
     - Using the 'defaults' directory.
@@ -517,8 +476,7 @@ The vars directory has the highest level of precedence. It will override invento
 The vars directory may only be overridden by variables passed via CLI.
 
 DIR DEFAULTS:
-The defaults directory contains default variables for the role.
-The defaults directory is entered via a 'main.yml'.
+The defaults directory contains default variables for the role. The defaults directory is entered via a 'main.yml' file.
 The defaults directory is one of three primary ways to interact with variables within a role (aside from convectional variable use such as inventory).
 The other two ways are:
     - Using the 'vars' directory.
@@ -526,13 +484,11 @@ The other two ways are:
 The defaults directory is only meant to provide value to a variable if no other value is given.
 
 DIR FILES:
-The files directory contains files which can be deployed via the role.
-Files within this directory may be referenced without path throughout the role.
+The files directory contains files which can be deployed via the role. Files within this directory may be referenced without path throughout the role.
 Note this directory is for ordinary files (not var files or templates).
 
 DIR TEMPLATES:
-The templates directory contains templates which can be deployed via this role.
-Templates within this directory may be referenced without a path throughout the role.
+The templates directory contains templates which can be deployed via this role. Templates within this directory may be referenced without a path throughout the role.
 
 ROLE USE:
 General:
@@ -575,15 +531,13 @@ Using dependencies:
 
 
 [ANSIBLE GALAXY]
-Ansible galaxy is essentially a large public repository of Ansible roles.
-Roles ship with readmes detailing role use and available variables.
-Galaxy contains a large number of roles that are constantly evolving and increasing.
-Galaxy can use git allowing for other role sources such as GitHub.
+Ansible galaxy is essentially a large public repository of Ansible roles. Roles ship with 'readme' files detailing role use and available variables.
+Galaxy contains a large number of roles that are constantly evolving and increasing. Galaxy can use git allowing for other role sources such as GitHub.
 
 COMMAND ansible-galaxy:
 Ansible ships with the 'ansible-galaxy' command which may be used to install roles from Galaxy among other useful role management features.
 
-'ansible-galaxy' can also create new empty roles in your working directory like so:
+'ansible-galaxy' command can also create new empty roles in your working directory like so:
     ansible-galaxy init ROLENAME
 
 You can download roles from galaxy.ansible.com via the command:
@@ -601,8 +555,7 @@ The '-p' flag allows specification of local role location. 'ansible-galaxy' uses
 
 
 [PARALLELISM]
-It's possible to control the number of hosts acted upon at once time by Ansible.
-The Ansible process will create forks to execute actions in parallel.
+It's possible to control the number of hosts acted upon at once by Ansible. The Ansible process will create forks to execute actions in parallel.
 By default, the process will only fork 5 times.
 The number of forks can be set for a single command using '-f' flag with either the 'ansible' or 'ansible-playbook' commands.
 The default may be changed in 'ansible.cfg' file.
@@ -611,11 +564,12 @@ The 'serial' keyword may also confine the number of simultaneous updates within 
 
 [ANSIBLE VAULT]
 The 'ansible-vault' command allows file encryption, and requires a password to un-encrypt.
+Example of encrypting a file:
     ansible-vault encrypt FILE
 
 The 'ansible-vault rekey' command will allow you to re-encrypt a file and reset the password (You will need to know the original password).
 
-To supply the vault password during play execution, you must use either the 'ask-vault-pass' or '--vault-password-file' flags.
+To supply the vault password during play execution, you must use either the '--ask-vault-pass' or '--vault-password-file' flags.
 
 Ansible 2.4 introduces the --vault-id feature.
 
@@ -624,22 +578,18 @@ It is also possible to set 'no_log' within a playbook (a tasks) to censor sensit
 
 
 [ANSIBLE TOWER]
-Ansible Tower provides a web server interface to Ansible.
-System requirements are somewhat heavy.
+Ansible Tower provides a web server interface to Ansible. System requirements are somewhat heavy.
 Tower is only free for minimal use. Working with more than a few systems requires a paid license.
 The two key benefits of Ansible Tower are:
     - User permissioning.
     - Audit trail (only provided with license).
-It's only touched on in EX407 exam.
 
-When installing Ansible Tower, the first step is to check the readme.md
-
+When installing Ansible Tower, the first step is to check the readme.md file.
 The Ansible Tower configuration file is: /etc/tower/settings.py
 
 
 [DOCUMENTATION]
-The 'ansible-doc' binary ships with Ansible and is capable of providing documentation on each Ansible module.
-You can use the '--list' flag to get all available modules.
+The 'ansible-doc' binary ships with Ansible and is capable of providing documentation on each Ansible module. You can use the '--list' flag to get all available modules.
 Syntax:
     ansible-doc MODULE      # Gets details on a specific module.
     ansible-doc -s MODULE   # Gets a condensed listing of a module's function.
@@ -695,20 +645,15 @@ VALIDATE A WORKING CONFIGURATION USING AD-HOC ANSIBLE COMMANDS:
 
 
 [FIREWALL RULES]
-Ansible and firewall rules.
-There are Ansible modules that can be used with firewalls:
+Ansible and firewall rules. There are Ansible modules that can be used with firewalls:
     - firewalld: The firewalld module like others, can be used to add or remove rules.
     - iptables: The iptables module can also be used for firewall rules.
 
 
 [SECURITY]
-Ansible is very useful as a security tool.
-You can make security changes to many nodes at once.
-You can apply changes to help with easily securing nodes.
-You can check lots of nodes for vulnerability quickly.
-It can work well with other tools that you may have in place.
-Not just for Linux; it can be used for OS X, Solaris, Windows, and others.
-Can be used or devices such as NetApp or EMC storage, F5, and others.
+Ansible is very useful as a security tool. You can make security changes to many nodes at once. You can apply changes to help with easily securing nodes.
+You can check lots of nodes for vulnerability quickly. It can work well with other tools that you may have in place.
+Not just for Linux; it can be used for OS X, Solaris, Windows, and others. Can be used on devices such as NetApp or EMC storage, F5, and others.
 
 There are many modules that can be useful for security:
     - selinux: Configures the SELinux mode and policy.
@@ -720,7 +665,7 @@ Can manage certificates such as OpenSSL or SSH.
 
 
 [COMMON MODULES]
-This is the list of the most common ansible modules.
+This is the list of the most common Ansible modules.
 
 PING:
 Validate server is up and reachable.
@@ -748,8 +693,7 @@ Needed parameters:
     - name.
 
 COPY:
-Copy files.
-Able to change ownership and permissions in the process of the copy.
+Copy files. Able to change ownership and permissions in the process of the copy.
 Needed parameters:
     - src.
     - dest.
@@ -843,7 +787,7 @@ COMMON PARAMETERS:
 Work with file archives.
 Assumes the compression source exists on the target.
 Does not copy source files from the local system to the target before archiving.
-You can delete source files after archiving by using the 'remove=true' option.
+You can delete source files after archiving by using the 'remove: true' option.
 COMMON PARAMETERS:
     - path. File path to archive.
     - dest. The newly created archive.
@@ -851,7 +795,7 @@ COMMON PARAMETERS:
 
 [UNARCHIVE MODULE]
 Work with file archives.
-If a 'checksum' is required, then use the 'get_url' or 'uri' instead.
+If a 'checksum' is required, then use the 'get_url' or 'uri' modules instead.
 By default it will copy from the source file to the target before unpacking.
 COMMON PARAMETERS:
     - src. The archive to be unarchive.
@@ -877,8 +821,7 @@ COMMON PARAMETERS:
 
 
 [TEMPLATE MODULE]
-The template module is used to deploy template files.
-The template module has several useful parameters.
+The template module is used to deploy template files. The template module has several useful parameters.
 COMMON PARAMETERS:
     - src. The template to use (in the control node).
     - dest. Where the resulting file should be on the target host.
@@ -991,7 +934,7 @@ When running an ansible-playbook command, you can specify the flag -e to specify
     ansible-playbook play.yml -e "@VARFILE"         # Using a variable file.
 The number of forks can be set for a single command using '-f' flag with either the 'ansible' or 'ansible-playbook' commands.
 
-To supply the vault password during play execution, you must use either the 'ask-vault-pass' or '--vault-password-file' flags.
+To supply the vault password during play execution, you must use either the '--ask-vault-pass' or '--vault-password-file' flags.
 Ansible 2.4 introduces the --vault-id feature.
 
 COMMAND ansible-galaxy:

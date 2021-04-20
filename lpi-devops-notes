@@ -532,8 +532,7 @@ echo "Hello world. The time is now $(data -R)!" | tee /root/output.txt
 ----------------------------------------------- CONFIGURATION MANAGEMENT -----------------------------------------------
 [CONFIGURATION MANAGEMENT]
 Configuration management refers to the process of systematically handling changes to a system, maintaining integrity of a system over time.
-Configuration management resolves configuration drift. It helps on maintaining a desired state.
-Automation plays a key role in configuration management.
+Configuration management resolves configuration drift. It helps on maintaining a desired state. Automation plays a key role in configuration management.
 
 Configuration management tools:
     - Puppet.
@@ -544,8 +543,7 @@ Configuration management tools:
 IDEMPOTENT BEHAVIOUR:
 Idempotence is an operation that can be applied multiple times without changing the results beyond the initial application.
 Configuration management tools will avoid repeating tasks.
-The desired state is maintained even if you run it multiple times.
-This behavior is not necessary enforced in all cases.
+The desired state is maintained even if you run it multiple times. This behavior is not necessary enforced in all cases.
 
 ADVANTAGES OF USING CONFIGURATION MANAGEMENT TOOLS:
 Quick provisioning of new servers.
@@ -592,12 +590,13 @@ user{'myuser':
     managehome => true,
 }
 
-COMMAND puppet apply: Manages systems without needing to contact a Puppet master server.
-COMMAND puppet agent: Manages systems, with the help of a Puppet master.
-COMMAND puppet cert: Helps manage Puppet's built-in certificate authority (CA).
-COMMAND puppet module: It's a multi-purpose tool for working with Puppet modules.
-COMMAND puppet resource: It lets you interactively inspect and manipulate resources on a system.
-COMMAND puppet parser: Lets you validate Puppet code to make sure it contains no syntax errors.
+COMMANDS:
+puppet apply: Manages systems without needing to contact a Puppet master server.
+puppet agent: Manages systems, with the help of a Puppet master.
+puppet cert: Helps manage Puppet's built-in certificate authority (CA).
+puppet module: It's a multi-purpose tool for working with Puppet modules.
+puppet resource: It lets you interactively inspect and manipulate resources on a system.
+puppet parser: Lets you validate Puppet code to make sure it contains no syntax errors.
 
 
 [CHEF]
@@ -634,56 +633,57 @@ A 'chef-client' is an agent that runs nodes managed by Chef.
 The agent will bring the node into the expected state:
     - Registering and authenticating the node with the Chef server.
     - Building the node object.
-    - synchronizing cookbooks.
+    - Synchronizing cookbooks.
     - Taking the appropriate and required actions to configure the node.
     - Looking for exceptions and notifications.
 
-COMMAND chef-server-ctl:
+CHEF-SERVER COMMANDS:
+chef-server-ctl:
 The Chef server comes with this utility.
 It start and stop individual services.
 Reconfigure the Chef server.
 Gather Chef server log files.
 Backup and restore Chef server data.
 
-COMMAND chef-server-ctl restore:
+chef-server-ctl restore:
 This command restores a Chef server data from a backup.
 Structure:
     chef-server-ctl restore PATHTOBACKUP [OPTIONS]
 
-COMMAND chef-server-ctl backup-recover:
+chef-server-ctl backup-recover:
 This command forces the chef server to attempt to become the backup server.
 
-COMMAND chef-server-ctl cleanse:
+chef-server-ctl cleanse:
 This command reset the chef server to a state that it was prior to when the reconfigure was run.
 
-COMMAND chef-server-ctl gather-logs:
+chef-server-ctl gather-logs:
 It gather logs from he chef server. This creates an archive file with all important log files.
 
-COMMAND chef-server-ctl ha-status:
+chef-server-ctl ha-status:
 Used to check to see if the Chef servers are running in HA.
 
-COMMAND chef-server-ctl show-config:
+chef-server-ctl show-config:
 Display the current configuration.
 
-COMMAND chef-server-ctl start:
+chef-server-ctl start:
 Used to start a service on the Chef server.
 Structure:
     chef-server-ctl start SERVICENAME
 
-COMMAND chef-server-ctl restart:
+chef-server-ctl restart:
 Used to restart all the services that are enabled on the Chef server.
 Structure:
     chef-server-ctl restart SERVICENAME
 
-COMMAND chef-server-ctl stop:
+chef-server-ctl stop:
 Used to stop a service on the Chef server.
 Structure:
     chef-server-ctl stop SERVICENAME
 
-COMMAND chef-server-ctl service-list:
+chef-server-ctl service-list:
 List all the available services on the Chef server.
 
-COMMAND chef-server-ctl status:
+chef-server-ctl status:
 Display the status of all the services available on the Chef server.
 
 CHEF-SOLO:
@@ -717,43 +717,45 @@ COMMAND knife:
     - The installation of the chef-client on management workstations
     - Searching of indexed data on the Chef server
 
-COMMAND knife cookbook:
-Interact with cookbooks locally in the Chef server or in a local Chef.
+KNIFE COMMANDS:
+knife cookbook:
+Interact with cookbooks locally, in the Chef server, or in a local Chef.
 
-COMMAND knife cookbook generate:
+knife cookbook generate:
 Generate a cookbook.
 Structure:
     knife cookbook generate COOKBOOKNAME [OPTIONS]
 
-COMMAND knife cookbook delete:
+knife cookbook delete:
 Delete a cookbook from the Chef server.
 Structure:
     knife cookbook delete COOKBOOKNAME [COOKBOOKVERSION] [OPTIONS]
 
-COMMAND knife cookbook download:
+knife cookbook download:
 Download a cookbook from the Chef server. It place the cookbook in the current directory.
 Structure:
     knife cookbook download COOKBOOKNAME [COOKBOOKVERSION] [OPTIONS]
 
-COMMAND knife cookbook list:
+knife cookbook list:
 List all available cookbooks in the Chef server.
 Structure:
     knife cookbook list [OPTIONS]
 
-COMMAND knife cookbook metadata:
+knife cookbook metadata:
 Generate metadata for one or more cookbooks.
 Structure:
     knife cookbook metadata [OPTIONS]
 
-COMMAND knife cookbook show:
+knife cookbook show:
 Used to gather information about an specific cookbook.
 Structure:
     knife cookbook show COOKBOOKNAME
 
-COMMAND knife cookbook upload:
+knife cookbook upload:
 Used to upload one or more cookbooks to the Chef server. Only files not existing in the Chef servers are going to be uploaded.
 Structure:
     knife cookbook upload [COOKBOOKNAME...] [OPTIONS]
+
 
 [ANSIBLE]
 Ansible is an open source software that automates software provisioning, configuration management, and application deployment.
@@ -791,7 +793,7 @@ Structure:
     ansible-inventory [OPTIONS] [HOST|GROUP]
 
 COMMAND ansible-playbook:
-Runs Ansible playbooks, executing he defined tasks on the targered hosts.
+Runs Ansible playbooks, executing he defined tasks on the targeted hosts.
 Structure:
     ansible-playbook [OPTIONS] PLAYBOOK.YAML...
 
@@ -862,14 +864,12 @@ Example:
     ansible-vault create foo.yml    # Creates an encrypted file.
 
 COMMAND ansible-vault encrypt:
-Encrypt unencrypted files.
-Encryption is permanent.
+Encrypt unencrypted files. Encryption is permanent.
 Example:
     ansible-vault encrypt foo.yml bar.yml   # Encrypts the files.
 
 COMMAND ansible-vault decrypt:
-Decrypt encrypted files.
-Decryption is permanent.
+Decrypt encrypted files. Decryption is permanent.
 Example:
     ansible-vault decrypt foo.yml bar.yml   # Decrypts the encrypted files.
 

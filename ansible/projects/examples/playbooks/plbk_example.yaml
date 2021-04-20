@@ -1,4 +1,5 @@
 ---
+# Play #1:
 - hosts: webservers
   remote_user: root
   tasks:
@@ -7,6 +8,7 @@
       - name: Write the apache config file.
         template: src=/srv/httpd.j2 dest=/etc/httpd.conf
 
+# Play #2:
 - hosts: dbservers
   remote_user: root
   tasks:
