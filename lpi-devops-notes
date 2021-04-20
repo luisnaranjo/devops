@@ -897,12 +897,10 @@ Example:
 
 ----------------------------------------------- CONTAINER MANAGEMENT -----------------------------------------------
 [DOCKER]
-Docker is a container management system.
-It's designed to make it easier to create, deploy, and run applications by using containers.
+Docker is a container management system. It's designed to make it easier to create, deploy, and run applications by using containers.
 Containers package up an application with all the parts it needs.
 Containers allow applications to run on any Linux machine regardless of configuration.
-Applications run in a loosely isolated environment called a container.
-Containers are lightweight.
+Applications run in a loosely isolated environment called a container. Containers are lightweight.
 
 DOCKER ENGINE:
 Docker Engine is a client-server application with 3 major components:
@@ -910,33 +908,33 @@ Docker Engine is a client-server application with 3 major components:
     - REST API.
     - A command line interface (CLI) client.
 
-COMMAND docker attach: Attach local standard input, output, and error streams to a running container. Once you de-attach from the container, it will terminate.
-COMMAND docker build: Build an image from a Dockerfile.
-COMMAND docker exec: Allows you to execute commands in a running container. It doesn't shutdown the container.
-COMMAND docker images: List images installed in docker server.
-COMMAND docker info: Display system-wide information.
-COMMAND docker inspect: Return low-level information about Docker objects.
-COMMAND docker logs: Fetch the logs of a container.
-COMMAND docker network: Manage networks (Create, delete, connect/disconnect containers).
-COMMAND docker node: Manage Swarm nodes.
-COMMAND docker ps: List running containers.
-COMMAND docker pull: Pull an image or a repository from a registry.
-COMMAND docker push: Push an image to a registry.
-COMMAND docker restart: Restart one or more containers.
-COMMAND docker rm: Remove one or more containers.
-COMMAND docker rmi: Remove one or more images.
-COMMAND docker run: Run a command in a new container.
-COMMAND docker start: Start one or more stopped containers.
-COMMAND docker stop: stop one or more running containers.
-COMMAND docker swarm: Manage swarm.
-COMMAND docker volume: Manage Docker volumes.
+COMMANDS:
+docker attach: Attach local standard input, output, and error streams to a running container. Once you de-attach from the container, it will terminate.
+docker build: Build an image from a Dockerfile.
+docker exec: Allows you to execute commands in a running container. It doesn't shutdown the container.
+docker images: List images installed in docker server.
+docker info: Display system-wide information.
+docker inspect: Return low-level information about Docker objects.
+docker logs: Fetch the logs of a container.
+docker volume: Manage Docker volumes.
+docker network: Manage networks (Create, delete, connect/disconnect containers).
+docker node: Manage Swarm nodes.
+docker ps: List running containers.
+docker pull: Pull an image or a repository from a registry.
+docker push: Push an image to a registry.
+docker restart: Restart one or more containers.
+docker rm: Remove one or more containers.
+docker rmi: Remove one or more images.
+docker run: Run a command in a new container.
+docker start: Start one or more stopped containers.
+docker stop: stop one or more running containers.
+docker swarm: Manage swarm.
 
 
 [DOCKER IMAGES]
 A Docker image is a template. It's built up from a series of layers. Used to build a container.
 Each layer represents an instruction in the image's Dockerfile (either a command or entrypoint).
-Each layer is going to be a set of differences from the layer before it. They are stacked on stop of each other.
-Each layer except the very last one is read-only.
+Each layer is going to be a set of differences from the layer before it. They are stacked on stop of each other. Each layer except the very last one is read-only.
 
 CONTAINER AND LAYERS:
 Containers create a new writable layer on top of the underlying image layers. This is called the 'container layer'.
@@ -945,8 +943,7 @@ Data changes are stored in this writable container. When the container is delete
 
 
 [DOCKER VOLUMES]
-Volumes are the preferred method to manage persistent data with Docker.
-The content within the volume exists outside of the container's life cycle.
+Volumes are the preferred method to manage persistent data with Docker. The content within the volume exists outside of the container's life cycle.
 There are two ways of handling volumes when working with containers:
     - Bind mounts.
     - Volumes.
@@ -964,8 +961,7 @@ There are 5 different types of network drivers:
     - None.
 
 BRIDGE NETWORKS:
-Bridge network is a Link layer device. Forwards traffic between network segments.
-Can be a hardware device or a software device.
+Bridge network is a Link layer device. Forwards traffic between network segments. Can be a hardware device or a software device.
 When working with docker we use software bridge. Allows containers connected to the same bridge network to communicate with each other.
 Provides isolation from other containers not connected to the same bridge network.
 A default bridge network is created. Creating user-defined custom bridge networks is also possible.
@@ -980,10 +976,8 @@ This is the Docker host network. This network stack is not isolated from the Doc
 A container which binds to port 80 will be available on port 80 on the host's IP address.
 
 MACVLAN NETWORK:
-The MACVlan network driver assign a MAC address to each container's virtual network interface.
-It gives the appearance of being on a physical network interface.
-A physical interface on the Docker host must be designated to use for the Macvlan.
-A subnet and gateway of the Macvlan must also be designated.
+The MACVlan network driver assign a MAC address to each container's virtual network interface. It gives the appearance of being on a physical network interface.
+A physical interface on the Docker host must be designated to use for the MACVlan. A subnet and gateway of the MACVlan must also be designated.
 
 
 [DOCKERFILES]
@@ -1007,20 +1001,21 @@ Environment variables are supported by the following list of instructions in the
     - VOLUME.
     - WORKDIR.
 
-DIRECTIVE FROM: Initializes a new build stage and sets the Base image for subsequent instructions.
-DIRECTIVE RUN: Executes any commands in a new layer on top of the current image and commit the results.
-DIRECTIVE CMD: Provides defaults for an executing container.
-DIRECTIVE LABEL: Adds metadata to an image.
-DIRECTIVE MAINTAINER: Sets the Author field of the generated images.
-DIRECTIVE EXPOSE: Informs Docker that the container listens on the specified network ports at runtime.
-DIRECTIVE ENV: Sets the environment variable KEY to the value VALUE.
-DIRECTIVE ADD: Copies new files, directories, or remote files to the Docker image.
-DIRECTIVE COPY: Copies new files or directories (but not remote files) to the Docker image.
-DIRECTIVE ENTRYPOINT: Allows you to configure a container that will run as an executable. This should be set at the end of the Dockerfile. If multiple are specified, only the last one is taken.
-DIRECTIVE VOLUME: Creates a mount point.
-DIRECTIVE USER: Sets the user name used to execute commands from the RUN directive.
-DIRECTIVE WORKDIR: Sets the working directory.
-DIRECTIVE ARG: Defines a variable that users can pass at built-time.
+DIRECTIVES:
+FROM: Initializes a new build stage and sets the Base image for subsequent instructions.
+RUN: Executes any commands in a new layer on top of the current image and commit the results.
+CMD: Provides defaults for an executing container.
+LABEL: Adds metadata to an image.
+MAINTAINER: Sets the Author field of the generated images.
+EXPOSE: Informs Docker that the container listens on the specified network ports at runtime.
+ENV: Sets the environment variable KEY to the value VALUE.
+ADD: Copies new files, directories, or remote files to the Docker image.
+COPY: Copies new files or directories (but not remote files) to the Docker image.
+ENTRYPOINT: Allows you to configure a container that will run as an executable. This should be set at the end of the Dockerfile. If multiple are specified, only the last one is taken.
+VOLUME: Creates a mount point.
+USER: Sets the user name used to execute commands from the RUN directive.
+WORKDIR: Sets the working directory.
+ARG: Defines a variable that users can pass at built-time.
 
 
 [KUBERNETES]
