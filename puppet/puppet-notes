@@ -381,7 +381,7 @@ Example:
     class nginx::service {
       service { 'nginx_service':
         name       => 'nginx',
-        ensure     => 'runnning',
+        ensure     => 'running',
         enable     => true,
         hasrestart => true,
       }
@@ -705,11 +705,11 @@ For a Puppet run to apply the configs to the server and verify puppetdb is runni
 SERVER INSTALLATION #########################
 /opt/puppetlabs/bin/puppetserver ca setup   # Setup the certificate authority.
 puppetserver ca list                        # Display the CA list.
-puppetserver ca list -all                   # Display all the signed certificated.
+puppetserver ca list --all                  # Display all the signed certificated.
 
 AGENT INSTALLATION ##############################################
 puppet agent --fingerprint                                      # Print the agent fingerprint (Run this on the Agent server).
-puppetserver ca sign --certname AGENTSERVERID.mylabserver.com   # Approved a server agent (Run this on the Puppet Master).
+puppetserver ca sign --certname AGENTSERVERID.mylabserver.com   # Approve a server agent (Run this on the Puppet Master).
 
 MODULE CREATION #################################################
 pdk new module MODULE                                           # Generates the module directory skeleton.

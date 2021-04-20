@@ -24,9 +24,10 @@ user{'myuser':
     managehome => true,
 }
 
-COMMAND puppet apply: Manages systems without needing to contact a Puppet master server.
-COMMAND puppet agent: Manages systems, with the help of a Puppet master.
-COMMAND puppet cert: Helps manage Puppet's built-in certificate authority (CA).
-COMMAND puppet module: It's a multi-purpose tool for working with Puppet modules.
-COMMAND puppet resource: It lets you interactively inspect and manipulate resources on a system.
-COMMAND puppet parser: Lets you validate Puppet code to make sure it contains no syntax errors.
+COMMANDS:
+puppet apply: Manages systems without needing to contact a Puppet master server.
+puppet agent: Manages systems, with the help of a Puppet master.
+puppet cert: Helps manage Puppet's built-in certificate authority (CA).
+puppet module: It's a multi-purpose tool for working with Puppet modules.
+puppet resource: It lets you interactively inspect and manipulate resources on a system.
+puppet parser: Lets you validate Puppet code to make sure it contains no syntax errors.

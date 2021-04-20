@@ -1,7 +1,7 @@
 ---
 # This playbook is an example of the use of variables and filters.
 # This playbook will pick some hosts from the 'groups' magic variable and store the hosts list in a file (specified in a variable).
-# The obtained hosts will be ones in the 'labservers' group.
+# The obtained hosts will be the ones in the 'labservers' group.
 - hosts: local
   vars:
       inv_file: /home/user/vars/inv.txt
