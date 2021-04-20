@@ -1019,15 +1019,15 @@ ARG: Defines a variable that users can pass at built-time.
 
 
 [KUBERNETES]
-Kubernetes is an open source container orchestration tool. It was developed by Google.
-Kubernetes is container runtime-agnostic.
-Features provide everything needed for deploying containerized applications.
+Kubernetes is an open source container orchestration tool. It was developed by Google. Kubernetes is container runtime-agnostic.
+Provide features for everything needed for deploying containerized applications.
     - Container deployments & Rollout control.
     - Resource Bin Packing.
     - Built-in service discovery & Autoscaling.
     - Heterogeneous Clusters.
     - Persistent storage.
     - High availability features.
+
 
 [CONFIGURING KUBERNETES]
 Initialize Kubernetes Master.
@@ -1071,8 +1071,7 @@ Example:
 
 
 [KUBERNETES | REPLICA SETS]
-By themself, you can't update replica sets.
-You can also create a replica set with the 'kubectl create -f FILE' command.
+By themselves, you can't update replica sets. You can also create a replica set with the 'kubectl create -f FILE' command.
     kubectl create -f replicaset.yml    # Creates a replica set based on the definition file.
 
 COMMAND kubectl get replicasets:
@@ -1098,8 +1097,7 @@ Example:
 
 
 [KUBERNETES | DEPLOYMENTS]
-Deployments have a notion of lifecycle.
-You can also create a deployment with the 'kubectl create -f FILE' command.
+Deployments have a notion of lifecycle. You can also create a deployment with the 'kubectl create -f FILE' command.
     kubectl create -f deployment.yml    # Creates a deployment based on the definition file.
 
 COMMAND kubectl get deployments:
