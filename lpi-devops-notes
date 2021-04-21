@@ -1139,6 +1139,7 @@ The Docker Compose file can be either named as:
     - docker-compose.yml.
     - docker-compose-yaml.
 However, if you specify the flag '-f' the file can have any name.
+
 The command 'docker-compose create' is deprecated.
 
 COMMAND docker-compose build: It creates an image based on a Dockerfile.
@@ -1167,20 +1168,16 @@ COMMAND docker-compose config: Perform verification of the docker-compose.yml fi
 
 [DOCKER SWARM]
 Docker Swarm is a clustering and scheduling tool for Docker container. It provides redundancy for failover.
-In a Docker Swarm, containers can be added or removed as demands changes.
-Cluster management is integrated with Docker Engine by default.
-Docker Swarm has a decentralized design. It uses a declarative service model.
-It allows scaling, and desired state reconciliation.
-It supports multi-host networking, service discovery and load balancing.
-Docker Swarm is secure by default, all containers within a swarm will use MTLS authentication.
+In a Docker Swarm, containers can be added or removed as demands changes. Cluster management is integrated with Docker Engine by default.
+Docker Swarm has a decentralized design. It uses a declarative service model. It allows scaling, and desired state reconciliation.
+It supports multi-host networking, service discovery and load balancing. Docker Swarm is secure by default, all containers within a swarm will use MTLS authentication.
 We can apply rolling updates.
 
-A Docker Swarm consists on multiple Docker hosts running in swarm mode.
-Nodes can be managers, workers, or both.
+A Docker Swarm consists on multiple Docker hosts running in swarm mode. Nodes can be managers, workers, or both.
 Creating a service defines its optimal state. Docker works to maintain that desired state.
 
 NODES:
-A nodes is a Docker engine instance that participates in the swarm. There are two types of nodes:
+A node is a Docker engine instance that participates in the swarm. There are two types of nodes:
     - Manager nodes. They perform orchestration and cluster management. By default, managers are also configured to be workers, but this can be changed.
     - Worker nodes. They perform the tasks within a swarm.
 
@@ -1205,24 +1202,31 @@ Example:
     docker swarm init --advertise-addr 192.168.1.12 # Initialize the Docker Swarm using specified IP.
 
 COMMAND docker swarm join --token TOKEN MANAGERIP:MANAGERPORT: It will add the node to the swarm as a worker.
+
 COMMAND docker swarm update:
 Allows you to modify the swarm properties. Can be run only from a swarm manager.
 Example:
     docker swarm update --autolock=true     # Modify the swarm to lock it.
+
 COMMAND docker swarm unlock-key: Display or generate a new unlock key.
 
 COMMAND docker node ls: Display all the swarm nodes.
-COMMAND docker node inspect NODE..: Display detailed information on one or more nodes. This command can olny be run on swarm managers.
+
+COMMAND docker node inspect NODE..: Display detailed information on one or more nodes. This command can only be run on swarm managers.
 
 COMMAND docker service: Manage services.
+
 COMMAND docker service create: Create a service. Flags are almost identical to the ones in 'docker run' command.
 Example:
     docker service create -p 8080:80 --replicas=2 --name=nginx-test nginx:latest    # Creates a service of 2 tasks on port 8080 using nginx latest image.
     docker service create -p 8081:80 --mount source=swarm-vol,dest=/usr/share/nginx/html --replicas=2 --name=nging-vol nginx:latest # Creates a service of 2 tasks on port 8080 using a volume.
+
 COMMAND docker service ls: Lists the running services.
+
 COMMAND docker service update SERVICENAME: Updates the properties of a service.
 Example:
     docker service update --replicas=1 nginx-test   # Updates the service to only have 1 task.
+
 COMMAND docker service scale SERVICE=REPLICANUMBER: Specify the number of replicas to have on the service.
 Example:
     docker service scale nginx-test=4   # Updates the service to have 4 replicas/tasks.
@@ -1237,10 +1241,9 @@ Docker Machine allows you to install Docker Engine on:
     - Cloud providers.
 
 USES CASES:
-The ability to run Docker on Mac or Windows on older desktop systems.
-Provision Docker hosts on remote systems.
+The ability to run Docker on Mac or Windows on older desktop systems. Provision Docker hosts on remote systems.
 
-docker-machine COMMANDS:
+docker-machine commands:
     - start.
     - inspect.
     - stop.
@@ -1256,7 +1259,7 @@ DOCKER MACHINE DRIVERS:
     - Microsoft Hyper-V. In order to use this, you need to have Hyper-V enabled on your system. When Docker for Windows is used, this is enabled by default.
     - OpenStack.
     - Oracle VirtualBox.
-    - VMware vSphere
+    - VMware vSphere.
 
 To verify Docker Machine is installed you can display the version.
     docker-machine version  # Display the Docker Machine version.
