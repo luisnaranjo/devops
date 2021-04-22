@@ -1,5 +1,5 @@
 # Example of specifying container resources via a resource request.
-# CPU: 250 units (out of 1000).
+# CPU: 250 units (out of 1000. 1000 means 1 CPU).
 # Memory: 128MB.
 
 apiVersion: v1

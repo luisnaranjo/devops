@@ -897,12 +897,10 @@ Example:
 
 ----------------------------------------------- CONTAINER MANAGEMENT -----------------------------------------------
 [DOCKER]
-Docker is a container management system.
-It's designed to make it easier to create, deploy, and run applications by using containers.
+Docker is a container management system. It's designed to make it easier to create, deploy, and run applications by using containers.
 Containers package up an application with all the parts it needs.
 Containers allow applications to run on any Linux machine regardless of configuration.
-Applications run in a loosely isolated environment called a container.
-Containers are lightweight.
+Applications run in a loosely isolated environment called a container. Containers are lightweight.
 
 DOCKER ENGINE:
 Docker Engine is a client-server application with 3 major components:
@@ -910,33 +908,33 @@ Docker Engine is a client-server application with 3 major components:
     - REST API.
     - A command line interface (CLI) client.
 
-COMMAND docker attach: Attach local standard input, output, and error streams to a running container. Once you de-attach from the container, it will terminate.
-COMMAND docker build: Build an image from a Dockerfile.
-COMMAND docker exec: Allows you to execute commands in a running container. It doesn't shutdown the container.
-COMMAND docker images: List images installed in docker server.
-COMMAND docker info: Display system-wide information.
-COMMAND docker inspect: Return low-level information about Docker objects.
-COMMAND docker logs: Fetch the logs of a container.
-COMMAND docker network: Manage networks (Create, delete, connect/disconnect containers).
-COMMAND docker node: Manage Swarm nodes.
-COMMAND docker ps: List running containers.
-COMMAND docker pull: Pull an image or a repository from a registry.
-COMMAND docker push: Push an image to a registry.
-COMMAND docker restart: Restart one or more containers.
-COMMAND docker rm: Remove one or more containers.
-COMMAND docker rmi: Remove one or more images.
-COMMAND docker run: Run a command in a new container.
-COMMAND docker start: Start one or more stopped containers.
-COMMAND docker stop: stop one or more running containers.
-COMMAND docker swarm: Manage swarm.
-COMMAND docker volume: Manage Docker volumes.
+COMMANDS:
+docker attach: Attach local standard input, output, and error streams to a running container. Once you de-attach from the container, it will terminate.
+docker build: Build an image from a Dockerfile.
+docker exec: Allows you to execute commands in a running container. It doesn't shutdown the container.
+docker images: List images installed in docker server.
+docker info: Display system-wide information.
+docker inspect: Return low-level information about Docker objects.
+docker logs: Fetch the logs of a container.
+docker volume: Manage Docker volumes.
+docker network: Manage networks (Create, delete, connect/disconnect containers).
+docker node: Manage Swarm nodes.
+docker ps: List running containers.
+docker pull: Pull an image or a repository from a registry.
+docker push: Push an image to a registry.
+docker restart: Restart one or more containers.
+docker rm: Remove one or more containers.
+docker rmi: Remove one or more images.
+docker run: Run a command in a new container.
+docker start: Start one or more stopped containers.
+docker stop: stop one or more running containers.
+docker swarm: Manage swarm.
 
 
 [DOCKER IMAGES]
 A Docker image is a template. It's built up from a series of layers. Used to build a container.
 Each layer represents an instruction in the image's Dockerfile (either a command or entrypoint).
-Each layer is going to be a set of differences from the layer before it. They are stacked on stop of each other.
-Each layer except the very last one is read-only.
+Each layer is going to be a set of differences from the layer before it. They are stacked on stop of each other. Each layer except the very last one is read-only.
 
 CONTAINER AND LAYERS:
 Containers create a new writable layer on top of the underlying image layers. This is called the 'container layer'.
@@ -945,8 +943,7 @@ Data changes are stored in this writable container. When the container is delete
 
 
 [DOCKER VOLUMES]
-Volumes are the preferred method to manage persistent data with Docker.
-The content within the volume exists outside of the container's life cycle.
+Volumes are the preferred method to manage persistent data with Docker. The content within the volume exists outside of the container's life cycle.
 There are two ways of handling volumes when working with containers:
     - Bind mounts.
     - Volumes.
@@ -964,8 +961,7 @@ There are 5 different types of network drivers:
     - None.
 
 BRIDGE NETWORKS:
-Bridge network is a Link layer device. Forwards traffic between network segments.
-Can be a hardware device or a software device.
+Bridge network is a Link layer device. Forwards traffic between network segments. Can be a hardware device or a software device.
 When working with docker we use software bridge. Allows containers connected to the same bridge network to communicate with each other.
 Provides isolation from other containers not connected to the same bridge network.
 A default bridge network is created. Creating user-defined custom bridge networks is also possible.
@@ -980,10 +976,8 @@ This is the Docker host network. This network stack is not isolated from the Doc
 A container which binds to port 80 will be available on port 80 on the host's IP address.
 
 MACVLAN NETWORK:
-The MACVlan network driver assign a MAC address to each container's virtual network interface.
-It gives the appearance of being on a physical network interface.
-A physical interface on the Docker host must be designated to use for the Macvlan.
-A subnet and gateway of the Macvlan must also be designated.
+The MACVlan network driver assign a MAC address to each container's virtual network interface. It gives the appearance of being on a physical network interface.
+A physical interface on the Docker host must be designated to use for the MACVlan. A subnet and gateway of the MACVlan must also be designated.
 
 
 [DOCKERFILES]
@@ -1007,32 +1001,33 @@ Environment variables are supported by the following list of instructions in the
     - VOLUME.
     - WORKDIR.
 
-DIRECTIVE FROM: Initializes a new build stage and sets the Base image for subsequent instructions.
-DIRECTIVE RUN: Executes any commands in a new layer on top of the current image and commit the results.
-DIRECTIVE CMD: Provides defaults for an executing container.
-DIRECTIVE LABEL: Adds metadata to an image.
-DIRECTIVE MAINTAINER: Sets the Author field of the generated images.
-DIRECTIVE EXPOSE: Informs Docker that the container listens on the specified network ports at runtime.
-DIRECTIVE ENV: Sets the environment variable KEY to the value VALUE.
-DIRECTIVE ADD: Copies new files, directories, or remote files to the Docker image.
-DIRECTIVE COPY: Copies new files or directories (but not remote files) to the Docker image.
-DIRECTIVE ENTRYPOINT: Allows you to configure a container that will run as an executable. This should be set at the end of the Dockerfile. If multiple are specified, only the last one is taken.
-DIRECTIVE VOLUME: Creates a mount point.
-DIRECTIVE USER: Sets the user name used to execute commands from the RUN directive.
-DIRECTIVE WORKDIR: Sets the working directory.
-DIRECTIVE ARG: Defines a variable that users can pass at built-time.
+DIRECTIVES:
+FROM: Initializes a new build stage and sets the Base image for subsequent instructions.
+RUN: Executes any commands in a new layer on top of the current image and commit the results.
+CMD: Provides defaults for an executing container.
+LABEL: Adds metadata to an image.
+MAINTAINER: Sets the Author field of the generated images.
+EXPOSE: Informs Docker that the container listens on the specified network ports at runtime.
+ENV: Sets the environment variable KEY to the value VALUE.
+ADD: Copies new files, directories, or remote files to the Docker image.
+COPY: Copies new files or directories (but not remote files) to the Docker image.
+ENTRYPOINT: Allows you to configure a container that will run as an executable. This should be set at the end of the Dockerfile. If multiple are specified, only the last one is taken.
+VOLUME: Creates a mount point.
+USER: Sets the user name used to execute commands from the RUN directive.
+WORKDIR: Sets the working directory.
+ARG: Defines a variable that users can pass at built-time.
 
 
 [KUBERNETES]
-Kubernetes is an open source container orchestration tool. It was developed by Google.
-Kubernetes is container runtime-agnostic.
-Features provide everything needed for deploying containerized applications.
+Kubernetes is an open source container orchestration tool. It was developed by Google. Kubernetes is container runtime-agnostic.
+Provide features for everything needed for deploying containerized applications.
     - Container deployments & Rollout control.
     - Resource Bin Packing.
     - Built-in service discovery & Autoscaling.
     - Heterogeneous Clusters.
     - Persistent storage.
     - High availability features.
+
 
 [CONFIGURING KUBERNETES]
 Initialize Kubernetes Master.
@@ -1076,8 +1071,7 @@ Example:
 
 
 [KUBERNETES | REPLICA SETS]
-By themself, you can't update replica sets.
-You can also create a replica set with the 'kubectl create -f FILE' command.
+By themselves, you can't update replica sets. You can also create a replica set with the 'kubectl create -f FILE' command.
     kubectl create -f replicaset.yml    # Creates a replica set based on the definition file.
 
 COMMAND kubectl get replicasets:
@@ -1103,8 +1097,7 @@ Example:
 
 
 [KUBERNETES | DEPLOYMENTS]
-Deployments have a notion of lifecycle.
-You can also create a deployment with the 'kubectl create -f FILE' command.
+Deployments have a notion of lifecycle. You can also create a deployment with the 'kubectl create -f FILE' command.
     kubectl create -f deployment.yml    # Creates a deployment based on the definition file.
 
 COMMAND kubectl get deployments:
@@ -1146,6 +1139,7 @@ The Docker Compose file can be either named as:
     - docker-compose.yml.
     - docker-compose-yaml.
 However, if you specify the flag '-f' the file can have any name.
+
 The command 'docker-compose create' is deprecated.
 
 COMMAND docker-compose build: It creates an image based on a Dockerfile.
@@ -1174,20 +1168,16 @@ COMMAND docker-compose config: Perform verification of the docker-compose.yml fi
 
 [DOCKER SWARM]
 Docker Swarm is a clustering and scheduling tool for Docker container. It provides redundancy for failover.
-In a Docker Swarm, containers can be added or removed as demands changes.
-Cluster management is integrated with Docker Engine by default.
-Docker Swarm has a decentralized design. It uses a declarative service model.
-It allows scaling, and desired state reconciliation.
-It supports multi-host networking, service discovery and load balancing.
-Docker Swarm is secure by default, all containers within a swarm will use MTLS authentication.
+In a Docker Swarm, containers can be added or removed as demands changes. Cluster management is integrated with Docker Engine by default.
+Docker Swarm has a decentralized design. It uses a declarative service model. It allows scaling, and desired state reconciliation.
+It supports multi-host networking, service discovery and load balancing. Docker Swarm is secure by default, all containers within a swarm will use MTLS authentication.
 We can apply rolling updates.
 
-A Docker Swarm consists on multiple Docker hosts running in swarm mode.
-Nodes can be managers, workers, or both.
+A Docker Swarm consists on multiple Docker hosts running in swarm mode. Nodes can be managers, workers, or both.
 Creating a service defines its optimal state. Docker works to maintain that desired state.
 
 NODES:
-A nodes is a Docker engine instance that participates in the swarm. There are two types of nodes:
+A node is a Docker engine instance that participates in the swarm. There are two types of nodes:
     - Manager nodes. They perform orchestration and cluster management. By default, managers are also configured to be workers, but this can be changed.
     - Worker nodes. They perform the tasks within a swarm.
 
@@ -1212,24 +1202,31 @@ Example:
     docker swarm init --advertise-addr 192.168.1.12 # Initialize the Docker Swarm using specified IP.
 
 COMMAND docker swarm join --token TOKEN MANAGERIP:MANAGERPORT: It will add the node to the swarm as a worker.
+
 COMMAND docker swarm update:
 Allows you to modify the swarm properties. Can be run only from a swarm manager.
 Example:
     docker swarm update --autolock=true     # Modify the swarm to lock it.
+
 COMMAND docker swarm unlock-key: Display or generate a new unlock key.
 
 COMMAND docker node ls: Display all the swarm nodes.
-COMMAND docker node inspect NODE..: Display detailed information on one or more nodes. This command can olny be run on swarm managers.
+
+COMMAND docker node inspect NODE..: Display detailed information on one or more nodes. This command can only be run on swarm managers.
 
 COMMAND docker service: Manage services.
+
 COMMAND docker service create: Create a service. Flags are almost identical to the ones in 'docker run' command.
 Example:
     docker service create -p 8080:80 --replicas=2 --name=nginx-test nginx:latest    # Creates a service of 2 tasks on port 8080 using nginx latest image.
     docker service create -p 8081:80 --mount source=swarm-vol,dest=/usr/share/nginx/html --replicas=2 --name=nging-vol nginx:latest # Creates a service of 2 tasks on port 8080 using a volume.
+
 COMMAND docker service ls: Lists the running services.
+
 COMMAND docker service update SERVICENAME: Updates the properties of a service.
 Example:
     docker service update --replicas=1 nginx-test   # Updates the service to only have 1 task.
+
 COMMAND docker service scale SERVICE=REPLICANUMBER: Specify the number of replicas to have on the service.
 Example:
     docker service scale nginx-test=4   # Updates the service to have 4 replicas/tasks.
@@ -1244,10 +1241,9 @@ Docker Machine allows you to install Docker Engine on:
     - Cloud providers.
 
 USES CASES:
-The ability to run Docker on Mac or Windows on older desktop systems.
-Provision Docker hosts on remote systems.
+The ability to run Docker on Mac or Windows on older desktop systems. Provision Docker hosts on remote systems.
 
-docker-machine COMMANDS:
+docker-machine commands:
     - start.
     - inspect.
     - stop.
@@ -1263,7 +1259,7 @@ DOCKER MACHINE DRIVERS:
     - Microsoft Hyper-V. In order to use this, you need to have Hyper-V enabled on your system. When Docker for Windows is used, this is enabled by default.
     - OpenStack.
     - Oracle VirtualBox.
-    - VMware vSphere
+    - VMware vSphere.
 
 To verify Docker Machine is installed you can display the version.
     docker-machine version  # Display the Docker Machine version.
