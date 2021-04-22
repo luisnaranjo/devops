@@ -19,7 +19,7 @@ AUTOMATION:
 Kubernetes offers a variety of features to help automate the management of your container apps.
 
 
-[K8S ARCHITECTUAL OVERVIEW]
+[K8S ARCHITECTURAL OVERVIEW]
 CONTROL PLANE:
 The control plane is a collection of multiple components responsible for managing the cluster itself globally.
 Essentially, the control plane controls the cluster.
@@ -92,7 +92,7 @@ INSTALL K8S PACKAGES (All nodes):
 On all nodes, install kubeadm, kubelet, kubectl:
     sudo apt-get update && sudo apt-get install -y apt-transport-https curl                 # Install dependencies.
     curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -      # Add the GPG key.
-    vi /etc/apt/sources.list.d/kubernetes.list                                            # Configure the Kubernetes repo.
+    vi /etc/apt/sources.list.d/kubernetes.list                                              # Configure the Kubernetes repo.
         deb https://apt.kubernetes.io/ kubernetes-xenial main
 
     sudo apt-get update
@@ -141,7 +141,7 @@ Namespaces are a way to divide cluster resources between multiple users.
 Namespaces provide scope for names. Names of resources need to be unique within a namespace, but not across namespaces.
 Namespaces cannot be nested inside one another and each Kubernetes resource can only be in one namespace.
 
-It's not necessary to sue multiple namespaces just to separate slightly different resources, such as different versions of the same software.
+You don't need to create multiple namespaces just to separate slightly different resources, such as different versions of the same software.
 Use "labels" to distinguish resources within the same namespace.
 
 All clusters have a "default" namespace. This is used when no other namespace is specified.
@@ -175,7 +175,7 @@ With HA in a K8s cluster, you have several ways to manage etcd.
 STACKED ETCD:
 With Stacked etcd, etcd runs on the same servers/nodes as the rest of the control plane components.
 This setup is used with clusters configured using kubeadm.
-In this setup, each control plane node with have its own etcd instance.
+In this setup, each control plane node will have its own etcd instance.
 
 EXTERNAL ETCD:
 With stacked etcd, etcd is running on the same node as the control plane components.
@@ -283,7 +283,7 @@ You would need to perform this step on every worker node when upgrading your clu
 Drain the worker node from the cluster, by running the next in a control plane node.
     kubectl drain WORKERNODE --ignore-daemonsets --force
 The "--force" flag is needed in case you have a single pod running on the node.
-Before using this flag, make sure the pod can be removed without issues, since this will delete it form the cluster (it won't be replicated on another worker node).
+Before using this flag, make sure the pod can be removed without issues, since this will delete it from the cluster (it won't be replicated on another worker node).
 
 Upgrade kubeadm. On the worker node, upgrade the kubeadm package.
     sudo apt-get update && sudo apt-get install -y --allow-change-held-packages kubeadm=1.20.2-00
@@ -309,7 +309,7 @@ From the control plane node, uncordon the worker node.
 All Kubernetes objects are stored in etcd. Periodically backing up the etcd cluster data is important to recover Kubernetes clusters under disaster scenarios, such as losing all control plane nodes.
 The snapshot file contains all the Kubernetes states and critical information. In order to keep the sensible Kubernetes data safe, encrypt the snapshot files.
 
-Backing up and etcd cluster can be accomplished in 2 ways:
+Backing up an etcd cluster can be accomplished in 2 ways:
     - etcd built-in snapshot.
     - Volume snapshot (outside of the etcd solution).
 
@@ -325,7 +325,7 @@ If etcd is running on a storage volume that supports backup, such as AWS Elastic
 
 RESTORING ETCD:
 etcd supports restoring from snapshots that are taken from an etcd process of the major.minor version.
-Restoring a version from a different patch version of etcd also is supported. A restore operation is employed to recover data of a failed cluster.
+Restoring a version from a different patch version of etcd is also supported. A restore operation is employed to recover data of a failed cluster.
 
 Before starting the restore operation, a snapshot file must be present. It can be either a snapshot file from a previous backup operation, or from a remaining data directory.
 
@@ -375,7 +375,7 @@ Where:
 COMMAND KUBECTL GET:
 Use kubectl get to list objects in the Kubernetes cluster.
 Structure:
-    kubectl get OBJECTTIME OBJECTNAME [FLAGS]
+    kubectl get OBJECTTYPE OBJECTNAME [FLAGS]
 Flags:
     - -o OUTPUT: Set output format.
     - --sort-by JSONPATH: Sort output using a JSONPath expression.
@@ -430,7 +430,7 @@ Example:
 
 
 [KUBECTL TIPS]
-IMPERATIVE COMMANDS
+IMPERATIVE COMMANDS:
 When creating Kubernetes objects there are two ways to do so.
 The first one and the mostly used is the Declarative commands. On this you define objects using data structures such as YAML or JSON and specify the files in the command line.
     kubectl create -f deployment.yml
@@ -439,11 +439,12 @@ The second way is with imperative commands. Here you define the objects using ku
     kubectl create deployment my-deployment --image=nginx      # Create a deployment named my-deployment with the nginx image.
 
 QUICK SAMPLE YAML:
-You can use "--dry-run" flag to run an imperative command without creating an object.
-Combine it with "-o yaml" option to quickly obtain a sample YAML file you can manipulate. By default it will write the YAML definition in STDOUT, you would need redirect to write it to a file.
+You can use "--dry-run" flag to run an imperative or declarative command without creating an object.
+Combine it with "-o yaml" option on a imperative command to quickly obtain a sample YAML file you can manipulate.
+By default it will write the YAML definition in STDOUT, you would need redirect to write it to a file.
     kubectl create deployment my-deployment --image=nginx --dry-run -o yaml    # Run the command without creating the object to create a sample YAML definition for the specified deployment.
 
-RECORD A COMMAND
+RECORD A COMMAND:
 You can use the "--record" flag to record the command that was used to make a change.
 This will save the command in the object's annotations, and can be reviewed via the kubectl describe command.
     kubectl scale deployment my-deployment replicas=5 --record      # Record the command in the object annotations.
