@@ -502,8 +502,7 @@ roleRef:
 [CREATING SERVICEACCOUNTS]
 A service account provides an identity for processes that run in a Pod.
 When you (a human) access the cluster (for example, using kubectl), you are authenticated by the apiserver as a particular User Account (currently this is usually "admin", unless your cluster admin has customized the cluster).
-Processes in containers inside pods can also contact the apiserver.
-When they do, they are authenticated as a particular Service Account (for example "default").
+Processes in containers inside pods can also contact the apiserver. When they do, they are authenticated as a particular Service Account (for example "default").
 
 RBAC is a powerful way to manage access to Kubernetes resources for regular user accounts.
 However, you can also use it to manage access from within your Pods. Service Accounts allow you to control the ways in which Pods in the cluster can utilize the K8s API.
@@ -520,7 +519,7 @@ metadata:
 You can use the imperative commands to create Service Accounts to.
     kubectl create serviceaccount my-serviceaccount2 -n my-namespace    # Create my-serviceaccount2 SA in the specified namespace.
 
-To check your services accounts you can use command:
+To check your service accounts you can use command:
     kubectl get sa          # Display a list of the existing Service Accounts in default Namespace.
 
 To check in-depth information about a Service Account you can use command:
@@ -545,14 +544,14 @@ You can examine application performance in a Kubernetes cluster by examining the
 Kubernetes provides detailed information about an application's resource usage at each of these levels.
 
 In Kubernetes, application monitoring doesn't depend on a single monitoring solution.
-On new cluster, you can use "resource metrics" or "full metrics" pipelines to collect monitoring statistics.
+On a new cluster, you can use "resource metrics" or "full metrics" pipelines to collect monitoring statistics.
 
-Resource metrics pipeline:
+RESOURCE METRICS PIPELINE:
 The resource metrics pipeline provides a limited set of metrics related to the cluster components such as the Horizontal Pod Autoscaler controller, as well as the "kubectl top" utility.
 These metrics are collected by the lightweight, short-term, in-memory "metrics-server" and are exposed via the "metrics.k8s.io" API.
-"metrics-servicer" discovers all nodes on the cluster and queries each node's kubelet for CPU and memory usage.
+"metrics-server" discovers all nodes on the cluster and queries each node's kubelet for CPU and memory usage.
 
-Full metrics pipeline:
+FULL METRICS PIPELINE:
 A full metrics pipeline gives you access to richer metrics.
 Kubernetes can respond to these metrics by automatically scaling or adapting the cluster based on its current state, using mechanisms such as the Horizontal Pod Autoscaler.
 The monitoring pipeline fetches metrics from the kubelet and then exposes them to Kubernetes via an adapter by implementing either the "custom.metrics.k8s.io" or "external.k8s.io" API.
@@ -632,8 +631,8 @@ data:
 NOTE: Kubernetes Secrets are, by default, stored as unencrypted base64-encoded strings.
 By default they can be retrieved (as plain text) by anyone with API access, or anyone with access to Kubernetes' underlying data store, etcd.
 In order to safely use Secrets, it's recommended you (at least):
-    1. Enable Encryption at Rest for Secrets.
-    2.  Enable or configure RVAB rules that restricts reading and writing the Secret.
+    1.  Enable Encryption at Rest for Secrets.
+    2.  Enable or configure RBAC rules that restricts reading and writing the Secret.
         Be aware that secrets can be obtained implicitly by anyone with the permission to create a Pod.
 
 ENVIRONMENT VARIABLES:
@@ -681,7 +680,7 @@ Containers are allowed to use more (or less) than the requested resources. Resou
 
 Memory is measured in bytes. CPU is measured in CPU units, which are 1/1000 of one CPU.
 
-When creating a Pod with a resource request bigger than the resources in any node, the pod will be in "Pending" waiting until a node matches with the required resources.
+When creating a Pod with a resource request bigger than the resources in any node, the pod will be in "Pending" state, waiting until a node matches with the required resources.
 It may be in Pending state indefinitely if a node doesn't have the resources.
 
 Example:
@@ -794,7 +793,7 @@ After containers in a Pod exit, the kubelet restarts them an exponential back-of
 Once a container has executed for 10 minutes without any problems, the kubelet resets the restart backoff timer for that container.
 
 RESTART POLICY 'Always':
-Always is the default restart policy in K8s. With this policy, containers will always be restarted if they stop, even if they completed sucessfuly.
+Always is the default restart policy in K8s. With this policy, containers will always be restarted if they stop, even if they completed successfully.
 Use this policy for applications that should always be running.
 
 RESTART POLICY 'OnFailure':
@@ -855,7 +854,7 @@ If you specify multiple init containers for a Pod, kubelet runs each init contai
 When all of the init containers have run to completion, kubelet initializes the application containers for the Pod and runs them as usual.
 
 You can use init containers to perform a variety of startup tasks. They can contain and use software and setup scripts that are not needed by your main containers.
-They are often useful in keeping your main containers lighter and mroe secure by offloading startup tasks to a separate container.
+They are often useful in keeping your main containers lighter and more secure by offloading startup tasks to a separate container.
 
 USE CASES:
     - Cause a Pod to wait for another K8s resource to be created before finishing startup.
@@ -911,7 +910,7 @@ NODENAME:
 You can bypass scheduling and assign a Pod to a specific Node by name using nodeName. nodeName is a field of PodSpec.
 Some of the limitations of using nodeName to select nodes are:
     - If the named node doesn't exists, the pod won't run, and in some cases may be automatically deleted.
-    - If the named node doesn't have the resources to accommodate the Pod, the Pod will fails and its reason will indicate why, for example OutOfmemory or OutofCpu
+    - If the named node doesn't have the resources to accommodate the Pod, the Pod will fails and its reason will indicate why, for example OutOfmemory or OutofCpu.
     - Node names in cloud environments are not always predictable or stable.
 
 Example:
@@ -1008,11 +1007,11 @@ Scaling refers to dedicating more (or fewer) resources to an application in orde
 K8s Deployments are very useful in "horizontal scaling", which involves changing the number of containers running an application.
 
 DEPLOYMENT SCALING:
-The Deployment's "replicas" stting determines how many replicas are desired in its desired state.
+The Deployment's "replicas" setting determines how many replicas are desired in its desired state.
 If the "replicas" number is changed, replica Pods will be created or deleted to satisfy the new number.
 
 HOW TO SCALE A DEPLOYMENT:
-You cans scale a deployment simply by changing the number of "replicas" in the YAML descriptor with "kubectl apply" command.
+You can scale a deployment simply by changing the number of "replicas" in the YAML descriptor with "kubectl apply" command.
 Or by using "kubectl edit" to edit the deployment's YAML descriptor in place.
 Example:
 ...
@@ -1025,7 +1024,6 @@ The other way is by using the special "kubectl scale" command. This command is s
 
 
 [MANAGING ROLLING UPDATES WITH DEPLOYMENTS]
-
 ROLLING UDPATE:
 Rolling updates allow you to make changes to a Deployment's Pods at controlled rate, gradually replacing old Pods with new Pods.
 This allows you to update your Pods without incurring downtime.
@@ -1049,7 +1047,7 @@ To display the history of the rollouts in a deployment, you can use the "kubectl
 If you add the "--record" flag at the moment of the rollout, you will find the command that cased the change in the history notations.
     kubectl rollout history deployment.v1.apps/my-deployment    # Display the rollout history of "my-deployment".
 
-To perform a rollback by unding the last rollout, you can use the next command:
+To perform a rollback by undoing the last rollout, you can use the next command:
     kubectl rollout undo deployment.v1.apps/DEPLOYMENT
     kubectl rollout undo deployment.v1.apps/my-deployment       # Rollback the last rollout.
 To rollout to an specific revision version, you can use the "--to-revision" flag
@@ -1064,7 +1062,6 @@ This means that when you roll an update, or roll back to an earlier revision, on
 
 ----------------------------------------------- NETWORKING -----------------------------------------------
 [K8S NETWORKING ARCHITECTUAL OVERVIEW]
-
 KUBERNETES NETWORK MODE:
 The Kubernetes network model is a set of standards that define how networking between Pods behaves.
 There are a variety of different implementations of this model, including the Calico network plugin.
@@ -1075,8 +1072,8 @@ Each Pod has its own unique IP address within the cluster. Any Pod can reach any
 This creates a virtual network that allows Pods to easily communicate with each other, regardless of which node they are on.
 
 Kubernetes imposes the following fundamental requirements on any networking implementation (barring any intentional network segmentation policies):
-    - pods on a node can communicate with all Pods on all notes without NAT.
-    - agents on a node (e.g., system daemons, kubelet) can communicate with all pods on that node.
+    - Pods on a node can communicate with all Pods on all notes without NAT.
+    - Agents on a node (e.g., system daemons, kubelet) can communicate with all pods on that node.
 
 NOTE: For platforms that support "Pods" running in the host network (e.g. Linux):
     - Pods in the host network of a node can communicate with all Pods on all nodes without NAT.
@@ -1094,17 +1091,15 @@ It's possible to request ports on the "Node" itself which forward to your Pod (c
 [CNI PLUGINS OVERVIEW]
 Network plugins in Kubernetes come in a few flavors:
     - CNI plugins:  Adhere to the Container Network Interface (CNI) specification designed for interoperability.
-                    Kubernetes follows the v0.4.0release of the CNI specification.
+                    Kubernetes follows the v0.4.0 release of the CNI specification.
     - Kubenet plugin: Implements basic "cbr0" using the "bridge" and "host-local" CNI plugins.
 
 CNI plugins are a type of Kubernetes network plugin.
-These plugins provide network connectivity between Pods according to the standard set by the Kubernetes network model.
-There are many CNI network plugins.
+These plugins provide network connectivity between Pods according to the standard set by the Kubernetes network model. There are many CNI network plugins.
 
 SELECTING A NETWORK PLUGIN:
 Which network plugin is best for you will depend on your specific situation. Check the Kubernetes documentation for a list of available plugins.
-You may need to research some of these plugins for yourself, depending on your production use case.
-Some examples of network plugins are:
+You may need to research some of these plugins for yourself, depending on your production use case. Some examples of network plugins are:
     - Calico.
     - Flannel.
 
@@ -1134,8 +1129,7 @@ Example:
 A Pod in the "default" namespace with the IP address "192.168.10.100" would have a domain name as:
     192-168-10-100.default.pod.cluster.local
 
-Since the Pod IP is part of the Pod's DNS name is not that useful.
-DNS name are really useful when used with Services.
+Since the Pod IP is part of the Pod's DNS name is not that useful. DNS name are really useful when used with Services.
 
 
 [USING NETWORK POLICIES]
@@ -1153,9 +1147,8 @@ The entities that a Pod can communicate with are identified through a combinatio
 When defining a Pod- or Namespace-based NetworkPolicy, you use a "selector" to specify what traffic is allowed to and from the Pod(s) that match that selector.
 Meanwhile, when IP based NetworkPolicies are created, you define policies based on IP blocks (CIDR ranges).
 
-NOTE: Network policies are implemented by the "network plugin".
-To use network policies, you must be using a networking solution which supports NetworkPolicy.
-Creatinga NetworkPolicy resource without a controller that implements it will have no effect.
+NOTE: Network policies are implemented by the "network plugin". To use network policies, you must be using a networking solution which supports NetworkPolicy.
+Creating a NetworkPolicy resource without a controller that implements it will have no effect.
 
 NETWORK POLICIES' COMPONENTS - podSelector:
 A podSelector determines to which Pods in the namespace the NetworkPolicy applies. The podSelector can select Pods using Pod labels.
@@ -1277,7 +1270,7 @@ This service type only work with cloud platforms that include load balancing fun
 
 To display a Service's endpoints you can run the next command:
     kubectl get endpoints SERVICE
-    kubectl get endpoint my-clusterip-svc   # Display the Service endpoints (Pod IPs).
+    kubectl get endpoints my-clusterip-svc   # Display the Service endpoints (Pod IPs).
 
 To reference or hit the service you would need to specify only the service name.
     kubectl exec TESTINGPOD -- curl SERVICE:PORT
@@ -1540,7 +1533,7 @@ spec:
 
 USING A PersistentVolumeClaim IN A POD:
 PersistentVolumeClaims can be mounted to a Pod's containers just like any other volume.
-If the PersistentVolumeClaim is bound to a PersistentVolime, the containers will use the underlying PersistentVolume storage.
+If the PersistentVolumeClaim is bound to a PersistentVolume, the containers will use the underlying PersistentVolume storage.
 
 Example:
 apiVersion: v1
@@ -1649,7 +1642,7 @@ When troubleshooting issues with containers, it will likely become necessary to 
 
 CONTAINER LOGGING:
 K8s containers maintain logs, which you can use to gain insight into what is going on within the container.
-A container's log container everything written to the standard output (STDOUT) and error (STDERR) streams by the container process.
+A container's log contains everything written to the standard output (STDOUT) and error (STDERR) streams by the container process.
 
 COMMAND kubectl logs:
 Use the kubectl logs command to view a container's logs.
@@ -1758,7 +1751,7 @@ kubectl rollout undo deployment.v1.apps/my-deployment                   # Rollba
 kubectl rollout undo deployment.v1.apps/my-deployment --to-revision=1   # Rollback the deployment back to revision 1.
 
 USING K8S SERVICES ##########################################
-kubectl get endpoint my-clusterip-svc                       # Display the Service endpoints (Pod IPs).
+kubectl get endpoints my-clusterip-svc                      # Display the Service endpoints (Pod IPs).
 kubectl exec svc-testing-pod -- curl my-cluster-ip-svc      # Hits a Pod via a service.
 
 USING K8S PERSISTENT VOLUMES ####
