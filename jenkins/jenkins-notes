@@ -3,9 +3,7 @@
 CONTINUOUS INTEGRATION (CI):
 Continuous integration (CI) is the development practice of frequently merging code changes done by developers.
 Continuous integration (CI) is a critical part of any DevOps pipeline.
-Code is merged constantly throughout the day.
-Automated tests are executed to verify the build.
-Rinse and repeat.
+Code is merged constantly throughout the day. Automated tests are executed to verify the build. Rinse and repeat.
 
 How does it looks like:
 Usually a CI server is involved.
@@ -18,11 +16,11 @@ Automated tests are executed against the build.
 Developers are notified if the build fails.
 
 Why do continuous integration:
-Early detection of certain types of bugs.
-Eliminate the scramble to integrate just before a big release.
-Makes frequent releases possible.
-Makes continuous testing possible.
-Encourages good coding practices.
+    - Early detection of certain types of bugs.
+    - Eliminate the scramble to integrate just before a big release.
+    - Makes frequent releases possible.
+    - Makes continuous testing possible.
+    - Encourages good coding practices.
 
 CONTINUOUS DELIVERY (CD):
 Continuous delivery (CD) is the practice of continuously maintaining code in a deployable state. Code is always in a deployable state.
@@ -31,8 +29,7 @@ Most of the time you can use the terms continuous delivery and continuous deploy
 
 [CI/CD PRINCIPLES & PRACTICES -- CONTINUOUS DEPLOYMENT]
 Continuous deployment is the practice of frequently deploying small code changes to production. Code is always in a deployable state.
-Code is deployed to production frequently. Deploying code to production multiple times a day is common.
-Deployments to production are routine and commonplace.
+Code is deployed to production frequently. Deploying code to production multiple times a day is common. Deployments to production are routine and commonplace.
 
 Continuous Deployment takes the code that you have created through the CI/CD process and automates the deployment step.
     - Infrastructure: The infrastructure should support automated deployments.
@@ -135,7 +132,7 @@ Jenkins can be containerized and run in cloud environments.
 
 JENKINS X:
 Jenkins X leverages Kubernetes and containers to create build environments as needed, and on the fly.
-This is not specifically a Jenkins installation., but is a way of configuring Jenkins so that it operates in a "cloud-native" fashion.
+This is not specifically a Jenkins installation, but is a way of configuring Jenkins so that it operates in a "cloud-native" fashion.
 
 
 [JENKINS GUI]
@@ -302,7 +299,7 @@ Each build produces its own artifacts and these need to be tracked to the build 
 FINGERPRINT:
 A fingerprint is the MD5 checksum of the artifact. The process of fingerprinting must be enabled in the job configuration, in the "Post-build Actions" section.
 
-LINKINS JOBS:
+LINKING JOBS:
 In cases where the artifact from one build is used in another build, you may want to run the second build anytime that you change the first build.
 In an automated build environment, you would link these jobs together using a trigger, to ensure that the second build passes tests and can be built successfully.
 
@@ -328,7 +325,7 @@ Examples:
     curl -X POST -u USERNAME:APITOKEN http://JENKINSMASTERURL/job/JOBNAME/config.xml -d "@apiconfig.xml"    # Configure the job with the data specified in the xml passed.
 
 USING THE JENKINS CLI:
-The Jenkins command line interface (CLI) is provided via a java (jar) file that is included in the Jenkins package. This allows you to address the CLI for command execution form a program.
+The Jenkins command line interface (CLI) is provided via a java (jar) file that is included in the Jenkins package. This allows you to address the CLI for command execution from a program.
 This CLI is extensive, and additional commands can be added via plugins. The CLI by default uses the same port that is defined for JNLP agents.
 The CLI client can connect via HTTP, WebSockets, or SSH. This last option makes it important that SSH Keys are set for users that are responsible for administration of the Jenkins master.
 The CLI can perform the same tasks as the API, such as starting and creating builds, but it's more functional and extensive than the API.
@@ -362,7 +359,7 @@ If you aren't familiar with the structure of a Jenkinsfile, this is an excellent
 
 [SCRIPTED PIPELINES]
 Scripted Pipelines tend to follow an imperative model. This means that they describe how something should be accomplished. They are based on a programming language named Groovy.
-This provides a very versatile environment nd presents more flexibility and choice for when you want to have total control over the Pipeline.
+This provides a very versatile environment and presents more flexibility and choice for when you want to have total control over the Pipeline.
 Scripted Pipelines are only limited by the Groovy programming language. A Scripted Pipeline is a fully-featured and extensible Groovy programming environment.
 
 
@@ -516,7 +513,7 @@ Authorization:
     - What are your user permissions?
 
 AUTHENTICATION:
-A security real determines where authentication occurs.
+A security realm determines where authentication occurs.
 Jenkins security realms (Availability depends on installed plugins):
     - LDAP/Active Directory: This is used in larger organizations where a central directory is used for user authentication or single sign-on.
     - Servlet Container: This uses the underlying container in which Jenkins is running to apply permissions. (Jetty).
