@@ -1871,7 +1871,7 @@ The command saves your local modifications away and reverts the working director
 
 COMMAND git push: Push commits to the remote repository (origin).
 Example:
-    git push origin master  # Push the commits to the remote repository from the master branch.
+    git push origin master  # Push the commits to the remote repository in the master branch.
 
 COMMAND git pull: Pull commits from the remote repository that are not in our local repository.
 Example:
@@ -1957,8 +1957,7 @@ Example:
 Tags are a fixed point in your repositories history and are a good way to deploy your code to production.
 
 COMMAND git tag: Allow you to work with Git tags.
-To push the tag to the remove repository you need to use 'git push REMOTEREPO TAG'.
-You can switch to the tag using the 'git checkout TAG'.
+To push the tag to the remove repository you need to use 'git push REMOTEREPO TAG'. You can switch to the tag using the 'git checkout TAG'.
 Flags:
     - -d TAG: Delete a tag.
 Structure:
