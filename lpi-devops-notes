@@ -2263,7 +2263,7 @@ The following HTTP request methods use a pre-flight request (requests that uses 
     - PATCH.
 Browsers create a pre-flight request if needed. The pre-flight requests use the OPTIONS header. Example:
     OPTIONS /data HTTP/1.1
-    Origin: https>//example.com
+    Origin: https://example.com
     Access-Control-Request-Method: DELETE
 On the server side, an application needs to respond to the pre-flight request with information about the methods the application accepts from the origin. Example:
     HTTP/1.1 200 OK
@@ -2405,15 +2405,13 @@ Just as SQL databases are almost uniformly ACID compliant, NoSQL databases tend 
 ----------------------------------------------- SERVICE OPERATIONS -----------------------------------------------
 [PROMETHEUS]
 Prometheus is a monitoring platform that is part of the Cloud Native Computing Foundation project.
-It collects metrics by monitoring systems and services via http endpoints.
-It can trigger alerts if some condition is observed to be true.
-It uses a multi-dimensional data mode. Store all its data as time series.
-Prometheus has its own query language.
+It collects metrics by monitoring systems and services via http endpoints. It can trigger alerts if some condition is observed to be true.
+It uses a multi-dimensional data mode. Store all its data as time series. Prometheus has its own query language (PromQL).
 It doesn't have dependency on distributed storage.
 Timeseries collection happens via a pull model over HTTP. Pushing timeseries supported via an intermediary gateway.
+In Prometheus, every timeseries data has a Metric name & a label.
 Targets are discovered via service discovery or static configuration.
 Multiple nodes of graphing and dashboarding support.
-In Prometheus, every timeseries data has a Metric name & a label.
 
 EXPORTERS:
 Prometheus was developed for the purpose of monitoring web services.
@@ -2465,7 +2463,7 @@ You can create and edit dashboards. Grafana comes with a unique Graphite target 
 [LOGSTASH]
 Logstash is a real time data collection engine with real time pipeline capabilities.
 Logstash is an opensource tool for collecting, parsing, and storing logs for future use.
-It's part of the elastic stack, which includes Elasticsearch, Beats, Kibana.
+It's part of the Elastic Stack, which includes Elasticsearch, Beats, Logstash, and Kibana.
 
 Logstash event processing pipelines three stages:
     - inputs. Generate events.
@@ -2501,7 +2499,8 @@ Codecs can be used to work with your inputs and outputs. Allows you to separate 
     - Multiline. Merge multiple line text events in to one single line.
 
 GROK:
-Grok parse arbitrary text and structure it. It parse unstructured log data into something structured and queryable. It comes with roughly 120 patters (shortcuts to RegExs).
+Grok parse arbitrary text and structure it. It parse unstructured log data into something structured and queryable.
+It comes with roughly 120 patters (shortcuts to RegExs).
 Grok is great for:
     - Parse syslog logs.
     - Parse Apache logs.
