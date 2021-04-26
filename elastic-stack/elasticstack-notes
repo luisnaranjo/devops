@@ -27,9 +27,9 @@ On top of these supported Beats, there is the Lib Beat. From this library you ca
 [LOGSTASH]
 Once you collect the data, you want to ship it somewhere.
 Here you would have 2 options:
-    - Ship it directly to ElasticSearch. Using and Ingest Node pipeline (will parse the data for us).
+    - Ship it directly to ElasticSearch. Using an Ingest Node pipeline (will parse the data for us).
     - Ship it to Logstash (This way is use in Production environments).
-An Ingest node in Elasticsearch is like a very light  version of Logstash.
+An Ingest node in Elasticsearch is like a very light version of Logstash.
 
 Logstash is a standalone data processing pipeline. You can use it outside of the Elastic Stack.
 It consists of 3 main features:
@@ -468,7 +468,7 @@ Make sure there is an index with name "metricbeat".
 
 
 [ANALIZING DATA WITH KIBANA]
-With the cluster set up, and collecting data about the nodes, you can get to use Kibana to analyze and gain insights into the system logs and resource utilization metrics
+With the cluster set up, and collecting data about the nodes, you can get to use Kibana to analyze and gain insights into the system logs and resource utilization metrics.
 
 Open Kibana via a web browser.
 For this example, you would need to use the public IP address of the Master node on port 8080 for reaching Kibana.
