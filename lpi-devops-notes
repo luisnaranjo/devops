@@ -2536,9 +2536,9 @@ There are two major components of Filebeat:
     - Inputs. Responsible for managing the Harvesters. Find all the sources that need to be run from. It will create a Harvester for each individual log file.
     - Harvesters. Responsible for read the content of the log files line by line. Can be set for multi-line reading.
 How it works:
-    1. It starts an inputs that look in the specified location for log data.
+    1. It starts an input that look in the specified location for log data.
     2. Filebeat starts a harvester for each log.
-    3. The harvester read a single log for new content (unless multi-line read is configured).
+    3. The harvester reads a single log for new content (unless multi-line read is configured, it will read a single line at a time).
     4. Then sends the new log data to libbeat.
     5. Libbeat aggregates the events and sends the aggregated data to an output.
 

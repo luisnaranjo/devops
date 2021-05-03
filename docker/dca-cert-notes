@@ -1052,7 +1052,7 @@ Options:
         * volume. A volume.
         * tmpfs. Temporary in-memory storage.
     - source, src=PATH: Volume name or bind mount path.
-    - destionation, dst, target=PATH: Path to mount inside the container.
+    - destination, dst, target=PATH: Path to mount inside the container.
     - readonly: Make the volume or bind mount read-only.
 Structure:
     docker run --mount [key=value][,key=value..]
