@@ -1,5 +1,18 @@
 ----------------------------------------------- HASHICORP CERTIFIED TERRAFORM ASSOCIATE - INTRODUCTION -----------------------------------------------
 [INFRASTRUCTURE AS CODE]
+Infrastructure as Code (or IaC) is a method of writing down human-readable code to deploy resources in the cloud and elsewhere (VMs, disks, apps, etc.).
+IaC enables DevOps. Codification of deployment means it can be tracked in version control, enabling better visibility and collaboration across teams.
+
+For the majority of IaC tools, the code is usually declarative, this means you declare or write down exactly what you want without caring about underlying functions or API calls will need to be made to deploy the infrastructure.
+However, it can be the case that the code is procedural(imperative).
+
+[CLOUD-AGNOSTIC IAC WITH TERRAFORM]
+The language used in Terraform is Hashicorp Configuration Language (HCL).
+
+Terraform can be used to codify the configuration for software defined networks.
+Terraform interacts and takes care of communication with control layer APIs with ease. You just use the HCL language to declare your infrastructure regardless of where you're deploying.
+Terraform is cloud-agnostic. This means it's not bound to one cloud. It support a vast array of private and public cloud vendors.
+Terraform tracks state of each resource deployed. Terraform's state tracking mechanism takes away the worry of dependency and resource tracking by keeping it all in one place.
 
 
 
