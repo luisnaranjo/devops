@@ -152,6 +152,87 @@ Because the state file is so critical to Terraform's functionality, never lose i
 Also, don't let it fall into wrong hands since it contains sensitive data and details about the resources deployed through Terraform.
 
 
+[TERRAFORM VARIABLES & OUTPUTS]
+VARIABLES:
+To reference a variable within your code, you use the following notation:
+     var.var_name
+Example:
+    var.my-variable
+Although variables can be on the same main file (where your code is), best practice is to have a separate file for variables. This file is called 'terraform.tfvars'
+
+The variable precedence at runtime is as follows:
+    1. Variable passed to the OS environment variables.
+    3. Passed via the command line.
+    2. terraform.tfvars file.
+
+VARIABLE SNIPPET STRUCTURE:
+    variable "my-variable" {
+      description = "This is a test variable"
+      type        = string
+      default     = "Hello"
+    }
+In this snippet, "variable" is a Terraform reserved word used to specify a variable.
+"my-var" is the name of the variable itself.
+Everything inside the curly braces ({}) are the variable config arguments such as type of variable and default value. This information is optional.
+
+VARIABLE VALIDATION:
+Variable validation allows you to set a criteria for allowed values for a variable. Example:
+    variable "my-variable" {
+      description = "This is a test variable"
+      type        = string
+      default     = "Hello"
+
+      validation {
+        condition     = length(var.my-var) > 4                          # Validation is that the variable character length must be greater than 4.
+        error_message = "This string must be more than 4 characters."   # If validation is not met, this error message is thrown.
+      }
+    }
+If validations are not met, Terraform will stop before it deploys anything. This feature is available on version 0.13 and later.
+
+VARIABLE SENSITIVE VALUES:
+You can enable a config parameter known as 'sensitive' to prevent Terraform from showing its value during Terraform execution runs. This is the default behavior with Terraform.
+The sensitive parameter is a boolean value, which means it can be either 'true' of 'false'. By default is 'false'.
+Example:
+    variable "my-variable" {
+      description = "This is a test variable"
+      type        = string
+      default     = "Hello"
+      sensitive   = true
+    }
+
+VARIABLE TYPES:
+Base types:
+There are 3 base variable types for Terraform variables:
+    - string: For characters or string of characters. In this case the value is inside double quotes.
+    - number: For numbers.
+    - bool: For Boolean values ('true' or 'false').
+
+Complex types:
+There are 5 complex variable types for Terraform variables:
+    - list.
+    - set.
+    - map.
+    - object.
+    - tuple.
+## Refer to example project 'variable-types' for examples for the different variable declaration.
+
+TERRAFORM OUTPUT - OUTPUT VARIABLES:
+Output variables are shown on the shell after running 'terraform apply' command.
+You can use the same sensitive setting argument for an output as you can with a Terraform variable if it's a secret value.
+Output values are like return values that you want to track after a successful Terraform deployment.
+
+OUTPUT VARIABLES SNIPPET STRUCTURE:
+    output "instance_ip" {
+      description = "VM private IP"
+      value = aws_instance.my-vm.private_ip
+    }
+In this snippet, "output" is a Terraform reserved word used to specify an output variable.
+"instance_ip" is the name of the output variable specified by the user.
+Everything inside the curly braces ({}) are the variable config arguments, such as variable description and value.
+The only mandatory argument is the "value" argument and can be set with any value, or even reference values of other Terraform resources and variables.
+
+
+
 
 ----------------------------------------------- TERRAFORM STATE -----------------------------------------------
 
@@ -183,7 +264,9 @@ terraform destroy               # Destroys all the actual resources created by y
 
 [FILES & DIRECTORIES]
 FILES:
+FILENAME.tf             # Terraform code file.
 terraform.tfstate       # Default file name of the state file.
+terraform.tfvars        # Default file for variables.
 
 DIRECTORIES:
 
