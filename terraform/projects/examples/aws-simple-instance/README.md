@@ -2,5 +2,6 @@
 Example project to create an EC2 instance on AWS.
 
 Provider: AWS
+
 Resources:
-    - EC2
+- EC2 instance.
