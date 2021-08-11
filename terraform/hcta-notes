@@ -121,6 +121,35 @@ Terraform executes code in the following order:
 
 
 ----------------------------------------------- TERRAFORM FUNDAMENTALS -----------------------------------------------
+[INSTALLING TERRAFORM & TERRAFORM PROVIDERS]
+INSTALLING TERRAFORM:
+There are 2 methods to install Terraform:
+    - Download the single binary file (download, unzip, use). If needed, set the binary path into the PATH environment variable.
+    - Set up the Terraform repository and install it via your package manager (Linux only).
+More info can be found in https://learn.hashicorp.com/tutorials/terraform/install-cli
+
+TERRAFORM PROVIDERS:
+Providers are Terraform's way of abstracting integration with API control layer of the infrastructure vendors. Every cloud vendor has its own provider.
+Terraform, by default, looks for Providers in the "Terraform providers" registry (https://registry.terraform.io/browse/providers). However, providers can also be sourced locally or internally and referenced within your code.
+Providers are plugins. They are released on a separate rhythm from Terraform itself, and each provider has its own series of version numbers.
+You can write your own custom providers as well.
+
+Terraform finds and install providers when initializing working directory (terraform init).
+As a best practice, providers should be pegged down to a specific version in your code. So that any changes across provider versions don't break your Terraform code.
+If you don't specify the provider's version in your code, it will select the latest version.
+
+
+[TERRAFORM STATE: THE CONCEPT]
+The main reason Terraform uses states is for resource tracking.
+State is a way for Terraform to keep tabs on what has been deployed, and it's critical to Terraform functionality.
+It helps Terraform to calculate deployment delta and create new deployment plans.
+
+The 'state file' is what help Terraform to map the resources in your code to the actual infrastructure deployed.
+This file is a JSON dump containing all the metadata about your Terraform deployment, as well as details about all the resources that it has deployed.
+By default, it's named 'terraform.tfstate'
+
+Because the state file is so critical to Terraform's functionality, never lose it. If you lose it, you won't have a codified way to go back and make changes to your infrastructure.
+Also, don't let it fall into wrong hands since it contains sensitive data and details about the resources deployed through Terraform.
 
 
 
