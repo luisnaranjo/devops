@@ -232,6 +232,34 @@ Everything inside the curly braces ({}) are the variable config arguments, such 
 The only mandatory argument is the "value" argument and can be set with any value, or even reference values of other Terraform resources and variables.
 
 
+[TERRAFORM PROVISIONERS]
+Terraform Provisioners are Terraform's way of bootstraping custom scripts, command or actions.
+They can be run either locally (on the same system where Terraform commands are being issued from), or remotely on resources spun up through the Terraform deployment.
+Within Terraform code, each individual Resource can have its own Provisioner defining the connection method (if required such as SSH or WinRM) and the actions/commands or script to execute.
+
+TYPES OF PROVISIONERS:
+There are 2 types of Provisioners that cover 2 events of your Terraform resource lifecycle. They can come in handy with custom one-off automation tasks:
+
+Creation-time:
+This Provisioner is run as a resource has been created. This is the default.
+
+Destroy-time:
+This Provisioner is run as a resource is destroyed.
+
+BEST PRACTICES & CAUTIONS WHEN USING PROVISIONERS:
+Hashicorp recommends using Provisioners as a last resource and to try using inherent mechanisms within your infrastructure deployment to carry out custom tasks where possible.
+Terraform cannot track changes to Provisioners as they can take any independent action, hence they are not tracked by Terraform 'state files'.
+Provisioners are recommended for use when you want to invoke actions not covered by Terraform declarative model.
+If the command within a Provisioner returns non-zero return code, it's considered failed and underlying resource is tainted (it marks the resource against which the Provisioner was to be run, to be created again on the next one).
+
+NOTES:
+By default, a Provisioner is a "create provisioner". If you want to specify a 'Destroy Provisioner' you need to explicitly set the Provisioner parameter 'when' to 'destroy'.
+    when = destroy
+You can use multiple Provisioners against the same resource, and they are going to be executed in the same sequence as they're written out.
+Provisioners aren't tracked and are independent from Terraform state file. Which means, it won't show in a Terraform Plan.
+For using variables inside Provisioners, Hashicorp has provided the 'self' object. This object can access any attribute available to the Resource that the Provisioner is attached to. Example:
+    self.id
+
 
 
 ----------------------------------------------- TERRAFORM STATE -----------------------------------------------
@@ -260,6 +288,7 @@ EXAMPLE #########################
 terraform init                  # Initialize the working directory containing the Terraform code.
 terraform plan                  # Read Terraform code and create & display a plan for execution/deployment.
 terraform apply                 # Deploys the instructions and statements (code) into the form of actual infrastructure. It also creates a last review/plan.
+terraform apply --auto-approve  # Deploys the instructions and statements (code) into the form of actual infrastructure. It won't create a review/plan.
 terraform destroy               # Destroys all the actual resources created by your code.
 
 [FILES & DIRECTORIES]
