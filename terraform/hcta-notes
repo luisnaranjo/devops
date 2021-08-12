@@ -138,6 +138,28 @@ Terraform finds and install providers when initializing working directory (terra
 As a best practice, providers should be pegged down to a specific version in your code. So that any changes across provider versions don't break your Terraform code.
 If you don't specify the provider's version in your code, it will select the latest version.
 
+NOTES:
+You can set an alias to a provider to specify it later on a resource. This if you are working with multiple providers:
+    provider "aws" {
+      alias  = "us-east-1"
+      region = "us-east-1"
+    }
+
+    provider "aws" {
+      alias  = "us-west-2"
+      region = "us-west-2"
+    }
+
+    resource "aws_sns_topic" "topic-us-east" {
+      provider = aws.us-east-1
+      name     = "topic-us-east"
+    }
+
+    resource "aws_sns_topic" "topic-us-west" {
+      provider = aws.us-west-1
+      name     = "topic-us-west"
+    }
+
 
 [TERRAFORM STATE: THE CONCEPT]
 The main reason Terraform uses states is for resource tracking.
@@ -291,7 +313,10 @@ terraform apply                 # Deploys the instructions and statements (code)
 terraform apply --auto-approve  # Deploys the instructions and statements (code) into the form of actual infrastructure. It won't create a review/plan.
 terraform destroy               # Destroys all the actual resources created by your code.
 
-[FILES & DIRECTORIES]
+[FILES, DIRECTORIES, ENVIRONMENT VARIABLES]
+ENVIRONMENT VARIABLES:
+TF_LOG                  # Environment variable that controls the level of logging with Terraform (the verbosity). To review log you can set this to 'TRACE'.
+
 FILES:
 FILENAME.tf             # Terraform code file.
 terraform.tfstate       # Default file name of the state file.
