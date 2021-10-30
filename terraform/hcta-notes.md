@@ -310,7 +310,7 @@ The only mandatory argument is the `value` argument and can be set with any valu
 
 
 ### TERRAFORM PROVISIONERS
-Terraform Provisioners are Terraform's way of bootstraping custom scripts, command or actions.
+Terraform Provisioners are Terraform's way of bootstrapping custom scripts, command or actions.
 They can be run either locally (on the same system where Terraform commands are being issued from), or remotely on resources spun up through the Terraform deployment.
 Within Terraform code, each individual Resource can have its own Provisioner defining the connection method (if required such as SSH or WinRM) and the actions/commands or script to execute.
 
@@ -335,8 +335,52 @@ If the command within a Provisioner returns non-zero return code, it's considere
 
 
 
+
 ---
 ## TERRAFORM STATE
+Terraform state is an important aspect of Terraform, since it allows the tracking of the infrastructure. It maps real-world resources to Terraform configuration.
+By default, state is stored locally in a file called `terraform.tfstate`, but it can be stored remotely in services such as AWS S3.
+
+Prior to any modification operation, Terraform refreshes the state file. Resource dependency metadata is also tracked via the state file. For example, Terraform must know that it needs to configure a subnet before it can deploy a VM in the AWS cloud.
+The state file also helps to boost deployment performance by caching resource attributes for subsequent use.
+
+
+### `terraform state` COMMAND
+The `terraform state` command is an utility for manipulating and reading the Terraform state file. Usually, there is no need for managing the state file outside of the Terraform plan/apply workflow. But some case scenarios are:
+- Advanced state management.
+- Manually remove a resource from terraform state file so that it's not managed by Terraform.
+- Listing out tracked resources and their details (via state and list subcommands).
+
+
+#### COMMON TERRAFORM STATE COMMANDS:
+- List out all resources tracked by the Terraform State file:
+  ```
+  terraform state list
+  ```
+
+- Delete a resource from the Terraform State file:
+  ```
+  terraform state rm
+  ```
+
+- Show details of a resource tracked in the Terraform State file:
+  ```
+  terraform state show
+  ```
+
+
+
+### LOCAL & REMOTE STATE STORAGE
+Terraform generally saves state files locally. That means that it's stored on the same system from where you are issuing the Terraform commands. This is the default behavior. This is mostly used for individual projects or testing.
+As a fail-safe, Terraform does back up your last known Terraform state file recorded after a successful `terraform apply` locally.
+
+#### REMOTE STAGE STORAGE:
+The remote stage storage mechanism saves the state file to a remote data source (AWS S3, Google Storage, etc). However, this is optional.
+The main advantages of working with remote storage are:
+  - It allows sharing state file between distributed teams.
+  - State locking: It allows locking the state file so parallel executions don't collide. Keep in mind state locking is not supported on all remote storage backend.
+  - It enables sharing *output* values with other Terraform configuration or code.
+
 
 
 
@@ -345,8 +389,10 @@ If the command within a Provisioner returns non-zero return code, it's considere
 
 
 
+
 ---
 ## BUILT-IN FUNCTIONS AND DYNAMIC BLOCKS
+
 
 
 
@@ -355,14 +401,16 @@ If the command within a Provisioner returns non-zero return code, it's considere
 
 
 
+
 ---
 ## TERRAFORM CLOUD & ENTERPRISE
 
 
 
+
 ---
 ## MISCELLANEOUS
-### COMMANDS:
+### COMMANDS
 #### GENERAL:
 ```
 terraform init                  # Initialize the working directory containing the Terraform code.
@@ -373,8 +421,16 @@ terraform destroy               # Destroys all the actual resources created by y
 ```
 
 
+#### TERRAFORM STATE:
+```
+terraform state list            # List out all resources tracked by the Terraform State file.
+terraform state show <RESOURCE> # Show details of a resource tracked in the Terraform State file.
+terraform state rm <RESOURCE>   # Delete a resource from the Terraform State file.
+```
 
-### FILES, DIRECTORIES, ENVIRONMENT VARIABLES:
+
+
+### FILES, DIRECTORIES, ENVIRONMENT VARIABLES
 #### ENVIRONMENT VARIABLES:
 ```
 TF_LOG                  # Environment variable that controls the level of logging with Terraform (the verbosity). To review log you can set this to 'TRACE'.
@@ -390,4 +446,4 @@ terraform.tfvars        # Default file for variables.
 #### DIRECTORIES:
 
 
-### MISCELLANEOUS:
+### MISCELLANEOUS
