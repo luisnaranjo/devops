@@ -386,6 +386,94 @@ The main advantages of working with remote storage are:
 
 ---
 ## TERRAFORM MODULES
+A module in Terraform is just another folder or collection of Terraform code files. And you reference the outputs of that code into other parts of your Terraform project.
+A module is a container for multiple resources that are used together.
+
+
+### ACCESSING AND USING TERRAFORM MODULES
+The main purpose of the modules is to make code reusable elsewhere so that you don't have to duplicate code/configurations.
+
+Every Terraform configuration has at least one module, called the `root` module, which consists of code files in your main working directory.
+When you invoke other modules inside your code, these newly referenced modules are known as child modules, and you can pass inputs to and get outputs back from these child modules.
+
+
+#### ACCESSING TERRAFORM MODULES:
+Modules can be downloaded or referenced from:
+- **Terraform Public Registry**: Terraform downloads them and place them in a directory on your system. Usually, that directory is a hidden directory.
+- **A private registry**: You reference the same way as the Public Registry.
+- **Your local system**: You reference the modules directory by its path.
+
+Modules are referenced using the `module` block:
+```
+module "my-vpc-module" {
+  source = "./modules/vpc"
+  version = "0.0.5"
+  region = var.region
+}
+```
+In this example:
+- `module` is a reserved keyword.
+- `my-vpc-module` is the module name.
+- Parameters within the curly braces are `source` of the module, its `version` to be used, and the inputs for the module.
+
+Other parameters allowed inside the `module` block include:
+  - `count`: Allows spawning multiple separate instances of the module's resources.
+  - `for_each`: Allows iterating over complex variables.
+  - `providers`: Allows to tie down specific providers to your module.
+  - `depends_on`: Allows you to set dependencies for your module.
+
+
+#### USING TERRAFORM MODULES:
+Modules can optionally take input and provide outputs to plug back into your main code.
+
+Accessing module outputs in your code:
+```
+resource "aws_instance" "my-vpc-module" {
+  ... # Other arguments.
+  subnet_id = module.my-vpc-module.subnet_id
+}
+```
+In this example, `module.my-vpc-module.subnet_id` is the module's output.
+
+
+
+### INTERACTING WITH TERRAFORM MODULE INPUTS AND OUTPUTS
+#### TERRAFORM MODULE INPUTS:
+Module inputs are arbitrarily named *parameters* that you can pass inside the module block.
+These inputs can be used as variables inside the module code.
+
+Example of specifying an input parameter from the root module:
+```
+module "my-vpc-module" {
+  source = ".modules/vpc"
+  server-name = 'my-server'   # This is the input parameter.
+}
+```
+In this case, inside the module definition, you would use the input parameter as a variable in the form of `var.server-name`.
+
+
+#### TERRAFORM MODULE OUTPUTS:
+The outputs declared inside Terraform module code can be fed back into the root module or your main code.
+
+Output invocation convention in Terraform code:
+```
+module.<name-of-module>.<name-of-output>
+```
+Keep in mind that this output is declared using the `output` block in Terraform.
+
+**Example**:
+
+Inside your module code:
+```
+output "ip_address" {
+  value = aws_instance.private_ip
+}
+```
+
+Referencing the module output in the main code:
+```
+module.my-vpc-module.ip_address
+```
 
 
 
