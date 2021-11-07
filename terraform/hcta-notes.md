@@ -582,7 +582,11 @@ It acts like a `for` loop and outputs a nested block for each element in your va
 Be careful not to overuse dynamic blocks in your main code, as they can be hard to read/maintain.
 Only use dynamic blocks when you need to hide detail in order to build a cleaner user interface when writing reusable modules.
 
-> Refer to example project [built-in-funcs-and-dynamic-blocks](projects/examples/built-in-funcs-and-dynamic-blocks) for examples of dynamic blocks & built-in functions.
+#### NOTES: 
+> - Dynamic blocks cannot be used with lifecycle blocks, as Terraform must process this type of block before it's safe to evaluate expressions.
+> - Refer to example project [built-in-funcs-and-dynamic-blocks](projects/examples/built-in-funcs-and-dynamic-blocks) for examples of dynamic blocks & built-in functions.
+
+
 
 
 ---
