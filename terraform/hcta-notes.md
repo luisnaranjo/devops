@@ -591,6 +591,110 @@ Only use dynamic blocks when you need to hide detail in order to build a cleaner
 
 ---
 ## TERRAFORM CLI
+### TERRAFORM FMT, TAINT & IMPORT
+#### `terraform fmt` (FORMAT) COMMAND:
+This command helps in making your code good for readability and consistent by formatting it to a standard.
+It makes the code consistent, easy to maintain and read through on VCS. This command is safe to run at any time.
+
+The syntax is just `terraform fmt`. It looks for all the files ending in `.tf` extension and formats them. Outputting any files which have been fixed for syntax and consistency.
+
+
+#### `terraform taint` COMMAND:
+This command taints a resource, forcing it to be destroyed and recreated. It modifies the state file only, which causes the recreation workflow.
+Keep in mind that tainting a resource may cause other resources that depend on it to be modified.
+
+Usually you want to run this command to cause provisioners to run, replace misbehaving resources forcefully, or to mimic side effects of recreation not modeled by any attributes of the resource.
+
+The command syntax is:
+```
+terraform taint <RESOURCE_ADDRESS>
+```
+
+
+#### `terraform import` COMMAND:
+This command maps existing resources (not managed by Terraform) to Terraform using an `ID`. The `ID` is dependent on the underlying vendor, for example to import an AWS EC2 instance you'll need to provide its instance ID. Importing the same resource to multiple Terraform resources can cause unknown behavior and is not recommended.
+
+Usually you want to runt his command when you need to work with existing resources, when you're not allowed to create new resources, or when you're not in control of creation process of infrastructure.
+
+The command syntax is:
+```
+terraform import <RESOURCE_ADDRESS> <ID>
+```
+
+
+#### TERRAFORM CONFIGURATION BLOCK:
+It's a special configuration block for controlling Terraform's own behavior. This configuration block only allows constant values (named `resources`), and variables are not allowed in it.
+
+Examples of usage are:
+- Configuring backend for storing state files.
+- Specifying a required Terraform version.
+- Specifying a required Terraform Provider version and its requirements.
+- Enable and test Terraform experimental features.
+- Passing metadata providers.
+
+Example:
+```
+terraform {
+  required_version = ">=0.13.0"
+  required_providers {
+    aws = ">=3.0.0"
+  }
+}
+```
+
+
+
+### TERRAFORM WORKSPACES (CLI)
+The Terraform Workspaces are alternate state files within the same working directory. By keeping alternate state files for the same code configuration, multiple environments can spin up. Terraform starts with a single workspace that is always called `default`. It cannot be deleted. If no workspace is specified, you are using the `default`. Each workspace tracks a separate independent copy of the state file against the TF code in that directory.
+
+You would usually use workspaces to test changes using a parallel, distinct copy of infrastructure. And also, it can be modeled against branches in VCS such as Git.
+
+To create a workspace you use: `terraform workspace new <WORKSPACE_NAME>`
+To select a workspace you use: `terraform workspace select <WORKSPACE_NAME>`
+
+Workspaces are meant to share resources and to help enable collaboration. Access to a workspace name is provided through the `${terraform.workspace}` variable available to use in your terraform configuration.
+
+Examples:
+```
+# EXAMPLE 1: Creates 5 AWS EC2 instances if the workspace is the default one. Otherwise only creates 1.
+resource "aws_instance" "example" {
+  count = terraform.workspace == "default" ? 5 : 1
+  # ... Other arguments.
+}
+
+# EXAMPLE 2: Creates a bucket with the workspace name as the suffix.
+resources "aws_s3_bucket" "bucket" {
+  bucket = "mysuperbucket-${terraform.workspace}
+  acl = "private"
+}
+```
+
+
+#### NOTES:
+> - The Terraform state file for the `default` workspace is always the `terraform.tfstate` file in the project's root directory.
+> - The Terraform state files for any other workspace are stored in the directory `terraform.tfstate.d`.
+
+
+
+### DEBUGGING TERRAFORM
+#### TF_LOG:
+In Terraform, `TF_LOG` is ann environment variable for enabling verbose logging. By default, it will send logs to `stderr` (standard error output). It allows you to set the following levels of verbosity:
+- `TRACE`.
+- `DEBUG`.
+- `INFO`.
+- `WARN`.
+- `ERROR`.
+
+`TRACE` is the most verbose level of logging and the most reliable one.
+
+
+#### TF_LOG_PATH:
+To persist logged output, you can use the `TF_LOG_PATH` environment variable. Which takes a file as the input.
+By default, this variable is disabled. To set its value, you can use the `export` command in Linux,
+```
+export TF_LOG=TRACE
+export TF_LOG_PATH=.terraform.log
+```
 
 
 
@@ -623,12 +727,25 @@ terraform state rm <RESOURCE>   # Delete a resource from the Terraform State fil
 ```
 
 
+#### TERRAFORM CLI:
+```
+terraform fmt                                 # Rewrite Terraform configuration file to a canonical format and style.
+terraform taint <RESOURCE_ADDRESS>            # Taints the resource, forcing it to be destroyed and recreated on next apply.
+terraform import <RESOURCE_ADDRESS> <ID>      # Imports an external resource to the Terraform state file.
+terraform workspace new <WORKSPACE_NAME>      # Creates a workspace.
+terraform workspace select <WORKSPACE_NAME>   # Selects a workspace.
+terraform workspace list                      # List the current workspaces.
+```
+
+
 
 ### FILES, DIRECTORIES, ENVIRONMENT VARIABLES
 #### ENVIRONMENT VARIABLES:
 ```
 TF_LOG                  # Environment variable that controls the level of logging with Terraform (the verbosity). To review log you can set this to 'TRACE'.
+TF_LOG_PATH             # Send logs to a file (persistent logging).
 ```
+
 
 #### FILES:
 ```
@@ -637,7 +754,11 @@ terraform.tfstate       # Default file name of the state file.
 terraform.tfvars        # Default file for variables.
 ```
 
+
 #### DIRECTORIES:
+```
+terraform.tfstate.d     # Directory containing the state files for all the workspaces (except for the default workspace).
+```
 
 
 ### MISCELLANEOUS
