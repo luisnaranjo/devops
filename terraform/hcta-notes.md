@@ -520,7 +520,7 @@ true
 
 
 ### TERRAFORM TYPE CONSTRAINTS (COLLECTIONS & STRUCTURAL)
-Terraform type constraints control the type of variable values that you can pass to your Terraform code. Essentially, there are 2 types of contraints:
+Terraform type constraints control the type of variable values that you can pass to your Terraform code. Essentially, there are 2 types of constraints:
 - **Primitive types**: For single type values (`number`, `string`, `bool`).
 - **Complex types**: For multiple types in a single variable (`list`, `tuple`, `map`, `object`). These complex types can be broken into 2 further types (`collections`, and `structural`).
 
@@ -582,7 +582,7 @@ It acts like a `for` loop and outputs a nested block for each element in your va
 Be careful not to overuse dynamic blocks in your main code, as they can be hard to read/maintain.
 Only use dynamic blocks when you need to hide detail in order to build a cleaner user interface when writing reusable modules.
 
-> Refer to example project [PROJECT](projects/examples/PROJECT) for examples for the different variable declaration.
+> Refer to example project [built-in-funcs-and-dynamic-blocks](projects/examples/built-in-funcs-and-dynamic-blocks) for examples of dynamic blocks & built-in functions.
 
 
 ---
