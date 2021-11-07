@@ -52,7 +52,7 @@ At this point, it's common to push your version control repository to a remote l
 
 
 
-### TERRAFORM INIT:
+### TERRAFORM INIT
 `terraform init` is the command that initializes the working directory that contains your Terraform code.
 `terraform init` is the first command that you'll be running when you're done writing your initial code.
 It can either go and download the plugins and modules from the Terraform public registry over the internet, or from your custom URLs where you might have uploaded your custom modules written for Terraform.
