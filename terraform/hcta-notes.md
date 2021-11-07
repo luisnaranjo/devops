@@ -701,6 +701,82 @@ export TF_LOG_PATH=.terraform.log
 
 ---
 ## TERRAFORM CLOUD & ENTERPRISE
+### BENEFITS OF SENTINEL (EMBEDDED POLICY-AS-CODE FRAMEWORK)
+Hashicorp Sentinel is a framework which enforces adherence to policies within your Terraform code. It's a feature provided with the TF Enterprise.
+
+Sentinel has its own policy language, the Sentinel language. The policies ensure that dangerous or malicious Terraform code is stopped, even before it gets executed or applied via the `terraform apply` command.
+
+The Sentinel integration with Terraform runs within Terraform Enterprise after `terraform plan` and before `terraform apply`. The policies have access to the data in the curated plan, the state of the resources at the time of the plan, and the configuration at the time of the plan.
+
+**Benefits:**
+- Sandboxing: Guardrails for automation. For example, stop a dev user from deploying into a prod workspace and kind of act as a guardrail against accidental deployments.
+- Codification: It codifies the process of security enforcement in TF code.
+- Version Control: Since is PaaC, it allows policies to be version controlled.
+- Testing & Automation.
+
+**User cases:**
+- For enforcing CIS standards across AWS accounts.
+- Checking to make sure only t3.micro instance types are used.
+- Ensuring Security Groups do not allow traffic on port 22.
+
+
+
+### BEST PRACTICE: TERRAFORM VAULT PROVIDER FOR INJECTING SECRETS SECURELY
+Hashicorp Vault is a secrets management software. It's used to store sensitive data securely and provide short-lived, temporary credentials to users in place of actual long-lived credentials, like AWS CLI access keys.
+
+In the backend, Vault handles rotating these temporarily provided credentials as per an expiration schedule, which is configurable in Vault.
+
+It encrypts sensitive data in transit and at rest and provides fine-grained access to secrets using ACLs.
+
+The general workflow for Terraform/Vault integration is as follows:
+1. Vault admin stores long-lived credentials in Vault, configures permissions for temporary credentials when generated.
+2. `terraform apply`.
+3. Terraform reaches out to Vault for temporary credentials.
+4. Vault returns temporary, short lived credentials.
+5. Terraform deploys using the credentials returned by Vault and, after a configurable amount of time, those temporal credentials are deleted by Vault.
+
+**Benefits:**
+- Developers don't need to manage long-lived credentials.
+- Inject secrets into your Terraform deployment at runtime.
+- Fine-grained ACLs for access to temporary credentials.
+
+
+
+### BENEFITS OF TERRAFORM REGISTRY AND TERRAFORM CLOUD WORKSPACES
+#### TERRAFORM REGISTRY:
+The Terraform registry is a repository of publicly available Terraform providers and modules.
+Being an open source proponent, Hashicorp allows for anyone to be able to contribute their own modules to the Registry.
+The Registry also provides useful links to GitHub pages for the code of the hosted providers and modules and documentation of all the hosted content.
+
+In the Registry, you can collaborate with other contributors to make changes to providers and modules.
+The Terraform Registry can be found [here](https://registry.terraform.io/).
+
+
+#### TERRAFORM CLOUD WORKSPACES:
+In essence, the workspace feature in Terraform Cloud does the same thing as the open source Terraform workspace feature. The difference is that the Cloud Workspaces are hosted in the cloud instead of the local system. Also, you can interact with the Cloud workspace using the APIs as well.
+
+Think of Cloud workspaces as directories for distinct deployments, hosted in the cloud where you don't need to worry about segregation, storage, and even security of your workspaces allowing also collaboration.
+By default, it stores old versions of state files.
+
+It maintains a record of all execution activity. This allows for auditing and investigating deployments.
+All Terraform commands are executed on managed Terraform Cloud VMs.
+
+Terraform OSS Workspaces vs. Terraform Cloud Workspaces:
+| Component | Terraform OSS Workspaces | Terraform Cloud Workspaces |
+|-----------|--------------------------|----------------------------|
+| Terraform configuration | On disk | In linked VCS repository or periodically uploaded via API/CLI
+| Variable values | As `.tfvars`, as CLI arguments, or in shell environment | In workspace (in Terraform Cloud)
+| State | On disk or in remote backend | In workspace (in Terraform Cloud)
+| Credentials and Secrets | In shell environments or entered at prompts | In workspace (Terraform Cloud), stored as sensitive variables.
+
+
+#### OTHER TERRAFORM CLOUD BENEFITS:
+- Remote Terraform execution.
+- Workspace based organization model.
+- VCS integration (GitHub, Bitbucket, etc).
+- Remote state management and CLI integration.
+- Private Terraform Module registry.
+- Cost estimation and Sentinel integration features.
 
 
 
@@ -762,3 +838,6 @@ terraform.tfstate.d     # Directory containing the state files for all the works
 
 
 ### MISCELLANEOUS
+Useful links:
+- ACloudGuru's [HashiCorp Certified Terraform Associate](https://learn.acloud.guru/course/hashicorp-certified-terraform-associate-1) course.
+- Terraform's [Terraform Associate Certification](https://learn.hashicorp.com/tutorials/terraform/associate-review) exam review.
