@@ -286,7 +286,7 @@ There are 5 complex variable types for Terraform variables:
 - object.
 - tuple.
 
-> Refer to example project *variable-types* for examples for the different variable declaration.
+> Refer to example project [variable-types](projects/examples/variable-types) for examples for the different variable declaration.
 
 
 #### TERRAFORM OUTPUT - OUTPUT VARIABLES:
@@ -480,8 +480,109 @@ module.my-vpc-module.ip_address
 
 ---
 ## BUILT-IN FUNCTIONS AND DYNAMIC BLOCKS
+### TERRAFORM BUILT-IN FUNCTIONS
+Terraform comes pre-packaged with functions to help you transform and combine values. You don't need any additional provisioners or providers to use these functions. User-defined functions are not allowed (only built-in ones). You can use these functions inside various places in your terraform code. Built-in functions are extremely useful in making Terraform code dynamic and flexible.
+
+General syntax:
+```
+function_name(arg1, arg2, ...)
+```
+
+A list of useful Terraform functions can be found [here](https://www.terraform.io/docs/language/functions/index.html). A few examples are:
+
+- `file`: Allows you to insert files into your resources where applicable.
+- `max`: Determines the max integer value from provided list.
+- `flatten`: Creates a singular list of a provided set of lists.
 
 
+#### `terraform console` COMMAND:
+The `terraform console` command provides an interactive console for evaluating expressions. If the current state of your deployment is empty or has not yet been created, the console can be used to experiment with expression syntax and build-in functions.
+
+When you execute `terraform console` it will execute the interactive CLI for testing built-in functions.
+
+Examples:
+```
+terraform console
+> contains(["my", "test", 1, 2, 3], "1")
+false
+> contains(["my", "test", 1, 2, 3], 1)
+true
+> max(0, 1, 9, 2, 5)
+9
+> timestamp()
+"2021-11-06T23:18:54Z"
+> join("-", ["my", "test"])
+"my-test"
+> exit
+
+```
+
+
+
+### TERRAFORM TYPE CONSTRAINTS (COLLECTIONS & STRUCTURAL)
+Terraform type constraints control the type of variable values that you can pass to your Terraform code. Essentially, there are 2 types of contraints:
+- **Primitive types**: For single type values (`number`, `string`, `bool`).
+- **Complex types**: For multiple types in a single variable (`list`, `tuple`, `map`, `object`). These complex types can be broken into 2 further types (`collections`, and `structural`).
+
+#### COMPLEX TYPES - COLLECTIONS:
+Collections types allow multiple values of one primitive type be grouped together. You cannot mix more than one type against a single variable. Constructors for these Collections include:
+- `list(type)`.
+- `map(type)`.
+- `set(type)`.
+
+Example:
+```
+variable "training" {
+  type = list(string)
+  default = ["first", "second"]
+}
+```
+
+
+#### COMPLEX TYPES - STRUCTURAL:
+Structural types allow multiple values of different primitive types to be grouped together. Constructors for these include:
+- `object(type)`.
+- `tuple(type)`.
+- `set(type)`.
+
+Example:
+```
+  variable "person" {
+    type = object({
+      name = string
+      age = number
+    })
+  }
+```
+
+
+#### DYNAMIC TYPES - THE `any` CONSTRAINT:
+`any` is a placeholder for a primitive type yet to be decided. Terraform makes a best effort to attempt to figure it out what kind of variable you've passed and assign it a proper primitive type. The actual type will be determined at runtime.
+
+Example:
+```
+variable "data" {
+  type = list(any)
+  default = [42, 7, 13]
+}
+```
+
+
+
+### TERRAFORM DYNAMIC BLOCKS:
+Dynamic blocks help to dynamically constructs repeatable nested configuration blocks inside Terraform resources. They are supported within the following block types:
+- resource.
+- data.
+- provider.
+- provisioner.
+
+Dynamic blocks expect a complex variable type to iterate over.
+It acts like a `for` loop and outputs a nested block for each element in your variable.
+
+Be careful not to overuse dynamic blocks in your main code, as they can be hard to read/maintain.
+Only use dynamic blocks when you need to hide detail in order to build a cleaner user interface when writing reusable modules.
+
+> Refer to example project [PROJECT](projects/examples/PROJECT) for examples for the different variable declaration.
 
 
 ---
@@ -506,6 +607,7 @@ terraform plan                  # Read Terraform code and create & display a pla
 terraform apply                 # Deploys the instructions and statements (code) into the form of actual infrastructure. It also creates a last review/plan.
 terraform apply --auto-approve  # Deploys the instructions and statements (code) into the form of actual infrastructure. It won't create a review/plan.
 terraform destroy               # Destroys all the actual resources created by your code.
+terraform console               # Executes the interactive Terraform CLI (useful for evaluating expressions).
 ```
 
 
