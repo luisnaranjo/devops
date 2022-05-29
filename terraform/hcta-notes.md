@@ -198,7 +198,7 @@ If you don't specify the provider's version in your code, it will select the lat
 
 
 
-### TERRAFORM STATE: THE CONCEPT:
+### TERRAFORM STATE - THE CONCEPT:
 The main reason Terraform uses states is for resource tracking.
 State is a way for Terraform to keep tabs on what has been deployed, and it's critical to Terraform functionality.
 It helps Terraform to calculate deployment delta and create new deployment plans.
@@ -236,7 +236,7 @@ variable "my-variable" {
 ```
 
 In this snippet, `variable` is a Terraform reserved word used to specify a variable.
-`my-var` is the name of the variable itself.
+`my-variable` is the name of the variable itself.
 Everything inside the curly braces (`{}`) are the variable config arguments such as type of variable and default value. This information is optional.
 
 
@@ -614,7 +614,7 @@ terraform taint <RESOURCE_ADDRESS>
 #### `terraform import` COMMAND:
 This command maps existing resources (not managed by Terraform) to Terraform using an `ID`. The `ID` is dependent on the underlying vendor, for example to import an AWS EC2 instance you'll need to provide its instance ID. Importing the same resource to multiple Terraform resources can cause unknown behavior and is not recommended.
 
-Usually you want to runt his command when you need to work with existing resources, when you're not allowed to create new resources, or when you're not in control of creation process of infrastructure.
+Usually you want to run this command when you need to work with existing resources, when you're not allowed to create new resources, or when you're not in control of creation process of infrastructure.
 
 The command syntax is:
 ```
@@ -678,7 +678,7 @@ resources "aws_s3_bucket" "bucket" {
 
 ### DEBUGGING TERRAFORM
 #### TF_LOG:
-In Terraform, `TF_LOG` is ann environment variable for enabling verbose logging. By default, it will send logs to `stderr` (standard error output). It allows you to set the following levels of verbosity:
+In Terraform, `TF_LOG` is an environment variable for enabling verbose logging. By default, it will send logs to `stderr` (standard error output). It allows you to set the following levels of verbosity:
 - `TRACE`.
 - `DEBUG`.
 - `INFO`.
